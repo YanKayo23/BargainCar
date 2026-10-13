@@ -4,7 +4,7 @@
 
 **O que é o sistema**
 
-O BargainCar é uma aplicação web de anúncios de venda, com foco regional. O sistema permite que usuários criem anúncios de carros para venda, incluindo informações do veículo, descrição e preço, e que outros usuários visualizem os anúncios de veículos disponíveis próximos à sua localização.
+O BargainCar é uma aplicação de anúncios de venda, disponível para web e Android, com foco regional. O sistema permite que usuários criem anúncios de carros para venda, incluindo informações do veículo, descrição e preço, e que outros usuários visualizem os anúncios de veículos disponíveis próximos à sua localização.
 
 **Público-alvo**
 
@@ -20,7 +20,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 - Filtragem e exibição de anúncios por proximidade geográfica (cidade de origem do usuário + cidades vizinhas).
 - A negociação e a efetivação da venda ocorrem fora da plataforma (o sistema não processa pagamentos).
 - Sistema de expiração de anúncios: cada anúncio permanece ativo por 30 dias.
-- Três dias antes do fim do período, o anúncio entra em estado pendente e o vendedor recebe uma notificação (por e-mail e por notificação no navegador) perguntando se o veículo ainda está à venda.
+- Três dias antes do fim do período, o anúncio entra em estado pendente e o vendedor recebe uma notificação (por e-mail e por notificação push (navegador e Android)) perguntando se o veículo ainda está à venda.
 - Caso o vendedor confirme, o anúncio é renovado por mais 30 dias. Caso não responda até o fim do prazo, o anúncio expira automaticamente.
 - Perfil de Loja (empresa), vinculado a um Usuário, com dados próprios separados do perfil pessoal.
 
@@ -28,7 +28,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 
 **Fora do escopo da v1**
 
-- Aplicativo mobile nativo (apenas versão web).
+- Aplicativo para iOS (a v1 cobre apenas web e Android).
 - Pagamento ou checkout dentro da plataforma.
 - Integração com calendário.
 - Sistema de anúncios pagos/destaque para lojas.
@@ -46,7 +46,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 - RF05: O sistema deve permitir que o usuário defina a localização e o contato do anúncio, podendo usar a localização e contato padrão do perfil ou escolher outro.
 - RF06: O sistema deve permitir que o usuário marque anúncios pelos quais está interessado.
 - RF07: O sistema deve permitir que o usuário envie e responda perguntas (que serão públicas) nos anúncios.
-- RF08: O sistema deve notificar o vendedor por e-mail e navegador quando o anúncio estiver a 3 dias de expirar, perguntando se o veículo ainda está à venda.
+- RF08: O sistema deve notificar o vendedor por e-mail e por notificação push (navegador e Android) quando o anúncio estiver a 3 dias de expirar, perguntando se o veículo ainda está à venda.
 - RF09: O sistema deve renovar o anúncio por mais 30 dias caso o vendedor confirme que o veículo ainda está à venda, ou expirá-lo automaticamente caso não haja resposta.
 - RF10: O sistema deve exibir automaticamente anúncios de cidades próximas à cidade padrão do usuário.
 - RF11: O sistema deve permitir que o usuário busque manualmente por anúncios em regiões que deseja.
@@ -220,11 +220,19 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 **Favorito**
 `id, usuario_id (FK), anuncio_id (FK), data`
 
+**TokenDispositivo**
+`id, usuario_id (FK), token, plataforma (web ou android), data_registro`
+
+**TokenRecuperacaoSenha**
+`id, usuario_id (FK), token_hash, data_expiracao, usado`
+
 *Notas de modelagem:*
 - `Cidade` guarda latitude e longitude para calcular a distância entre cidades (ver seção Arquitetura). Os nomes das cidades e coordenadas vêm de uma base pública dos municípios brasileiros, importada uma vez para o MySQL.
 - `Mídia` existe porque um anúncio pode ter várias fotos e vários vídeos. O arquivo em si fica no servidor; o banco guarda só o caminho.
 - `data_expiracao` no Anúncio permite ao sistema descobrir quais anúncios estão a 3 dias de expirar (RF08).
 - `Pergunta` guarda pergunta e resposta juntas: a resposta só pode ser escrita pelo dono do anúncio.
+- `TokenDispositivo` guarda o identificador que o Firebase gera para cada aparelho ou navegador, e sem ele o sistema não consegue enviar a notificação push (RF08). Um usuário pode ter vários (celular, navegador).
+- `TokenRecuperacaoSenha` guarda o token do link de redefinição (RF16). Guarda-se só o hash do token, com data de expiração, e o registro é marcado como usado depois da redefinição.
 
 ### Relacionamentos
 
@@ -238,6 +246,8 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 - **Usuário → Pergunta:** 1:N — um Usuário faz várias Perguntas; cada Pergunta tem um autor.
 - **Usuário → Favorito:** 1:N — um Usuário favorita vários Anúncios; cada registro pertence a um Usuário.
 - **Anúncio → Favorito:** 1:N — um Anúncio pode ser favoritado por vários Usuários; cada registro aponta para um Anúncio.
+- **Usuário → TokenDispositivo:** 1:N — um Usuário pode ter vários aparelhos/navegadores registrados para push.
+- **Usuário → TokenRecuperacaoSenha:** 1:N — um Usuário pode pedir recuperação de senha várias vezes ao longo do tempo.
 
 *Observação: Usuário e Anúncio têm uma relação N:N entre si por meio de Favorito, que a quebra em dois relacionamentos 1:N.*
 
@@ -255,6 +265,8 @@ erDiagram
     ANUNCIO ||--o{ MIDIA : "tem"
     ANUNCIO ||--o{ PERGUNTA : "recebe"
     ANUNCIO ||--o{ FAVORITO : "e_favoritado_em"
+    USUARIO ||--o{ TOKEN_DISPOSITIVO : "registra"
+    USUARIO ||--o{ TOKEN_RECUPERACAO_SENHA : "solicita"
 
     CIDADE {
         int id PK
@@ -328,6 +340,22 @@ erDiagram
         int anuncio_id FK
         date data
     }
+
+    TOKEN_DISPOSITIVO {
+        int id PK
+        int usuario_id FK
+        string token
+        string plataforma
+        date data_registro
+    }
+
+    TOKEN_RECUPERACAO_SENHA {
+        int id PK
+        int usuario_id FK
+        string token_hash
+        date data_expiracao
+        boolean usado
+    }
 ```
 
 ---
@@ -340,21 +368,21 @@ O BargainCar é dividido em um front-end e uma API, que se comunicam por HTTP em
 
 | Camada | Tecnologia |
 |---|---|
-| Front-end | HTML, CSS e JavaScript puro, em projeto separado; usa `fetch` para consumir a API |
-| Back-end (API) | PHP com CodeIgniter 4 |
+| Front-end | Flutter (Dart), com um único código para Web e Android, consumindo a API por HTTP |
+| Back-end (API) | Dart com Dart Frog, acessando o MySQL com `mysql_client_plus` |
 | Banco de dados | MySQL |
 
 ```mermaid
 flowchart LR
-    Front[Front-end] -->|HTTP + JSON| API[API CodeIgniter 4]
+    Front[Front-end] -->|HTTP + JSON| API[API Dart Frog]
     API --> DB[(MySQL)]
     API --> Arquivos[Armazenamento de fotos e videos]
     API --> Email[Servico de e-mail SMTP]
-    API --> Push[Notificacao no navegador]
+    API --> Push[Notificacao push - navegador e Android]
     Cron[Tarefa agendada diaria] --> API
 ```
 
-Dentro da API, o CodeIgniter segue o padrão MVC adaptado para API: **Rotas** apontam para **Controllers**, que aplicam as regras de negócio e usam **Models** (um por tabela) para acessar o MySQL. A resposta é sempre JSON, sem Views.
+No Dart Frog, as **rotas** são definidas pela estrutura de pastas e arquivos da API: cada arquivo em `routes/` vira uma URL, e arquivos com nome entre colchetes (como `[id].dart`) recebem parâmetros da URL. Cada rota é um **handler** que aplica as regras de negócio e acessa o MySQL por uma camada de dados (um repositório por tabela). **Middlewares** (arquivos `_middleware.dart`) cuidam do que vale para várias rotas, como verificar o token de login. A resposta é sempre JSON. As classes de dados (Usuário, Anúncio etc.) podem ficar em um pacote Dart compartilhado entre o back-end e o app Flutter.
 
 ### Decisões de arquitetura por necessidade do sistema
 
@@ -364,11 +392,25 @@ Dentro da API, o CodeIgniter segue o padrão MVC adaptado para API: **Rotas** ap
 | Recuperação de senha | RF16 | Reaproveita o SMTP já usado para a expiração de anúncios (RF08): envia um link de redefinição com token temporário. |
 | Proximidade entre cidades | RF10, RF11 | Tabela `Cidade` com latitude e longitude. A distância é calculada no MySQL (fórmula de Haversine ou `ST_Distance_Sphere`), com raio de 100 km. Sem dependência de API externa a cada busca. |
 | Padronização das cidades | RF01, RF05 | O usuário escolhe a cidade em uma lista (base do IBGE importada para `Cidade`), em vez de digitar texto livre. |
-| Fotos e vídeos | RF04, RNF03, RNF06 | Arquivos guardados no servidor, com o caminho na tabela `Mídia`. Mínimo de 3 fotos e 1 vídeo por anúncio. Imagens comprimidas no upload; limite de tamanho por arquivo. O PHP limita uploads por padrão (`upload_max_filesize` e `post_max_size`), então esses valores precisam ser aumentados no servidor. |
-| Expiração e renovação | RF08, RF09 | Tarefa agendada (cron) que roda todo dia e executa um comando do CodeIgniter: marca como pendente os anúncios a 3 dias de expirar, notifica o vendedor e expira os vencidos. |
-| E-mail | RF08 | Envio via SMTP, usando a biblioteca de e-mail do CodeIgniter. |
-| Notificação no navegador | RF08 | Web Push (exige HTTPS e que o usuário autorize as notificações). |
-| Front separado da API | Decisão de arquitetura | A API precisa liberar o acesso do front via configuração de CORS. |
+| Fotos e vídeos | RF04, RNF03, RNF06 | Arquivos guardados no servidor, com o caminho na tabela `Mídia`. Mínimo de 3 fotos e 1 vídeo por anúncio. Imagens comprimidas no upload; limite de tamanho por arquivo. O back-end precisa aceitar uploads multipart e impor o limite de tamanho por arquivo. |
+| Expiração e renovação | RF08, RF09 | Tarefa agendada (cron) que roda todo dia e executa um script do back-end em Dart: marca como pendente os anúncios a 3 dias de expirar, notifica o vendedor e expira os vencidos. |
+| E-mail | RF08, RF16 | Envio via SMTP, usando um pacote de e-mail do Dart e o Brevo como provedor. O Brevo serve apenas para enviar e-mails. |
+| Notificação push | RF08 | Firebase Cloud Messaging (FCM) para Android e navegador. O app pede ao Firebase um token do aparelho e o envia à API; quando um anúncio chega a 3 dias de expirar, o back-end pede ao FCM que entregue o aviso a esse token. Exige que o usuário autorize as notificações e, na web, HTTPS. Configuração adiada para a fase de implementação. |
+| Front separado da API | Decisão de arquitetura | O Flutter Web roda no navegador, então a API precisa liberar o acesso via CORS. O app Android não precisa disso. |
+
+### Pacotes (dependências do back-end)
+
+| Função | Pacote | Situação |
+|---|---|---|
+| Framework | `dart_frog` | Decidido |
+| Acesso ao MySQL | `mysql_client_plus` | Decidido |
+| Token de login (JWT) | `dart_jsonwebtoken` | Decidido |
+| Hash de senha | `password_guard` (alternativa: `hashlib`) | Decidido |
+| Envio de e-mail (SMTP) | `mailer` | Decidido |
+| Provedor de SMTP | Brevo (plano gratuito) | Decidido; será usado apenas para enviar e-mails (aviso de expiração e recuperação de senha). Configuração adiada para a fase de implementação |
+| Envio de push (FCM) | `firebase_cloud_messaging_dart` | Decidido; exige conta de serviço do Firebase |
+
+*Antes de instalar cada pacote, conferir no pub.dev a versão atual e a data da última atualização.*
 
 ### Rotas da API
 
@@ -399,6 +441,7 @@ Todas as rotas usam o plural e `id` para identificar o registro. Rotas marcadas 
 | DELETE | `/perguntas/{id}` 🔒 | Exclui a pergunta (dono do anúncio ou autor da pergunta) |
 | GET | `/favoritos` 🔒 | Lista os favoritos do usuário |
 | POST | `/anuncios/{id}/favoritar` 🔒 | Favorita ou desfavorita (alterna) |
+| POST | `/dispositivos` 🔒 | Registra o token de notificação push do aparelho ou navegador |
 | GET | `/cidades?busca=ceres` | Lista cidades para o campo de escolha |
 
 ---
@@ -451,5 +494,14 @@ Todas as rotas usam o plural e `id` para identificar o registro. Rotas marcadas 
 
 ## Pendências (decisões a tomar)
 
+
+- [ ] (Adiado) Configurar o Brevo: criar a conta e gerar as credenciais SMTP, guardando-as fora do repositório, em variáveis de ambiente.
+- [ ] (Adiado) Configurar o Firebase para as notificações push (FCM), na fase de implementação:
+  - Criar um projeto no Firebase (pode ser com a conta Google que você já usa).
+  - Registrar o app Android e o app web dentro do projeto.
+  - Baixar o arquivo de credenciais da conta de serviço, que o back-end usa para enviar as notificações.
+  - Guardar esse arquivo fora do repositório (nunca subir para o GitHub), indicando o caminho por variável de ambiente.
+  - No app Flutter, pedir o token do aparelho ao Firebase e enviá-lo para a API em `POST /dispositivos` (tabela `TokenDispositivo`).
+  - Conferir na página de preços do Firebase se o FCM continua gratuito.
 - [ ] Avaliar, no futuro, denúncia de perguntas e um perfil de administrador para moderação.
 - [ ] Desenhar o diagrama ER no MySQL Workbench (o Mermaid acima serve de referência).
