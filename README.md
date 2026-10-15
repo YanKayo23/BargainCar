@@ -494,7 +494,16 @@ Todas as rotas usam o plural e `id` para identificar o registro. Rotas marcadas 
 
 ## Pendências (decisões a tomar)
 
-
+- [x] Raio de "cidades próximas": 100 km, fixo.
+- [x] Estado pendente: nos últimos 3 dias, até o vendedor responder; sem resposta, o anúncio expira.
+- [x] Anúncio expirado não é reativado; o vendedor cria outro.
+- [x] RF01 usa apenas CPF (o CNPJ fica na Loja).
+- [x] Front-end: Flutter (Dart), para Web e Android.
+- [x] Back-end: Dart, sem PHP/CodeIgniter. Banco continua MySQL.
+- [x] Framework do back-end: Dart Frog.
+- [x] Pacote de acesso ao MySQL: `mysql_client_plus` (conferir a data da última versão no pub.dev ao instalar).
+- [x] Pacotes de JWT, hash de senha, e-mail e push confirmados (tabela de pacotes na Arquitetura).
+- [x] Provedor de SMTP: Brevo (plano gratuito), usado apenas para o envio de e-mails.
 - [ ] (Adiado) Configurar o Brevo: criar a conta e gerar as credenciais SMTP, guardando-as fora do repositório, em variáveis de ambiente.
 - [ ] (Adiado) Configurar o Firebase para as notificações push (FCM), na fase de implementação:
   - Criar um projeto no Firebase (pode ser com a conta Google que você já usa).
@@ -503,5 +512,6 @@ Todas as rotas usam o plural e `id` para identificar o registro. Rotas marcadas 
   - Guardar esse arquivo fora do repositório (nunca subir para o GitHub), indicando o caminho por variável de ambiente.
   - No app Flutter, pedir o token do aparelho ao Firebase e enviá-lo para a API em `POST /dispositivos` (tabela `TokenDispositivo`).
   - Conferir na página de preços do Firebase se o FCM continua gratuito.
+- [x] Perguntas ofensivas podem ser excluídas (pelo dono do anúncio ou pelo autor).
 - [ ] Avaliar, no futuro, denúncia de perguntas e um perfil de administrador para moderação.
 - [ ] Desenhar o diagrama ER no MySQL Workbench (o Mermaid acima serve de referência).
