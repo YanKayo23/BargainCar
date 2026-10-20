@@ -1,15 +1,16 @@
+/// Verifica se um CPF possui dígitos verificadores válidos.
 bool validarCpf(String cpf) {
-  cpf = cpf.replaceAll(RegExp(r'\D'), '');
+  final cpfLimpo = cpf.replaceAll(RegExp(r'\D'), '');
 
-  if (cpf.length != 11) {
+  if (cpfLimpo.length != 11) {
     return false;
   }
 
-  if (RegExp(r'^(\d)\1{10}$').hasMatch(cpf)) {
+  if (RegExp(r'^(\d)\1{10}$').hasMatch(cpfLimpo)) {
     return false;
   }
 
-  final numeros = cpf.split('').map(int.parse).toList();
+  final numeros = cpfLimpo.split('').map(int.parse).toList();
 
   var soma = 0;
 
