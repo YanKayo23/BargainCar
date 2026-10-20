@@ -1,4 +1,7 @@
+import 'package:backend/validators/cpf_validator.dart';
 import 'package:dart_frog/dart_frog.dart';
+
+
 
 Future<Response> onRequest(RequestContext context) async {
   final method = context.request.method;
@@ -35,6 +38,15 @@ Future<Response> onRequest(RequestContext context) async {
     return Response(
       statusCode: 400,
       body: 'Informe um e-mail válido.',
+    );
+  }
+
+  final cpf = body['cpf'];
+
+  if (cpf is! String || !validarCpf(cpf)) {
+    return Response(
+      statusCode: 400,
+      body: 'Informe um CPF válido.',
     );
   }
 
