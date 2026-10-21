@@ -1,5 +1,7 @@
 import 'package:backend/validators/cpf_validator.dart';
 import 'package:dart_frog/dart_frog.dart';
+import 'package:password_guard/password_guard.dart';
+
 
 
 
@@ -49,6 +51,22 @@ Future<Response> onRequest(RequestContext context) async {
       body: 'Informe um CPF válido.',
     );
   }
+
+  final senha = body['senha'];
+
+
+  if (senha is! String || senha.length < 8) {
+    return Response(
+      statusCode: 400,
+      body: 'A senha deve ter pelo menos 8 caracteres.',
+    );
+  }
+
+  final resultado = await PasswordGuard.hash(
+    password: senha,
+  );
+
+  final senhaHash = resultado.hash;
 
   return Response(body: 'Requisição POST recebida!');
 }
