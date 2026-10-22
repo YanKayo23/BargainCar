@@ -227,7 +227,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 `id, usuario_id (FK), token_hash, data_expiracao, usado`
 
 *Notas de modelagem:*
-- `Cidade` guarda latitude e longitude para calcular a distância entre cidades (ver seção Arquitetura). Os nomes das cidades e coordenadas vêm de uma base pública dos municípios brasileiros, importada uma vez para o MySQL.
+- `Cidade` guarda latitude e longitude para calcular a distância entre cidades (ver seção Arquitetura). Os nomes das cidades e as coordenadas vêm de bases públicas dos municípios brasileiros (como a API de localidades do IBGE e uma lista de coordenadas), importadas uma única vez para o MySQL por um script de carga. São cerca de 5.570 registros pequenos, e o sistema não consulta nenhuma API externa durante o uso.
 - `Mídia` existe porque um anúncio pode ter várias fotos e vários vídeos. O arquivo em si fica no servidor; o banco guarda só o caminho.
 - `data_expiracao` no Anúncio permite ao sistema descobrir quais anúncios estão a 3 dias de expirar (RF08).
 - `Pergunta` guarda pergunta e resposta juntas: a resposta só pode ser escrita pelo dono do anúncio.
