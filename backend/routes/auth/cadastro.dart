@@ -26,12 +26,16 @@ Future<Response> onRequest(RequestContext context) async {
 
   final nome = body['nome'];
 
-  if (nome is! String || nome.trim().isEmpty) {
+  if (nome is! String ||
+    nome.trim().isEmpty ||
+    nome.trim().length > 100) {
     return Response(
       statusCode: 400,
-      body: 'O campo nome é obrigatório e deve ser um texto.',
+      body: 'O nome deve ter entre 1 e 100 caracteres.',
     );
   }
+
+  final nomeNormalizado = nome.trim();
 
   final email = body['email'];
 
@@ -42,6 +46,8 @@ Future<Response> onRequest(RequestContext context) async {
       body: 'Informe um e-mail válido.',
     );
   }
+
+  final emailNormalizado = email.trim().toLowerCase();
 
   final cpf = body['cpf'];
 
