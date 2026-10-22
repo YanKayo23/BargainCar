@@ -160,6 +160,17 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 
 **Fluxo alternativo:** Para ver anúncios de locais mais distantes, o usuário pode escolher outras regiões manualmente.
 
+### Caso de Uso: Selecionar Cidade
+**Ator:** Usuário
+**Pré-condição:** Usuário está em uma tela com campo de cidade (cadastro, criar anúncio ou busca)
+**Fluxo principal:**
+1. Usuário começa a digitar o nome da cidade
+2. Sistema exibe uma lista de sugestões, com nome e UF (ex: "Ceres - GO")
+3. Usuário seleciona uma das cidades da lista
+4. Sistema guarda a cidade escolhida
+
+**Fluxo alternativo:** Se nenhuma cidade corresponder ao texto digitado, o sistema exibe "Nenhuma cidade encontrada" e não permite avançar com texto livre.
+
 ### Caso de Uso: Visualizar Anúncio
 **Ator:** Usuário
 **Pré-condição:** Usuário está autenticado (e-mail e senha)
@@ -474,6 +485,7 @@ Todas as rotas usam o plural e `id` para identificar o registro. Rotas marcadas 
 - RN13: A busca pública exibe apenas anúncios com status `ativo` ou `pendente`. Anúncios `expirados` não aparecem. Esse filtro é aplicado pelo back-end, não escolhido pelo usuário.
 - RN14: A busca sem cidade informada usa a cidade padrão do usuário e mostra também as cidades num raio de 100 km.
 - RN15: Na busca, o usuário pode escolher outra cidade para ver anúncios de locais mais distantes. O raio é fixo em 100 km e não pode ser ajustado; o que muda é a cidade de referência.
+- RN15.1: A cidade é sempre escolhida em uma lista de sugestões, e o sistema guarda o `cidade_id`, nunca um texto digitado livremente.
 
 **Perfil, loja e privacidade**
 - RN16: O perfil público do usuário mostra apenas nome, fotos, anúncios ativos e tempo de criação da conta. CPF, CNPJ, contato padrão e localização padrão nunca são exibidos publicamente.
