@@ -74,5 +74,14 @@ Future<Response> onRequest(RequestContext context) async {
 
   final senhaHash = resultado.hash;
 
+  final cidadeId = body['cidade_id'];
+
+if (cidadeId is! int || cidadeId <= 0) {
+  return Response(
+    statusCode: 400,
+    body: 'Informe um ID de cidade válido.',
+  );
+}
+
   return Response(body: 'Requisição POST recebida!');
 }
