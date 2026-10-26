@@ -211,7 +211,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 ### Entidades e Atributos
 
 **Cidade**
-`id, nome, uf, latitude, longitude`
+`codigo_ibge (PK), nome, uf, latitude, longitude`
 
 **Usuário**
 `id, nome, email, cpf, cidade_id (FK, cidade padrão), contato_padrao, data_cadastro, senha`
@@ -238,7 +238,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 `id, usuario_id (FK), token_hash, data_expiracao, usado`
 
 *Notas de modelagem:*
-- `Cidade` guarda latitude e longitude para calcular a distância entre cidades (ver seção Arquitetura). Os nomes das cidades e as coordenadas vêm de bases públicas dos municípios brasileiros (como a API de localidades do IBGE e uma lista de coordenadas), importadas uma única vez para o MySQL por um script de carga. São cerca de 5.570 registros pequenos, e o sistema não consulta nenhuma API externa durante o uso.
+- `Cidade` guarda latitude e longitude para calcular a distância entre cidades (ver seção Arquitetura). Os dados vêm do repositório público `kelvins/Municipios-Brasileiros` (https://github.com/kelvins/Municipios-Brasileiros), que traz código IBGE, nome, UF, latitude e longitude de 5.570 municípios, sob licença MIT (é preciso manter o aviso de licença do repositório de origem). Os dados são importados uma única vez para o MySQL por um script de carga, e o sistema não consulta nenhuma API externa durante o uso. A chave primária da `Cidade` é o código IBGE do município, e o campo `cidade_id` das outras entidades guarda esse código.
 - `Mídia` existe porque um anúncio pode ter várias fotos e vários vídeos. O arquivo em si fica no servidor; o banco guarda só o caminho.
 - `data_expiracao` no Anúncio permite ao sistema descobrir quais anúncios estão a 3 dias de expirar (RF08).
 - `Pergunta` guarda pergunta e resposta juntas: a resposta só pode ser escrita pelo dono do anúncio.
@@ -280,7 +280,7 @@ erDiagram
     USUARIO ||--o{ TOKEN_RECUPERACAO_SENHA : "solicita"
 
     CIDADE {
-        int id PK
+        int codigo_ibge PK
         string nome
         string uf
         decimal latitude
@@ -402,7 +402,7 @@ No Dart Frog, as **rotas** são definidas pela estrutura de pastas e arquivos da
 | Autenticação | RNF01 | Login com CPF e senha, em tela separada do cadastro; a API devolve um token que o front envia nas requisições seguintes. Senhas armazenadas com hash (RNF07). |
 | Recuperação de senha | RF16 | Reaproveita o SMTP já usado para a expiração de anúncios (RF08): envia um link de redefinição com token temporário. |
 | Proximidade entre cidades | RF10, RF11 | Tabela `Cidade` com latitude e longitude. A distância é calculada no MySQL (fórmula de Haversine ou `ST_Distance_Sphere`), com raio de 100 km. Sem dependência de API externa a cada busca. |
-| Padronização das cidades | RF01, RF05 | O usuário escolhe a cidade em uma lista (base do IBGE importada para `Cidade`), em vez de digitar texto livre. |
+| Padronização das cidades | RF01, RF05 | O usuário escolhe a cidade em uma lista (base de municípios importada para `Cidade`, conforme a nota na Modelagem de Dados), em vez de digitar texto livre. |
 | Fotos e vídeos | RF04, RNF03, RNF06 | Arquivos guardados no servidor, com o caminho na tabela `Mídia`. Mínimo de 3 fotos e 1 vídeo por anúncio. Imagens comprimidas no upload; limite de tamanho por arquivo. O back-end precisa aceitar uploads multipart e impor o limite de tamanho por arquivo. |
 | Expiração e renovação | RF08, RF09 | Tarefa agendada (cron) que roda todo dia e executa um script do back-end em Dart: marca como pendente os anúncios a 3 dias de expirar, notifica o vendedor e expira os vencidos. |
 | E-mail | RF08, RF16 | Envio via SMTP, usando um pacote de e-mail do Dart e o Brevo como provedor. O Brevo serve apenas para enviar e-mails. |
@@ -526,4 +526,5 @@ Todas as rotas usam o plural e `id` para identificar o registro. Rotas marcadas 
   - Conferir na página de preços do Firebase se o FCM continua gratuito.
 - [x] Perguntas ofensivas podem ser excluídas (pelo dono do anúncio ou pelo autor).
 - [ ] Avaliar, no futuro, denúncia de perguntas e um perfil de administrador para moderação.
+- [ ] (Implementação) Importar a base de municípios do repositório `kelvins/Municipios-Brasileiros` para a tabela `Cidade`, com um script de carga.
 - [ ] Desenhar o diagrama ER no MySQL Workbench (o Mermaid acima serve de referência).
