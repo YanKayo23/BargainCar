@@ -1,3 +1,24 @@
+Banco de dados — BargainCar
+Versão atualizada para CodeIgniter 4 e MariaDB/MySQL
+Este documento acompanha o arquivo bargaincar_sql_atualizado.sql e reproduz exatamente o esquema SQL dessa versão. O sistema é exclusivamente web, utiliza PHP e CodeIgniter 4 e armazena os dados no MariaDB/MySQL do XAMPP.
+Alterações em relação à versão anterior
+- Adicionado anuncios.deleted_at DATETIME NULL para exclusão lógica (soft delete).
+- Removida a tabela token_dispositivos, pois notificações push não fazem parte da versão inicial.
+- Criados índices para consultas de anúncios por status/cidade, vencimento, usuário, mídias e perguntas.
+- Mantidas oito tabelas: cidades, usuarios, lojas, anuncios, midias, perguntas, favoritos e tokens_recuperacao_senha.
+- Preservadas as chaves estrangeiras e restrições de unicidade existentes.
+Observações de implementação
+- O script cria o banco bargaincar caso não exista, mas também contém DROP TABLE IF EXISTS: executá-lo novamente apaga as tabelas listadas e seus dados. Use somente em uma instalação vazia ou após backup.
+- A base de municípios ainda deverá ser importada dos arquivos CSV para a tabela cidades.
+- A aplicação deve filtrar anúncios excluídos com deleted_at IS NULL; a coluna não remove registros automaticamente.
+- O limite de fotos, o vídeo opcional, as regras de renovação e a autorização do proprietário serão validados na aplicação, não apenas pelo esquema SQL.
+- O usuário bargaincar_app pode continuar sendo usado pela aplicação para operações de dados; criação de tabelas requer uma conta com privilégios de estrutura.
+Script SQL completo
+-- BargainCar | Esquema inicial para MariaDB/MySQL
+-- Execute apenas em banco vazio: o script recria as tabelas listadas.
+-- As cidades serao importadas posteriormente via CSV.
+-- A exclusao logica dos anuncios utiliza deleted_at.
+
 CREATE DATABASE IF NOT EXISTS bargaincar
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
@@ -7,7 +28,6 @@ USE bargaincar;
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS tokens_recuperacao_senha;
-DROP TABLE IF EXISTS token_dispositivos;
 DROP TABLE IF EXISTS favoritos;
 DROP TABLE IF EXISTS perguntas;
 DROP TABLE IF EXISTS midias;
@@ -84,6 +104,11 @@ CREATE TABLE anuncios (
     situacao_documentacao VARCHAR(100) NOT NULL,
     status ENUM('ativo', 'pendente', 'expirado')
         NOT NULL DEFAULT 'ativo',
+    deleted_at DATETIME NULL,
+
+    INDEX idx_anuncios_busca (status, deleted_at, cidade_id),
+    INDEX idx_anuncios_expiracao (status, data_expiracao),
+    INDEX idx_anuncios_usuario (usuario_id),
 
     CONSTRAINT fk_anuncios_usuarios
         FOREIGN KEY (usuario_id)
@@ -106,6 +131,8 @@ CREATE TABLE midias (
     caminho_arquivo VARCHAR(500) NOT NULL,
     ordem INT UNSIGNED NOT NULL DEFAULT 1,
 
+    INDEX idx_midias_anuncio_ordem (anuncio_id, ordem),
+
     CONSTRAINT fk_midias_anuncios
         FOREIGN KEY (anuncio_id)
         REFERENCES anuncios(id)
@@ -121,6 +148,8 @@ CREATE TABLE perguntas (
     resposta TEXT NULL,
     data_pergunta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_resposta DATETIME NULL,
+
+    INDEX idx_perguntas_anuncio (anuncio_id),
 
     CONSTRAINT fk_perguntas_anuncios
         FOREIGN KEY (anuncio_id)
@@ -152,20 +181,6 @@ CREATE TABLE favoritos (
 
     CONSTRAINT uq_favorito_usuario_anuncio
         UNIQUE (usuario_id, anuncio_id)
-) ENGINE = InnoDB;
-
--- Tabela de tokens de dispositivos
-CREATE TABLE token_dispositivos (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT UNSIGNED NOT NULL,
-    token VARCHAR(500) NOT NULL UNIQUE,
-    plataforma ENUM('web', 'android') NOT NULL,
-    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_tokens_usuarios
-        FOREIGN KEY (usuario_id)
-        REFERENCES usuarios(id)
-        ON DELETE CASCADE
 ) ENGINE = InnoDB;
 
 -- Tabela de recuperação de senha
