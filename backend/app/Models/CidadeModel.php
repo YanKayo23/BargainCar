@@ -6,41 +6,28 @@ use CodeIgniter\Model;
 
 class CidadeModel extends Model
 {
-    protected $table            = 'cidades';
-    protected $primaryKey       = 'id';
-    protected $useAutoIncrement = true;
-    protected $returnType       = 'array';
-    protected $useSoftDeletes   = false;
-    protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $table = 'cidades';
 
-    protected bool $allowEmptyInserts = false;
-    protected bool $updateOnlyChanged = true;
+    protected $primaryKey = 'codigo_ibge';
 
-    protected array $casts = [];
-    protected array $castHandlers = [];
+    protected $returnType = 'array';
 
-    // Dates
-    protected $useTimestamps = false;
-    protected $dateFormat    = 'datetime';
-    protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
-    protected $deletedField  = 'deleted_at';
+    protected $useAutoIncrement = false;
 
-    // Validation
-    protected $validationRules      = [];
-    protected $validationMessages   = [];
-    protected $skipValidation       = false;
-    protected $cleanValidationRules = true;
+    protected $allowedFields = [
+        'codigo_ibge',
+        'nome',
+        'uf',
+        'latitude',
+        'longitude',
+    ];
 
-    // Callbacks
-    protected $allowCallbacks = true;
-    protected $beforeInsert   = [];
-    protected $afterInsert    = [];
-    protected $beforeUpdate   = [];
-    protected $afterUpdate    = [];
-    protected $beforeFind     = [];
-    protected $afterFind      = [];
-    protected $beforeDelete   = [];
-    protected $afterDelete    = [];
+    public function buscarPorNome(string $nome, int $limite = 10): array
+    {
+        return $this
+            ->like('nome', $nome, 'after')
+            ->orderBy('nome', 'ASC')
+            ->limit($limite)
+            ->findAll();
+    }
 }
