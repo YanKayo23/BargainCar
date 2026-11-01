@@ -1,0 +1,91 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 30px 16px;
+    background: #f3f4f6;
+    font-family: Arial, sans-serif;
+    color: #222;
+}
+
+.container {
+    max-width: 520px;
+    margin: auto;
+    background: white;
+    padding: 28px;
+    border-radius: 12px;
+    box-shadow: 0 4px 18px #00000012;
+}
+
+h1 {
+    margin-top: 0;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+label {
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+button {
+    margin-top: 16px;
+    padding: 14px;
+    border: 0;
+    border-radius: 6px;
+    background: #222;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #444;
+}
+
+.erros, .sucesso {
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+.erros {
+    background: #ffe5e5;
+    color: #8b0000;
+}
+
+.sucesso {
+    background: #e2f5e7;
+    color: #17612d;
+}
+
+#resultados_cidades {
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.cidade-opcao {
+    background: #fff;
+    padding: 12px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.cidade-opcao:hover {
+    background: #eee;
+}
