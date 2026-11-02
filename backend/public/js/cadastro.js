@@ -127,3 +127,51 @@ formulario.addEventListener('submit', evento => {
     // O banco armazena CPF sem pontos ou traço.
     campoCpf.value = campoCpf.value.replace(/\D/g, '');
 });
+
+const campoWhatsapp = document.getElementById('contato_padrao');
+
+function formatarWhatsapp(valor) {
+    const numeros = valor.replace(/\D/g, '').slice(0, 11);
+
+    if (numeros.length === 0) return '';
+    if (numeros.length <= 2) return `(${numeros}`;
+    if (numeros.length <= 6) {
+        return `(${numeros.slice(0, 2)}) ${numeros.slice(2)}`;
+    }
+    if (numeros.length <= 10) {
+        return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 6)}-${numeros.slice(6)}`;
+    }
+
+    return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 7)}-${numeros.slice(7)}`;
+}
+
+campoWhatsapp.addEventListener('input', () => {
+    campoWhatsapp.value = formatarWhatsapp(campoWhatsapp.value);
+});
+
+campoWhatsapp.value = formatarWhatsapp(campoWhatsapp.value);
+
+
+const requisitoTamanho = document.getElementById('requisito-tamanho');
+const requisitoMaiuscula = document.getElementById('requisito-maiuscula');
+
+function atualizarRequisito(elemento, valido) {
+    elemento.classList.toggle('valido', valido);
+
+    const indicador = elemento.querySelector('span');
+    indicador.textContent = valido ? '✓' : '○';
+}
+
+function verificarSenha() {
+    const senha = campoSenha.value;
+
+    const tamanhoValido = senha.length >= 8;
+    const maiusculaValida = /[A-Z]/.test(senha);
+
+    atualizarRequisito(requisitoTamanho, tamanhoValido);
+    atualizarRequisito(requisitoMaiuscula, maiusculaValida);
+}
+
+campoSenha.addEventListener('input', verificarSenha);
+verificarSenha();
+
