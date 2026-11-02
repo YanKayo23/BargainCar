@@ -2,9 +2,14 @@
 const campoCidade = document.getElementById('cidade_busca');
 const campoCidadeId = document.getElementById('cidade_id');
 const resultados = document.getElementById('resultados_cidades');
+const campoCpf = document.getElementById('cpf');
+const campoSenha = document.getElementById('senha');
+const botaoOlho = document.getElementById('alternar-senha');
 const formulario = document.querySelector('form');
 
 let controlador = null;
+
+// Pesquisa de cidades
 
 function limparResultados() {
     resultados.replaceChildren();
@@ -32,7 +37,7 @@ campoCidade.addEventListener('input', async () => {
         );
 
         if (!resposta.ok) {
-            throw new Error('Falha na pesquisa');
+            throw new Error('Erro ao buscar cidades');
         }
 
         const cidades = await resposta.json();
@@ -64,7 +69,7 @@ campoCidade.addEventListener('input', async () => {
         );
     } catch (erro) {
         if (erro.name !== 'AbortError') {
-            resultados.textContent = 'Erro ao buscar cidades.';
+            resultados.textContent = 'Erro ao pesquisar cidades.';
             campoCidade.setAttribute('aria-expanded', 'true');
         }
     }
@@ -76,6 +81,39 @@ document.addEventListener('click', evento => {
     }
 });
 
+// Máscara visual do CPF
+
+campoCpf.addEventListener('input', () => {
+    let numeros = campoCpf.value.replace(/\D/g, '').slice(0, 11);
+
+    numeros = numeros.replace(/^(\d{3})(\d)/, '$1.$2');
+    numeros = numeros.replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+    numeros = numeros.replace(/\.(\d{3})(\d)/, '.$1-$2');
+
+    campoCpf.value = numeros;
+});
+
+// Mostrar ou ocultar senha
+
+botaoOlho.addEventListener('click', () => {
+    const mostrar = campoSenha.type === 'password';
+
+    campoSenha.type = mostrar ? 'text' : 'password';
+
+    botaoOlho.setAttribute(
+        'aria-label',
+        mostrar ? 'Ocultar senha' : 'Mostrar senha'
+    );
+
+    botaoOlho.setAttribute('aria-pressed', String(mostrar));
+
+    const icone = document.getElementById('icone-olho');
+
+    icone.style.opacity = mostrar ? '0.5' : '1';
+});
+
+// Validação e preparação dos dados
+
 formulario.addEventListener('submit', evento => {
     if (!campoCidadeId.value) {
         evento.preventDefault();
@@ -83,5 +121,9 @@ formulario.addEventListener('submit', evento => {
             'Selecione uma cidade da lista.'
         );
         campoCidade.reportValidity();
+        return;
     }
+
+    // O banco armazena CPF sem pontos ou traço.
+    campoCpf.value = campoCpf.value.replace(/\D/g, '');
 });
