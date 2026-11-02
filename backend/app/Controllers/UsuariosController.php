@@ -21,10 +21,17 @@ class UsuariosController extends BaseController
             'cidade_id' => 'required|is_not_unique[cidades.codigo_ibge]',
             'contato_padrao' => 'permit_empty|max_length[30]',
             'senha' => 'required|min_length[8]',
-            'confirmar_senha' => 'required|matches[senha]',
         ];
 
-        if (! $this->validateData($this->request->getPost(), $regras)) {
+        $dadosRecebidos = $this->request->getPost();
+
+        $dadosRecebidos['cpf'] = preg_replace(
+            '/\D/',
+            '',
+            (string) ($dadosRecebidos['cpf'] ?? '')
+        );
+
+        if (! $this->validateData($dadosRecebidos, $regras)) {
             return redirect()->back()
                 ->withInput()
                 ->with('erros', $this->validator->getErrors());
