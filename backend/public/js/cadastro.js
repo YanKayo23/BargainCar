@@ -2,14 +2,21 @@
 const campoCidade = document.getElementById('cidade_busca');
 const campoCidadeId = document.getElementById('cidade_id');
 const resultados = document.getElementById('resultados_cidades');
+const formulario = document.querySelector('form');
 
 let controlador = null;
+
+function limparResultados() {
+    resultados.replaceChildren();
+    campoCidade.setAttribute('aria-expanded', 'false');
+}
 
 campoCidade.addEventListener('input', async () => {
     const termo = campoCidade.value.trim();
 
     campoCidadeId.value = '';
-    resultados.replaceChildren();
+    campoCidade.setCustomValidity('');
+    limparResultados();
 
     if (controlador) controlador.abort();
 
@@ -25,7 +32,7 @@ campoCidade.addEventListener('input', async () => {
         );
 
         if (!resposta.ok) {
-            throw new Error('Erro ao buscar cidades');
+            throw new Error('Falha na pesquisa');
         }
 
         const cidades = await resposta.json();
@@ -35,34 +42,46 @@ campoCidade.addEventListener('input', async () => {
         }
 
         cidades.forEach(cidade => {
-            const opcao = document.createElement('div');
-
+            const opcao = document.createElement('button');
+            opcao.type = 'button';
             opcao.className = 'cidade-opcao';
+            opcao.setAttribute('role', 'option');
             opcao.textContent = `${cidade.nome} - ${cidade.uf}`;
 
             opcao.addEventListener('click', () => {
                 campoCidade.value = `${cidade.nome} - ${cidade.uf}`;
                 campoCidadeId.value = cidade.codigo_ibge;
-                resultados.replaceChildren();
+                campoCidade.setCustomValidity('');
+                limparResultados();
             });
 
             resultados.appendChild(opcao);
         });
+
+        campoCidade.setAttribute(
+            'aria-expanded',
+            cidades.length > 0 ? 'true' : 'false'
+        );
     } catch (erro) {
         if (erro.name !== 'AbortError') {
-            resultados.textContent = 'Erro ao pesquisar cidades.';
+            resultados.textContent = 'Erro ao buscar cidades.';
+            campoCidade.setAttribute('aria-expanded', 'true');
         }
     }
 });
 
-document.querySelector('form').addEventListener('submit', evento => {
-    if (!campoCidadeId.value) {
-        evento.preventDefault();
-        campoCidade.setCustomValidity('Selecione uma cidade da lista.');
-        campoCidade.reportValidity();
+document.addEventListener('click', evento => {
+    if (!evento.target.closest('.campo-cidade')) {
+        limparResultados();
     }
 });
 
-campoCidade.addEventListener('input', () => {
-    campoCidade.setCustomValidity('');
+formulario.addEventListener('submit', evento => {
+    if (!campoCidadeId.value) {
+        evento.preventDefault();
+        campoCidade.setCustomValidity(
+            'Selecione uma cidade da lista.'
+        );
+        campoCidade.reportValidity();
+    }
 });
