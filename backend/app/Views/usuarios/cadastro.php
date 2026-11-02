@@ -8,73 +8,109 @@
     <link rel="stylesheet" href="<?= base_url('css/cadastro.css') ?>">
 </head>
 <body>
-    <main class="container">
-        <h1>Criar conta no BargainCar</h1>
-        <p>Preencha os dados para se cadastrar.</p>
+    <main class="cadastro-container">
+        <section class="painel-azul">
+            <h1>BargainCar</h1>
+            <h2>Bem-vindo de volta</h2>
+            <p>Já tenho uma conta</p>
+            <a href="<?= site_url('login') ?>" class="botao-entrar">
+                Entrar agora
+            </a>
+        </section>
 
-        <?php if (session()->getFlashdata('sucesso')): ?>
-            <div class="sucesso">
-                <?= esc(session()->getFlashdata('sucesso')) ?>
-            </div>
-        <?php endif; ?>
+        <section class="painel-formulario">
+            <h2>Crie sua conta</h2>
 
-        <?php $erros = session()->getFlashdata('erros') ?? []; ?>
+            <?php if (session()->getFlashdata('sucesso')): ?>
+                <div class="sucesso">
+                    <?= esc(session()->getFlashdata('sucesso')) ?>
+                </div>
+            <?php endif; ?>
 
-        <?php if (! empty($erros)): ?>
-            <div class="erros" role="alert">
-                <?php foreach ($erros as $erro): ?>
-                    <p><?= esc($erro) ?></p>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
+            <?php $erros = session()->getFlashdata('erros') ?? []; ?>
 
-        <form action="<?= site_url('cadastro') ?>" method="post">
-            <?= csrf_field() ?>
+            <?php if (! empty($erros)): ?>
+                <div class="erros" role="alert">
+                    <?php foreach ($erros as $erro): ?>
+                        <p><?= esc($erro) ?></p>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
 
-            <label for="nome">Nome completo</label>
-            <input type="text" id="nome" name="nome"
-                   maxlength="100" required
-                   value="<?= esc(old('nome')) ?>">
+            <form action="<?= site_url('cadastro') ?>" method="post">
+                <?= csrf_field() ?>
 
-            <label for="email">E-mail</label>
-            <input type="email" id="email" name="email"
-                   maxlength="150" required
-                   value="<?= esc(old('email')) ?>">
+                <div class="campo">
+                    <label for="nome">Nome completo</label>
+                    <input id="nome" name="nome" type="text"
+                           maxlength="100" required
+                           value="<?= esc(old('nome')) ?>">
+                </div>
 
-            <label for="cpf">CPF (somente números)</label>
-            <input type="text" id="cpf" name="cpf"
-                   maxlength="11" inputmode="numeric"
-                   pattern="[0-9]{11}" required
-                   value="<?= esc(old('cpf')) ?>">
+                <div class="linha-campos">
+                    <div class="campo">
+                        <label for="email">E-mail</label>
+                        <input id="email" name="email" type="email"
+                               maxlength="150" required
+                               value="<?= esc(old('email')) ?>">
+                    </div>
 
-            <label for="cidade_busca">Cidade</label>
-            <input type="text" id="cidade_busca"
-                   placeholder="Digite sua cidade"
-                   autocomplete="off" required>
+                    <div class="campo">
+                        <label for="contato_padrao">Contato (WhatsApp)</label>
+                        <input id="contato_padrao" name="contato_padrao"
+                               type="tel" maxlength="30"
+                               placeholder="(00) 00000-0000"
+                               value="<?= esc(old('contato_padrao')) ?>">
+                    </div>
+                </div>
 
-            <input type="hidden" id="cidade_id"
-                   name="cidade_id"
-                   value="<?= esc(old('cidade_id')) ?>">
+                <div class="linha-campos">
+                    <div class="campo">
+                        <label for="cpf">CPF</label>
+                        <input id="cpf" name="cpf" type="text"
+                               maxlength="11" inputmode="numeric"
+                               pattern="[0-9]{11}" required
+                               value="<?= esc(old('cpf')) ?>">
+                    </div>
 
-            <div id="resultados_cidades"></div>
+                    <div class="campo campo-cidade">
+                        <label for="cidade_busca">Sua cidade</label>
+                        <input id="cidade_busca" type="text"
+                               placeholder="Escolha na lista"
+                               autocomplete="off" required
+                               role="combobox"
+                               aria-autocomplete="list"
+                               aria-expanded="false"
+                               aria-controls="resultados_cidades">
 
-            <label for="contato_padrao">Telefone ou WhatsApp</label>
-            <input type="text" id="contato_padrao"
-                   name="contato_padrao" maxlength="30"
-                   value="<?= esc(old('contato_padrao')) ?>">
+                        <input id="cidade_id" name="cidade_id"
+                               type="hidden"
+                               value="<?= esc(old('cidade_id')) ?>">
 
-            <label for="senha">Senha</label>
-            <input type="password" id="senha"
-                   name="senha" minlength="8"
-                   autocomplete="new-password" required>
+                        <div id="resultados_cidades"
+                             role="listbox"></div>
+                    </div>
+                </div>
 
-            <label for="confirmar_senha">Confirmar senha</label>
-            <input type="password" id="confirmar_senha"
-                   name="confirmar_senha" minlength="8"
-                   autocomplete="new-password" required>
+                <div class="campo">
+                    <label for="senha">Senha</label>
+                    <input id="senha" name="senha" type="password"
+                           minlength="8" autocomplete="new-password"
+                           required>
+                </div>
 
-            <button type="submit">Criar minha conta</button>
-        </form>
+                <div class="campo">
+                    <label for="confirmar_senha">Confirmar senha</label>
+                    <input id="confirmar_senha" name="confirmar_senha"
+                           type="password" minlength="8"
+                           autocomplete="new-password" required>
+                </div>
+
+                <button class="botao-cadastrar" type="submit">
+                    Cadastrar
+                </button>
+            </form>
+        </section>
     </main>
 
     <script src="<?= base_url('js/cadastro.js') ?>"></script>
