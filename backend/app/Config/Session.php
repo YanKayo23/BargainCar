@@ -58,7 +58,7 @@ class Session extends BaseConfig
      *
      * IMPORTANT: You are REQUIRED to set a valid save path!
      */
-    public string $savePath = 'C:/bargaincar-sessoes';
+    public string $savePath = '';
 
     /**
      * --------------------------------------------------------------------------
@@ -125,4 +125,49 @@ class Session extends BaseConfig
      * seconds.
      */
     public int $lockMaxRetries = 300;
+
+
+    public function __construct()
+    {
+        // Primeira opção: pasta padrão do CodeIgniter.
+        $pastaOriginal = WRITEPATH . 'session';
+
+        // Segunda opção: pasta alternativa configurável.
+        $pastaAlternativa = env(
+            'session.fallbackPath',
+            rtrim(sys_get_temp_dir(), '/\\')
+                . DIRECTORY_SEPARATOR
+                . 'bargaincar-sessoes'
+        );
+
+        // Tenta utilizar a pasta original.
+        if ($this->pastaDisponivel($pastaOriginal)) {
+            $this->savePath = $pastaOriginal;
+            return;
+        }
+
+        // Se falhar, tenta a pasta alternativa.
+        if ($this->pastaDisponivel($pastaAlternativa)) {
+            $this->savePath = $pastaAlternativa;
+            return;
+        }
+
+        throw new \RuntimeException(
+            'Não foi possível encontrar uma pasta gravável para as sessões.'
+        );
+    }
+
+    private function pastaDisponivel(string $caminho): bool
+    {
+        if (! is_dir($caminho)) {
+            if (
+                ! @mkdir($caminho, 0700, true)
+                && ! is_dir($caminho)
+            ) {
+                return false;
+            }
+        }
+
+        return is_writable($caminho);
+    }
 }
