@@ -5,63 +5,176 @@
 
 body {
     margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding: 30px 16px;
-    background: #f3f4f6;
+    background: #fff;
     font-family: Arial, sans-serif;
     color: #222;
 }
 
-.container {
-    max-width: 520px;
-    margin: auto;
-    background: white;
-    padding: 28px;
-    border-radius: 12px;
-    box-shadow: 0 4px 18px #00000012;
+.cadastro-container {
+    width: 100%;
+    max-width: 1000px;
+    display: grid;
+    grid-template-columns: 38% 62%;
+    border-radius: 22px;
+    overflow: visible;
 }
 
-h1 {
+.painel-azul {
+    background: #0785f8;
+    color: white;
+    border-radius: 22px 0 0 22px;
+    padding: 45px 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.painel-azul h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.painel-azul h2 {
+    font-size: 27px;
+}
+
+.painel-azul p {
+    margin-top: 8px;
+}
+
+.botao-entrar {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    padding: 17px;
+    background: white;
+    color: #0064bc;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    text-align: center;
+}
+
+.painel-formulario {
+    background: #eeeeee;
+    border-radius: 0 22px 22px 0;
+    padding: 35px 50px 45px;
+}
+
+.painel-formulario h2 {
+    color: #0064bc;
+    text-align: center;
     margin-top: 0;
+    margin-bottom: 28px;
+    font-size: 28px;
 }
 
 form {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 18px;
 }
 
-label {
-    font-weight: bold;
-    margin-top: 8px;
+.linha-campos {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 15px;
 }
 
-input {
+.campo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 8px;
+}
+
+.campo label {
+    font-weight: 500;
+}
+
+.campo input {
     width: 100%;
+    height: 52px;
+    border: 2px solid #999;
+    border-radius: 9px;
+    background: white;
     padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
     font-size: 15px;
 }
 
-button {
-    margin-top: 16px;
-    padding: 14px;
+.campo input:focus {
+    outline: none;
+    border-color: #0785f8;
+}
+
+/* A lista fica flutuando sobre os outros campos */
+.campo-cidade {
+    position: relative;
+}
+
+#resultados_cidades {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    max-height: 210px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #bbb;
+    border-radius: 0 0 9px 9px;
+    box-shadow: 0 8px 20px #00000025;
+}
+
+#resultados_cidades:not(:empty) {
+    display: block;
+}
+
+.cidade-opcao {
+    display: block;
+    width: 100%;
+    padding: 12px;
     border: 0;
-    border-radius: 6px;
-    background: #222;
-    color: white;
-    font-size: 16px;
+    background: white;
+    text-align: left;
+    font: inherit;
     cursor: pointer;
 }
 
-button:hover {
-    background: #444;
+.cidade-opcao:hover,
+.cidade-opcao:focus {
+    background: #e5f2ff;
+    outline: none;
+}
+
+.botao-cadastrar {
+    align-self: center;
+    width: 210px;
+    padding: 17px;
+    background: #0064c8;
+    color: white;
+    border: none;
+    border-radius: 9px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.botao-cadastrar:hover {
+    background: #004f9e;
 }
 
 .erros, .sucesso {
     padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 16px;
+    border-radius: 8px;
 }
 
 .erros {
@@ -74,18 +187,22 @@ button:hover {
     color: #17612d;
 }
 
-#resultados_cidades {
-    border-radius: 6px;
-    overflow: hidden;
-}
+@media (max-width: 700px) {
+    .cadastro-container {
+        grid-template-columns: 1fr;
+    }
 
-.cidade-opcao {
-    background: #fff;
-    padding: 12px;
-    border: 1px solid #ddd;
-    cursor: pointer;
-}
+    .painel-azul {
+        border-radius: 22px 22px 0 0;
+        padding: 25px;
+    }
 
-.cidade-opcao:hover {
-    background: #eee;
+    .painel-formulario {
+        border-radius: 0 0 22px 22px;
+        padding: 30px 22px;
+    }
+
+    .linha-campos {
+        grid-template-columns: 1fr;
+    }
 }
