@@ -59,6 +59,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 - RF17: O sistema deve permitir que o usuário, estando logado e possuindo uma Loja, alterne entre navegar como pessoa física ou como loja, usando a mesma conta.
 - RF18: Visitantes não autenticados podem buscar, listar e visualizar anúncios e perfis públicos.
 - RF19: O sistema deve permitir a exclusão lógica de anúncios pelo proprietário, retirando-os das buscas e mantendo a referência de favoritos indisponíveis.
+- RF20: O sistema deve permitir que o usuário mostre ou oculte a senha digitada por meio de um ícone de olho nos campos de senha (cadastro, login e redefinição).
 
 **Requisitos Não Funcionais (RNF)**
 
@@ -69,6 +70,8 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 - RNF05: O sistema deve suportar crescimento de usuários sem perda significativa de performance.
 - RNF06: Arquivos de mídia devem ter limite de tamanho por upload: fotos em JPG, PNG ou WebP até 5 MB cada; vídeo em MP4 até 50 MB.
 - RNF07: As senhas dos usuários devem ser armazenadas como hashes seguros, nunca em texto puro ou criptografia reversível.
+- RNF07.1: Os formulários de criação e redefinição de senha devem validar no servidor o mínimo de 8 caracteres e pelo menos uma letra maiúscula de A a Z; letras minúsculas, números e símbolos são permitidos, mas não obrigatórios.
+- RNF07.2: O ícone de olho deve alternar a visibilidade do texto digitado sem modificar a senha, com indicação acessível do estado mostrar/ocultar.
 - RNF08: Formulários e ações de alteração de estado devem utilizar proteção CSRF e validação de entradas.
 - RNF09: CPF e e-mail devem ser únicos, normalizados e protegidos contra exposição indevida.
 - RNF10: O login deve limitar tentativas abusivas e usar cookies de sessão seguros.
@@ -95,7 +98,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 **Pré-condição:** Usuário possui conta cadastrada
 **Fluxo principal:**
 1. Usuário acessa a tela de login (separada da tela de criar conta)
-2. Usuário informa CPF e senha
+2. Usuário informa CPF e senha; pode mostrar ou ocultar a senha pelo ícone de olho
 3. Usuário clica em "Entrar"
 4. Sistema valida as credenciais e redireciona o usuário para a página inicial, autenticado
 
@@ -109,7 +112,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 2. Usuário informa o e-mail cadastrado
 3. Usuário clica em "Enviar link"
 4. Sistema exibe a mensagem "Se esse e-mail estiver cadastrado, você vai receber um link em instantes. Confira também a caixa de spam e verifique se digitou o e-mail corretamente."
-5. Usuário acessa o link recebido, define uma nova senha e é redirecionado para o login
+5. Usuário acessa o link recebido, define uma nova senha com no mínimo 8 caracteres e pelo menos uma letra maiúscula (A–Z), podendo mostrar ou ocultar a digitação pelo ícone de olho, e é redirecionado para o login
 
 **Fluxo alternativo:** A mensagem do passo 4 é sempre a mesma, exista ou não aquele e-mail no sistema — o sistema nunca confirma nem nega se um e-mail está cadastrado. O link de redefinição expira após um tempo determinado.
 
@@ -401,12 +404,41 @@ As rotas são declaradas em `app/Config/Routes.php` e direcionadas a Controllers
 |---|---|---|
 | Autenticação | RNF01 | Login com CPF e senha, em tela separada do cadastro; o servidor estabelece uma sessão autenticada, verificada por Filters nas requisições seguintes. Senhas armazenadas com hash (RNF07). |
 | Recuperação de senha | RF16 | Reaproveita o SMTP já usado para a expiração de anúncios (RF08): envia um link de redefinição com token temporário. |
-| Proximidade entre cidades | RF10, RF11 | Tabela `Cidade` com latitude e longitude. A distância é calculada no MySQL (fórmula de Haversine ou `ST_Distance_Sphere`), com raio de 100 km. Sem dependência de API externa a cada busca. |
+| Proximidade entre cidades | RF10, RF11 | Tabela `Cidade` com latitude e longitude. A distância é estimada no MySQL pela distância euclidiana em um plano local, convertendo diferenças angulares em quilômetros e corrigindo a longitude pelo cosseno da latitude média. O raio é fixo em 100 km, sem API externa. Trata-se de distância aproximada em linha reta, não rodoviária. |
 | Padronização das cidades | RF01, RF05 | O usuário escolhe a cidade em uma lista (base de municípios importada para `Cidade`, conforme a nota na Modelagem de Dados), em vez de digitar texto livre. |
 | Fotos e vídeos | RF04, RNF03, RNF06 | Arquivos guardados no servidor, com o caminho na tabela `Mídia`. Mínimo de 3 fotos por anúncio; vídeo opcional (até 1). Imagens comprimidas no upload; limite de tamanho por arquivo. O back-end precisa aceitar uploads multipart e impor o limite de tamanho por arquivo. |
 | Expiração e renovação | RF08, RF09 | Tarefa agendada (cron) que roda todo dia e executa um comando CLI do CodeIgniter 4: marca como pendente os anúncios a 3 dias de expirar, notifica o vendedor e expira os vencidos. |
 | E-mail | RF08, RF16 | Envio via SMTP, usando o serviço de e-mail do CodeIgniter 4 via SMTP e o Brevo como provedor. O Brevo serve apenas para enviar e-mails. |
 | Aplicação web integrada | Decisão de arquitetura | O CodeIgniter entrega páginas e processa formulários na mesma aplicação; não é necessária uma API separada nem configuração CORS para um front-end distinto. |
+
+### Cálculo de proximidade entre municípios
+
+Para estimar a distância em linha reta entre os centros geográficos de duas cidades, o sistema utilizará uma **aproximação euclidiana local**, não a fórmula euclidiana diretamente sobre graus de latitude/longitude.
+
+Sejam `lat1`, `lon1` as coordenadas da cidade de referência e `lat2`, `lon2` as da cidade candidata (em graus):
+
+- `lat_media = RADIANS((lat1 + lat2) / 2)`;
+- `delta_y = 111.32 * (lat2 - lat1)` km;
+- `delta_x = 111.32 * COS(lat_media) * (lon2 - lon1)` km;
+- `distancia_km = SQRT(POW(delta_x, 2) + POW(delta_y, 2))`.
+
+A cidade será considerada próxima quando `distancia_km <= 100`. O cálculo será executado no MySQL com parâmetros vinculados pelo CodeIgniter 4. A distância é aproximada e **não representa o percurso por estradas**; municípios próximos do limite podem apresentar pequena divergência em relação à distância geodésica.
+
+Exemplo de expressão SQL (os valores de referência devem ser vinculados como parâmetros, não concatenados):
+
+```sql
+SELECT codigo_ibge, nome, uf,
+       SQRT(
+           POW(111.32 * (latitude - ?), 2) +
+           POW(111.32 * COS(RADIANS((latitude + ?) / 2))
+               * (longitude - ?), 2)
+       ) AS distancia_km
+FROM cidades
+HAVING distancia_km <= 100
+ORDER BY distancia_km ASC;
+```
+
+Na execução, os parâmetros são, nesta ordem: latitude de referência, latitude de referência e longitude de referência. O nome real da tabela deve corresponder à Migration implementada.
 
 ### Dependências e recursos do PHP
 
@@ -471,6 +503,8 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 - RN06.2: A recuperação de senha é identificada pelo e-mail (não pelo CPF): o sistema envia um link de redefinição, válido por tempo limitado.
 - RN06.3: A mensagem de confirmação é sempre a mesma, exista ou não o e-mail informado no sistema. Para orientar quem digitou errado, a mensagem sugere conferir se o e-mail foi digitado corretamente, sem confirmar nem negar se ele está cadastrado.
 - RN06.4: A Loja não tem login próprio. O dono acessa a área da loja alternando o modo de navegação dentro da mesma conta.
+- RN06.5: Na criação de conta e na redefinição de senha, a senha deve conter no mínimo 8 caracteres e pelo menos uma letra maiúscula (A–Z). Os demais caracteres podem ser letras, números ou símbolos; não há obrigatoriedade de números ou caracteres especiais.
+- RN06.6: Os campos de senha no cadastro, login e redefinição devem possuir um ícone de olho que permita mostrar ou ocultar o que está sendo digitado. Por padrão, a senha permanece oculta.
 
 **Ciclo de vida do anúncio**
 - RN07: Todo anúncio nasce com status `ativo` e fica no ar por 30 dias.
@@ -482,7 +516,7 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 
 **Busca e localização**
 - RN13: A busca pública exibe apenas anúncios com status `ativo` ou `pendente`. Anúncios `expirados` não aparecem. Esse filtro é aplicado pelo back-end, não escolhido pelo usuário.
-- RN14: A busca sem cidade informada usa a cidade padrão do usuário autenticado e mostra também as cidades num raio de 100 km. Visitantes devem escolher uma cidade de referência antes de uma busca regional, sem depender de geolocalização automática.
+- RN14: A busca sem cidade informada usa a cidade padrão do usuário autenticado e mostra também municípios cuja distância euclidiana local aproximada seja de até 100 km, calculada pelas coordenadas geográficas convertidas para quilômetros. Visitantes devem escolher uma cidade de referência antes de uma busca regional, sem depender de geolocalização automática.
 - RN15: Na busca, o usuário pode escolher outra cidade para ver anúncios de locais mais distantes. O raio é fixo em 100 km e não pode ser ajustado; o que muda é a cidade de referência.
 - RN15.1: A cidade é sempre escolhida em uma lista de sugestões, e o sistema guarda o `cidade_id`, nunca um texto digitado livremente.
 
