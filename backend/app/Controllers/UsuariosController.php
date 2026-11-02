@@ -20,7 +20,7 @@ class UsuariosController extends BaseController
             'cpf' => 'required|regex_match[/^[0-9]{11}$/]|is_unique[usuarios.cpf]',
             'cidade_id' => 'required|is_not_unique[cidades.codigo_ibge]',
             'contato_padrao' => 'permit_empty|max_length[30]',
-            'senha' => 'required|min_length[8]',
+            'senha' => 'required|min_length[8]|regex_match[/[A-Z]/]',
         ];
 
         $dadosRecebidos = $this->request->getPost();
@@ -29,7 +29,17 @@ class UsuariosController extends BaseController
             '/\D/',
             '',
             (string) ($dadosRecebidos['cpf'] ?? '')
+
+
         );
+
+        if (! $this->cpfValido($dadosRecebidos['cpf'])) {
+            return redirect()->back()
+                ->withInput()
+                ->with('erros', [
+                    'cpf' => 'O CPF informado é inválido.',
+                ]);
+        }
 
         if (! $this->validateData($dadosRecebidos, $regras)) {
             return redirect()->back()
