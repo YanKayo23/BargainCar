@@ -1,4 +1,3 @@
-
 * {
     box-sizing: border-box;
 }
@@ -304,5 +303,27 @@ form {
 
     .linha-campos {
         grid-template-columns: 1fr;
+    }
+
+    .requisitos-senha {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .requisitos-senha p {
+        margin: 0;
+        color: #666;
+        font-size: 13px;
+    }
+
+    .requisitos-senha p.valido {
+        color: #16783b;
+    }
+
+    .requisitos-senha span {
+        display: inline-block;
+        width: 17px;
+        font-weight: bold;
     }
 }
