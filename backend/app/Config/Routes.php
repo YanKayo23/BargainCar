@@ -17,3 +17,5 @@ $routes->post('cadastro', 'UsuariosController::salvar');
 $routes->get('login', 'AuthController::login');
 // Processamento do login
 $routes->post('login', 'AuthController::autenticar');
+
+$routes->post('logout', 'AuthController::sair');
