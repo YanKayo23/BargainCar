@@ -174,4 +174,3 @@ function verificarSenha() {
 
 campoSenha.addEventListener('input', verificarSenha);
 verificarSenha();
-
