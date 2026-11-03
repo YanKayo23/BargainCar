@@ -62,4 +62,14 @@ class AuthController extends BaseController
         return redirect()->to('/')
             ->with('sucesso', 'Login realizado com sucesso!');
     }
+
+
+    public function sair(): RedirectResponse
+    {
+        // Encerra a sessão do usuário
+        session()->destroy();
+
+        // Redireciona para a página de login
+        return redirect()->to('/login');
+    }
 }
