@@ -115,7 +115,9 @@
                         <div class="cidade-container">
                             <input
                                 id="cidade_busca"
+                                name="cidade_busca"
                                 type="text"
+                                value="<?= esc(old('cidade_busca')) ?>"
                                 placeholder="Escolha na lista"
                                 autocomplete="off"
                                 role="combobox"
