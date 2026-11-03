@@ -23,6 +23,33 @@ class UsuariosController extends BaseController
             'senha' => 'required|min_length[8]|regex_match[/[A-Z]/]',
         ];
 
+
+        $mensagens = [
+            'nome' => [
+                'required' => 'Informe seu nome completo.',
+            ],
+            'email' => [
+                'required' => 'Informe seu e-mail.',
+                'valid_email' => 'Digite um e-mail válido.',
+                'is_unique' => 'Este e-mail já está cadastrado.',
+            ],
+            'cpf' => [
+                'required' => 'Informe seu CPF.',
+                'regex_match' => 'O CPF deve conter 11 números.',
+                'is_unique' => 'Este CPF já está cadastrado.',
+            ],
+            'cidade_id' => [
+                'required' => 'Selecione sua cidade.',
+                'is_not_unique' => 'Selecione uma cidade válida.',
+            ],
+            'senha' => [
+                'required' => 'Crie uma senha.',
+                'min_length' => 'A senha deve ter pelo menos 8 caracteres.',
+                'regex_match' => 'A senha precisa ter pelo menos uma letra maiúscula.',
+            ],
+        ];
+
+
         $dadosRecebidos = $this->request->getPost();
 
         $dadosRecebidos['cpf'] = preg_replace(
@@ -41,7 +68,7 @@ class UsuariosController extends BaseController
                 ]);
         }
 
-        if (! $this->validateData($dadosRecebidos, $regras)) {
+        if (! $this->validateData($dadosRecebidos, $regras, $mensagens)) {
             return redirect()->back()
                 ->withInput()
                 ->with('erros', $this->validator->getErrors());
