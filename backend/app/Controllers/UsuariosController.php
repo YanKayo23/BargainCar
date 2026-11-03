@@ -17,7 +17,7 @@ class UsuariosController extends BaseController
         $regras = [
             'nome' => 'required|max_length[100]',
             'email' => 'required|valid_email|max_length[150]|is_unique[usuarios.email]',
-            'cpf' => 'required|regex_match[/^[0-9]{11}$/]|is_unique[usuarios.cpf]',
+            'cpf' => 'required|regex_match[/^[0-9]{11}$/]|cpf_valido|is_unique[usuarios.cpf]',
             'cidade_id' => 'required|is_not_unique[cidades.codigo_ibge]',
             'contato_padrao' => 'permit_empty|max_length[30]',
             'senha' => 'required|min_length[8]|regex_match[/[A-Z]/]',
@@ -36,6 +36,7 @@ class UsuariosController extends BaseController
             'cpf' => [
                 'required' => 'Informe seu CPF.',
                 'regex_match' => 'O CPF deve conter 11 números.',
+                'cpf_valido' => 'O CPF informado é inválido.',
                 'is_unique' => 'Este CPF já está cadastrado.',
             ],
             'cidade_id' => [
@@ -59,14 +60,6 @@ class UsuariosController extends BaseController
 
 
         );
-
-        if (! $this->cpfValido($dadosRecebidos['cpf'])) {
-            return redirect()->back()
-                ->withInput()
-                ->with('erros', [
-                    'cpf' => 'O CPF informado é inválido.',
-                ]);
-        }
 
         if (! $this->validateData($dadosRecebidos, $regras, $mensagens)) {
             return redirect()->back()
@@ -102,34 +95,4 @@ class UsuariosController extends BaseController
             ->with('sucesso', 'Usuário cadastrado com sucesso!');
     }
 
-
-    private function cpfValido(string $cpf): bool
-    {
-        $cpf = preg_replace('/\D/', '', $cpf);
-
-        if (strlen($cpf) !== 11) {
-            return false;
-        }
-
-        if (preg_match('/^(\d)\1{10}$/', $cpf)) {
-            return false;
-        }
-
-        for ($tamanho = 9; $tamanho < 11; $tamanho++) {
-            $soma = 0;
-
-            for ($i = 0; $i < $tamanho; $i++) {
-                $soma += (int) $cpf[$i] * ($tamanho + 1 - $i);
-            }
-
-            $resto = ($soma * 10) % 11;
-            $digito = $resto === 10 ? 0 : $resto;
-
-            if ($digito !== (int) $cpf[$tamanho]) {
-                return false;
-            }
-        }
-
-        return true;
-    }
 }
