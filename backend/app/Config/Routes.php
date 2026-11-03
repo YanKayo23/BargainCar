@@ -19,3 +19,11 @@ $routes->get('login', 'AuthController::login');
 $routes->post('login', 'AuthController::autenticar');
 
 $routes->post('logout', 'AuthController::sair');
+
+// Criação de loja
+$routes->get('criar-loja', 'LojasController::criar', [
+    'filter' => 'auth'
+]);
+$routes->post('criar-loja', 'LojasController::salvar', [
+    'filter' => 'auth'
+]);
