@@ -48,15 +48,35 @@ CREATE TABLE usuarios (
         REFERENCES cidades(codigo_ibge)
 ) ENGINE = InnoDB;
 
+
 -- Tabela de lojas
 CREATE TABLE lojas (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT UNSIGNED NOT NULL UNIQUE,
+    usuario_id INT UNSIGNED NOT NULL,
     cidade_id INT UNSIGNED NOT NULL,
     contato VARCHAR(30) NOT NULL,
     nome_empresa VARCHAR(150) NOT NULL,
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     cnpj CHAR(14) UNIQUE,
+
+    -- NULL = loja ativa
+    -- Data preenchida = loja excluída logicamente
+    deleted_at DATETIME NULL DEFAULT NULL,
+
+    -- Identifica o usuário apenas quando a loja está ativa
+    usuario_ativo_id INT UNSIGNED
+        GENERATED ALWAYS AS (
+            CASE
+                WHEN deleted_at IS NULL THEN usuario_id
+                ELSE NULL
+            END
+        ) PERSISTENT,
+
+    -- Permite várias lojas no histórico do mesmo usuário
+    INDEX idx_lojas_usuario (usuario_id),
+
+    -- Permite somente uma loja ativa por usuário
+    UNIQUE KEY uq_lojas_usuario_ativo (usuario_ativo_id),
 
     CONSTRAINT fk_lojas_usuarios
         FOREIGN KEY (usuario_id)
