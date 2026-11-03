@@ -8,15 +8,8 @@ use CodeIgniter\HTTP\RedirectResponse;
 class LojasController extends BaseController
 {
     // Exibe o formulário de criação de loja
-    public function criar(): string
+    public function criar(): string|RedirectResponse
     {
-        return view('lojas/criar');
-    }
-
-    // Recebe e salva os dados da loja
-    public function salvar(): RedirectResponse
-    {
-        // Identifica o usuário autenticado
         $usuarioId = session()->get('usuario_id');
 
         if (! $usuarioId) {
@@ -25,17 +18,46 @@ class LojasController extends BaseController
 
         $lojaModel = new LojaModel();
 
-        // Impede que o usuário crie uma segunda loja
-        $lojaExistente = $lojaModel
+        // Procura somente lojas ativas
+        $lojaAtiva = $lojaModel
             ->where('usuario_id', $usuarioId)
             ->first();
 
-        if ($lojaExistente) {
-            return redirect()->back()
-                ->with('erro', 'Você já possui uma loja cadastrada.');
+        if ($lojaAtiva) {
+            return redirect()->to('/')
+                ->with('erro', 'Você já possui uma loja ativa.');
         }
 
-        // Recebe os dados do formulário
+        return view('lojas/criar');
+    }
+
+    // Recebe e salva os dados da loja
+    public function salvar(): RedirectResponse
+    {
+        $usuarioId = session()->get('usuario_id');
+
+        if (! $usuarioId) {
+            return redirect()->to('/login');
+        }
+
+        $lojaModel = new LojaModel();
+
+        // Impede duas lojas ativas para o mesmo usuário
+        $lojaAtiva = $lojaModel
+            ->where('usuario_id', $usuarioId)
+            ->first();
+
+        if ($lojaAtiva) {
+            return redirect()->to('/')
+                ->with('erro', 'Você já possui uma loja ativa.');
+        }
+
+        $cnpj = preg_replace(
+            '/\D/',
+            '',
+            (string) $this->request->getPost('cnpj')
+        );
+
         $dados = [
             'nome_empresa' => trim(
                 (string) $this->request->getPost('nome_empresa')
@@ -44,19 +66,9 @@ class LojasController extends BaseController
             'contato' => trim(
                 (string) $this->request->getPost('contato')
             ),
-            'cnpj' => preg_replace(
-                '/\D/',
-                '',
-                (string) $this->request->getPost('cnpj')
-            ),
+            'cnpj' => $cnpj === '' ? null : $cnpj,
         ];
 
-        // CNPJ é opcional
-        if ($dados['cnpj'] === '') {
-            $dados['cnpj'] = null;
-        }
-
-        // Validação dos campos
         $regras = [
             'nome_empresa' => 'required|max_length[150]',
             'cidade_id' => 'required|is_not_unique[cidades.codigo_ibge]',
@@ -72,10 +84,12 @@ class LojasController extends BaseController
 
         $dadosValidados = $this->validator->getValidated();
 
-        // O usuário responsável vem da sessão
+        // O ID vem da sessão, nunca do formulário
         $dadosValidados['usuario_id'] = $usuarioId;
 
-        // Salva a loja no MariaDB
+        // Mantém o CNPJ vazio como NULL
+        $dadosValidados['cnpj'] = $dados['cnpj'];
+
         if ($lojaModel->insert($dadosValidados) === false) {
             return redirect()->back()
                 ->withInput()
