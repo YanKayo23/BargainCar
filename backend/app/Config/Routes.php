@@ -12,3 +12,8 @@ $routes->get('buscar-cidade', static function () {
 
 $routes->get('cadastro', 'UsuariosController::cadastro');
 $routes->post('cadastro', 'UsuariosController::salvar');
+
+// Página de login
+$routes->get('login', 'AuthController::login');
+// Processamento do login
+$routes->post('login', 'AuthController::autenticar');
