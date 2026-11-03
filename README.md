@@ -126,7 +126,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 3. Sistema passa a exibir a área da loja (anúncios, dados e perfil público da loja)
 4. Usuário pode voltar ao modo pessoa a qualquer momento, pelo mesmo seletor
 
-**Fluxo alternativo:** Se o usuário não tiver uma Loja cadastrada, o seletor não exibe a opção "Loja", apenas um convite para criar uma.
+**Fluxo alternativo:** Se o usuário não tiver uma Loja ativa, o seletor não exibe a opção "Loja", apenas um convite para criar uma.
 
 ### Caso de Uso: Criar Loja
 **Ator:** Usuário
@@ -229,7 +229,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 `id, nome, email, cpf, cidade_id (FK, cidade padrão), contato_padrao, data_cadastro, senha`
 
 **Loja**
-`id, usuario_id (FK), cidade_id (FK, cidade padrão da loja), contato, nome_empresa, data_cadastro, cnpj (opcional)`
+`id, usuario_id (FK), cidade_id (FK, cidade padrão da loja), contato, nome_empresa, data_cadastro, cnpj (opcional), deleted_at (opcional)`
 
 **Anúncio**
 `id, tipo_anunciante (pessoa ou loja), usuario_id (FK), loja_id (FK, opcional), deleted_at (opcional), cidade_id (FK, padrão ou variante), informacoes_contato (padrão ou variante), data_criacao, data_expiracao, titulo, ano, preco, cor, descricao, defeitos, debitos_pendentes, situacao_documentacao, status (ativo, pendente, expirado)`
@@ -258,7 +258,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 - **Cidade → Usuário:** 1:N — uma Cidade é a cidade padrão de vários Usuários; cada Usuário tem uma cidade padrão.
 - **Cidade → Loja:** 1:N — mesma lógica para a cidade padrão da Loja.
 - **Cidade → Anúncio:** 1:N — uma Cidade pode ter vários Anúncios; cada Anúncio está em uma cidade.
-- **Usuário → Loja:** 1:1 — um Usuário pode ter, no máximo, uma Loja; toda Loja pertence a exatamente um Usuário.
+- **Usuário → Loja:** 1:N no histórico — um Usuário pode ter várias Lojas registradas, mas apenas uma Loja ativa por vez; toda Loja pertence a exatamente um Usuário.
 - **Usuário → Anúncio:** 1:N — um Usuário cria vários Anúncios (como pessoa ou em nome da Loja); cada Anúncio pertence a um único Usuário.
 - **Anúncio → Mídia:** 1:N — um Anúncio tem várias fotos/vídeos; cada Mídia pertence a um Anúncio.
 - **Anúncio → Pergunta:** 1:N — um Anúncio recebe várias Perguntas; cada Pergunta pertence a um Anúncio.
@@ -277,7 +277,7 @@ erDiagram
     CIDADE ||--o{ USUARIO : "cidade_padrao"
     CIDADE ||--o{ LOJA : "cidade_padrao"
     CIDADE ||--o{ ANUNCIO : "localiza"
-    USUARIO ||--o| LOJA : "possui"
+    USUARIO ||--o{ LOJA : "possui_historico"
     USUARIO ||--o{ ANUNCIO : "cria"
     USUARIO ||--o{ PERGUNTA : "faz"
     USUARIO ||--o{ FAVORITO : "favorita"
@@ -314,6 +314,7 @@ erDiagram
         string nome_empresa
         date data_cadastro
         string cnpj
+        datetime deleted_at
     }
 
     ANUNCIO {
@@ -472,6 +473,8 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 | POST | `/lojas` 🔒 | Cria a loja do usuário |
 | GET | `/lojas/{id}` | Página pública da loja |
 | PUT | `/lojas/{id}` 🔒 | Edita a loja (só o dono) |
+| DELETE | `/lojas/{id}` 🔒 | Exclui logicamente a loja e oculta seus anúncios |
+| POST | `/lojas/{id}/reativar` 🔒 | Reativa loja antiga, desde que o usuário não tenha outra loja ativa |
 | POST | `/anuncios` 🔒 | Cria um anúncio |
 | GET | `/anuncios?titulo=gol&cidade_id=7` | Busca anúncios ativos e pendentes por título e cidade (e cidades num raio de 100 km). Sem `cidade_id`, usa a cidade padrão do usuário autenticado; para visitantes, solicitar uma cidade de referência |
 | GET | `/anuncios/{id}` | Mostra um anúncio |
@@ -528,8 +531,12 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 
 **Perfil, loja e privacidade**
 - RN16: O perfil público do usuário mostra apenas nome, fotos, anúncios ativos e tempo de criação da conta. CPF, CNPJ, contato padrão e localização padrão nunca são exibidos publicamente.
-- RN17: Um usuário pode ter no máximo uma loja, com dados separados dos dados pessoais.
+- RN17: Um usuário pode manter apenas uma loja ativa por vez, embora possa possuir lojas antigas excluídas logicamente, com dados separados dos dados pessoais.
 - RN18: O CNPJ da loja é opcional.
+- RN18.1: A exclusão de lojas será lógica (`deleted_at`), ocultando a loja e seus anúncios públicos sem apagar seus registros.
+- RN18.2: Após excluir uma loja, o usuário poderá criar outra ou reativar uma antiga, desde que não tenha nenhuma loja ativa.
+- RN18.3: Ao reativar uma loja, será possível publicar novos anúncios; os anúncios antigos permanecerão arquivados e não voltarão automaticamente à exibição.
+- RN18.4: A conta pessoal continuará ativa e utilizável independentemente da exclusão ou reativação de lojas.
 
 **Interação**
 - RN19: As perguntas nos anúncios são públicas, e somente o dono do anúncio pode respondê-las.
@@ -540,6 +547,26 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 
 **Negociação**
 - RN22: O sistema não processa pagamentos. A negociação e a venda ocorrem fora da plataforma.
+
+---
+
+## 7. Funcionalidades futuras (fora do escopo da v1)
+
+### 7.1 Selo de Loja Formal
+
+**Objetivo:** identificar visualmente lojas que concluíram todos os campos do cadastro empresarial, com atenção especial ao preenchimento do CNPJ.
+
+**Critérios propostos para concessão:**
+- A loja deve possuir todos os campos do cadastro preenchidos, incluindo nome da empresa, contato, cidade padrão e CNPJ.
+- O CNPJ deve ter formato e dígitos verificadores válidos e, antes da concessão do selo, passar por verificação cadastral em fonte oficial, conforme integração ou processo a ser definido.
+- A loja deve continuar vinculada a uma conta de usuário válida.
+- Se os dados obrigatórios forem removidos ou deixarem de atender aos critérios, o selo deverá ser reavaliado e poderá ser retirado.
+
+**Exibição:** o selo poderá aparecer ao lado do nome da loja no perfil público e nos anúncios publicados em nome dela.
+
+**Limitação:** o selo indicará a conclusão e a verificação dos dados cadastrais definidos pelo BargainCar. Não será garantia de honestidade do vendedor, qualidade do veículo ou segurança da negociação.
+
+**Implementação futura:** definir o nome e a identidade visual do selo, o procedimento de verificação do CNPJ, o armazenamento do status da verificação e as regras de concessão e revogação. O CNPJ continuará opcional para criar uma loja na v1; será obrigatório apenas para obter o selo quando essa funcionalidade for implementada.
 
 ---
 
@@ -566,6 +593,7 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 - [ ] (Implementação) Definir política de retenção de dados pessoais e pedidos de exclusão conforme LGPD.
 - [ ] (Implementação) Validar integração do CodeIgniter Shield com login por CPF, se adotado.
 - [x] Perguntas ofensivas podem ser excluídas (pelo dono do anúncio ou pelo autor).
+- [ ] (Funcionalidade futura) Implementar selo de Loja Formal para lojas com cadastro completo e CNPJ verificado.
 - [ ] Avaliar, no futuro, denúncia de perguntas e um perfil de administrador para moderação.
 - [ ] (Implementação) Importar a base de municípios do repositório `kelvins/Municipios-Brasileiros` para a tabela `Cidade`, com um script de carga.
 - [ ] Desenhar o diagrama ER no MySQL Workbench (o Mermaid acima serve de referência).
