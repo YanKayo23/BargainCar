@@ -60,6 +60,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 - RF18: Visitantes não autenticados podem buscar, listar e visualizar anúncios e perfis públicos.
 - RF19: O sistema deve permitir a exclusão lógica de anúncios pelo proprietário, retirando-os das buscas e mantendo a referência de favoritos indisponíveis.
 - RF20: O sistema deve permitir que o usuário mostre ou oculte a senha digitada por meio de um ícone de olho nos campos de senha (cadastro, login e redefinição).
+- RF21: O sistema deve bloquear temporariamente o login após 5 tentativas incorretas consecutivas, recusando novas tentativas por 1 minuto.
 
 **Requisitos Não Funcionais (RNF)**
 
@@ -74,7 +75,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 - RNF07.2: O ícone de olho deve alternar a visibilidade do texto digitado sem modificar a senha, com indicação acessível do estado mostrar/ocultar.
 - RNF08: Formulários e ações de alteração de estado devem utilizar proteção CSRF e validação de entradas.
 - RNF09: CPF e e-mail devem ser únicos, normalizados e protegidos contra exposição indevida.
-- RNF10: O login deve limitar tentativas abusivas e usar cookies de sessão seguros.
+- RNF10: O login deve bloquear novas tentativas por 1 minuto após 5 tentativas incorretas consecutivas, inclusive quando a senha correta for informada durante o bloqueio. O contador deve ser zerado após autenticação bem-sucedida antes do limite. A verificação e o bloqueio devem ser aplicados no servidor, com armazenamento temporário seguro e cookies de sessão seguros.
 - RNF11: Uploads devem validar tamanho, tipo real, extensão e permissões de acesso; arquivos devem receber nomes gerados pelo servidor.
 - RNF12: O tratamento de dados pessoais deve respeitar princípios da LGPD, incluindo finalidade, minimização, transparência e política de retenção e exclusão.
 
@@ -102,7 +103,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 3. Usuário clica em "Entrar"
 4. Sistema valida as credenciais e redireciona o usuário para a página inicial, autenticado
 
-**Fluxo alternativo:** Se o CPF ou a senha estiverem incorretos, sistema exibe erro e não autentica. Um link "Esqueci minha senha" leva ao caso de uso de recuperação.
+**Fluxo alternativo:** Se o CPF ou a senha estiverem incorretos, o sistema exibe uma mensagem genérica e registra a tentativa incorreta. Ao atingir a quinta tentativa incorreta consecutiva, o login é bloqueado por 1 minuto. Durante o bloqueio, qualquer nova tentativa é recusada, mesmo que a senha informada esteja correta. Terminado o minuto, o usuário pode tentar novamente, com o contador reiniciado. Se o usuário acertar a senha antes de atingir 5 erros, o contador é zerado. Um link "Esqueci minha senha" leva ao caso de uso de recuperação.
 
 ### Caso de Uso: Recuperar Senha
 **Ator:** Usuário
@@ -403,6 +404,7 @@ As rotas são declaradas em `app/Config/Routes.php` e direcionadas a Controllers
 | Necessidade | Origem | Solução adotada |
 |---|---|---|
 | Autenticação | RNF01 | Login com CPF e senha, em tela separada do cadastro; o servidor estabelece uma sessão autenticada, verificada por Filters nas requisições seguintes. Senhas armazenadas com hash (RNF07). |
+| Proteção contra tentativas de login | RF21, RNF10 | Contabilizar no servidor as tentativas incorretas consecutivas por conta/CPF normalizado, aplicando bloqueio de 60 segundos na quinta falha. Recusar tentativas durante o bloqueio antes de verificar a senha; após o prazo, permitir novas tentativas com contador zerado. Sucesso anterior ao limite zera o contador. Adotar também proteção complementar contra abuso por origem/IP, sem revelar se o CPF existe. |
 | Recuperação de senha | RF16 | Reaproveita o SMTP já usado para a expiração de anúncios (RF08): envia um link de redefinição com token temporário. |
 | Proximidade entre cidades | RF10, RF11 | Tabela `Cidade` com latitude e longitude. A distância é estimada no MySQL pela distância euclidiana em um plano local, convertendo diferenças angulares em quilômetros e corrigindo a longitude pelo cosseno da latitude média. O raio é fixo em 100 km, sem API externa. Trata-se de distância aproximada em linha reta, não rodoviária. |
 | Padronização das cidades | RF01, RF05 | O usuário escolhe a cidade em uma lista (base de municípios importada para `Cidade`, conforme a nota na Modelagem de Dados), em vez de digitar texto livre. |
@@ -505,6 +507,10 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 - RN06.4: A Loja não tem login próprio. O dono acessa a área da loja alternando o modo de navegação dentro da mesma conta.
 - RN06.5: Na criação de conta e na redefinição de senha, a senha deve conter no mínimo 8 caracteres e pelo menos uma letra maiúscula (A–Z). Os demais caracteres podem ser letras, números ou símbolos; não há obrigatoriedade de números ou caracteres especiais.
 - RN06.6: Os campos de senha no cadastro, login e redefinição devem possuir um ícone de olho que permita mostrar ou ocultar o que está sendo digitado. Por padrão, a senha permanece oculta.
+- RN06.7: O usuário poderá realizar até 4 tentativas incorretas consecutivas sem bloqueio. Na quinta tentativa incorreta, o sistema bloqueará novas tentativas de login por 60 segundos (1 minuto).
+- RN06.8: Durante os 60 segundos de bloqueio, todas as tentativas de login para a conta serão recusadas, mesmo com a senha correta. O bloqueio deve ser verificado antes da validação da senha.
+- RN06.9: Após os 60 segundos, o bloqueio termina e o contador de tentativas incorretas é reiniciado, permitindo novas tentativas.
+- RN06.10: Quando o usuário informar a senha correta antes de alcançar 5 tentativas incorretas consecutivas, a autenticação será permitida e o contador será zerado.
 
 **Ciclo de vida do anúncio**
 - RN07: Todo anúncio nasce com status `ativo` e fica no ar por 30 dias.
@@ -549,7 +555,7 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 - [x] Banco: MySQL, com Models e Migrations.
 - [x] Dependências: Composer e recursos do PHP/CodeIgniter.
 - [x] Login: CPF e senha, autenticação por sessão e Filters.
-- [x] Segurança: hash de senha, CSRF, validação, limite de tentativas e controles de privacidade.
+- [x] Segurança: hash de senha, CSRF, validação, limite de 5 tentativas incorretas com bloqueio de 1 minuto e controles de privacidade.
 - [x] Anúncios: mínimo de 3 fotos; vídeo opcional.
 - [x] Busca e visualização públicas sem login; ações interativas exigem login.
 - [x] Anúncios de loja: `loja_id` explícito e validado.
