@@ -28,7 +28,7 @@ class LojasController extends BaseController
                 ->with('erro', 'Você já possui uma loja ativa.');
         }
 
-        return view('lojas/criar');
+        return view('lojas/CriarLoja');
     }
 
     // Recebe e salva os dados da loja
