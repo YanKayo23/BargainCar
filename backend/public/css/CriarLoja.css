@@ -1,0 +1,555 @@
+
+/* ========================================
+   BARGAINCAR - CRIAR LOJA
+======================================== */
+
+:root {
+    --azul: #1769e0;
+    --azul-escuro: #1254b5;
+    --azul-claro: #eaf3ff;
+    --fundo: #f5f7fb;
+    --branco: #ffffff;
+    --texto: #202b3c;
+    --texto-secundario: #69778c;
+    --borda: #dce3ec;
+    --erro: #b42318;
+    --sombra: 0 4px 18px rgba(25, 42, 70, 0.05);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--fundo);
+    color: var(--texto);
+}
+
+button,
+input {
+    font: inherit;
+}
+
+a {
+    text-decoration: none;
+}
+
+/* ========================================
+   CABEÇALHO
+======================================== */
+
+.cabecalho {
+    background: var(--branco);
+    border-bottom: 1px solid var(--borda);
+}
+
+.cabecalho-conteudo {
+    max-width: 1200px;
+    min-height: 76px;
+    margin: 0 auto;
+    padding: 0 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.marca {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    color: var(--azul);
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.7px;
+}
+
+.marca-icone {
+    width: 31px;
+    height: 31px;
+    background: var(--azul);
+    border-radius: 9px;
+    display: inline-block;
+    position: relative;
+}
+
+.marca-icone::after {
+    content: "";
+    position: absolute;
+    inset: 9px 6px;
+    border: 2px solid white;
+    border-radius: 3px;
+}
+
+.navegacao {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.navegacao a {
+    color: var(--texto-secundario);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.navegacao a:hover {
+    color: var(--azul);
+}
+
+.perfil-atual {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 10px 15px;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.perfil-indicador {
+    width: 9px;
+    height: 9px;
+    background: var(--azul);
+    border-radius: 50%;
+}
+
+/* ========================================
+   ESTRUTURA PRINCIPAL
+======================================== */
+
+.pagina {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 32px 24px 70px;
+}
+
+.voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 30px;
+
+    color: var(--texto-secundario);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.voltar:hover {
+    color: var(--azul);
+}
+
+.titulo-pagina {
+    margin-bottom: 30px;
+}
+
+.titulo-pagina h1 {
+    font-size: 31px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    margin-bottom: 10px;
+}
+
+.titulo-pagina p {
+    color: var(--texto-secundario);
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* ========================================
+   CARTÕES
+======================================== */
+
+.conteudo-principal {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.cartao {
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 13px;
+    box-shadow: var(--sombra);
+}
+
+.formulario-cartao {
+    padding: 30px;
+}
+
+/* ========================================
+   CAMPOS DO FORMULÁRIO
+======================================== */
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-width: 0;
+    margin-bottom: 24px;
+}
+
+.campo label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--texto);
+}
+
+.opcional {
+    color: var(--texto-secundario);
+    font-weight: 400;
+}
+
+.campo input {
+    width: 100%;
+    height: 47px;
+    padding: 0 14px;
+
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    outline: none;
+
+    background: var(--branco);
+    color: var(--texto);
+
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.campo input::placeholder {
+    color: #a0aaba;
+}
+
+.campo input:focus {
+    border-color: var(--azul);
+    box-shadow: 0 0 0 3px rgba(23, 105, 224, 0.10);
+}
+
+.linha-campos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+/* ========================================
+   AUTOCOMPLETE DE CIDADES
+======================================== */
+
+.campo-cidade {
+    position: relative;
+}
+
+.cidade-container {
+    position: relative;
+    width: 100%;
+}
+
+#resultados_cidades {
+    display: none;
+
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    z-index: 100;
+
+    max-height: 210px;
+    overflow-y: auto;
+
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 9px;
+    box-shadow: 0 10px 25px rgba(25, 42, 70, 0.13);
+}
+
+#resultados_cidades:not(:empty) {
+    display: block;
+}
+
+.cidade-opcao {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+
+    border: none;
+    border-bottom: 1px solid #edf0f5;
+    background: var(--branco);
+
+    color: var(--texto);
+    text-align: left;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.cidade-opcao:last-child {
+    border-bottom: none;
+}
+
+.cidade-opcao:hover,
+.cidade-opcao:focus {
+    background: var(--azul-claro);
+    color: var(--azul);
+    outline: none;
+}
+
+.cidade-mensagem {
+    padding: 12px 14px;
+    color: var(--texto-secundario);
+    font-size: 13px;
+}
+
+/* ========================================
+   BOTÕES
+======================================== */
+
+.acoes {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+
+    margin-top: 8px;
+    padding-top: 22px;
+    border-top: 1px solid var(--borda);
+}
+
+.botao {
+    min-height: 44px;
+    padding: 0 22px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.botao-cancelar {
+    color: var(--texto-secundario);
+    background: var(--branco);
+    border: 1px solid var(--borda);
+}
+
+.botao-cancelar:hover {
+    background: #f1f4f8;
+}
+
+.botao-salvar {
+    color: var(--branco);
+    background: var(--azul);
+    border: 1px solid var(--azul);
+}
+
+.botao-salvar:hover {
+    background: var(--azul-escuro);
+}
+
+/* ========================================
+   PRÉ-VISUALIZAÇÃO
+======================================== */
+
+.previa-cartao {
+    padding: 24px;
+}
+
+.previa-cartao h2 {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.previa-capa {
+    height: 155px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    background: #edf1f6;
+    border: 1px dashed #cbd5e1;
+    border-radius: 9px;
+
+    color: #8a97a9;
+    font-size: 13px;
+}
+
+.capa-icone {
+    font-size: 30px;
+}
+
+.previa-informacoes {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-top: 20px;
+}
+
+.previa-avatar {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--azul-claro);
+    border-radius: 10px;
+
+    color: var(--azul);
+    font-size: 23px;
+    font-weight: 800;
+}
+
+.previa-dados {
+    min-width: 0;
+}
+
+.previa-dados h3 {
+    font-size: 16px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.previa-dados p {
+    margin-top: 6px;
+    color: var(--texto-secundario);
+    font-size: 13px;
+}
+
+.previa-observacao {
+    margin-top: 22px;
+    padding-top: 18px;
+
+    border-top: 1px solid var(--borda);
+
+    color: var(--texto-secundario);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* ========================================
+   AVISO
+======================================== */
+
+.aviso {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    margin-top: 24px;
+    padding: 18px 20px;
+
+    background: var(--azul-claro);
+    border: 1px solid #d4e6ff;
+    border-radius: 10px;
+
+    color: #345b91;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.aviso-icone {
+    font-size: 19px;
+    line-height: 1.2;
+}
+
+/* ========================================
+   MENSAGENS DE ERRO
+======================================== */
+
+.mensagem {
+    padding: 15px 18px;
+    margin-bottom: 22px;
+    border-radius: 9px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.mensagem-erro {
+    color: var(--erro);
+    background: #fff0ee;
+    border: 1px solid #f4c7c3;
+}
+
+.mensagem ul {
+    margin-top: 8px;
+    padding-left: 20px;
+}
+
+/* ========================================
+   RESPONSIVIDADE
+======================================== */
+
+@media (max-width: 850px) {
+    .conteudo-principal {
+        grid-template-columns: 1fr;
+    }
+
+    .previa-cartao {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 550px) {
+    .cabecalho-conteudo {
+        min-height: 66px;
+        padding: 0 16px;
+    }
+
+    .marca {
+        font-size: 20px;
+    }
+
+    .navegacao {
+        gap: 12px;
+    }
+
+    .navegacao a {
+        display: none;
+    }
+
+    .pagina {
+        padding: 24px 16px 50px;
+    }
+
+    .titulo-pagina h1 {
+        font-size: 26px;
+    }
+
+    .formulario-cartao,
+    .previa-cartao {
+        padding: 20px;
+    }
+
+    .linha-campos {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .acoes {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .botao {
+        width: 100%;
+    }
+}
