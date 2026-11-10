@@ -6,6 +6,7 @@ use App\Models\AnuncioModel;
 use App\Models\LojaModel;
 use App\Models\MidiaModel;
 use App\Models\UsuarioModel;
+use App\Models\CidadeModel;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\Files\UploadedFile;
 use RuntimeException;
@@ -19,6 +20,7 @@ class AnunciosController extends BaseController
     private const MAX_FOTO_BYTES = 5 * 1024 * 1024;
     private const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
 
+
     public function criar(): string|RedirectResponse
     {
         $usuarioId = session()->get('usuario_id');
@@ -29,6 +31,7 @@ class AnunciosController extends BaseController
 
         $usuarioModel = new UsuarioModel();
         $lojaModel = new LojaModel();
+        $cidadeModel = new CidadeModel();
 
         $usuario = $usuarioModel->find($usuarioId);
 
@@ -36,16 +39,34 @@ class AnunciosController extends BaseController
             return redirect()->to('/login');
         }
 
+        // Busca somente a loja ativa
         $loja = $lojaModel
             ->where('usuario_id', $usuarioId)
             ->where('deleted_at', null)
             ->first();
 
+        // Busca a cidade cadastrada no perfil
+        $cidadeUsuario = null;
+
+        if (! empty($usuario['cidade_id'])) {
+            $cidadeUsuario = $cidadeModel->find($usuario['cidade_id']);
+        }
+
+        // Busca a cidade cadastrada na loja
+        $cidadeLoja = null;
+
+        if ($loja && ! empty($loja['cidade_id'])) {
+            $cidadeLoja = $cidadeModel->find($loja['cidade_id']);
+        }
+
         return view('anuncios/CriarAnuncio', [
             'usuario' => $usuario,
             'loja' => $loja,
+            'cidadeUsuario' => $cidadeUsuario,
+            'cidadeLoja' => $cidadeLoja,
         ]);
     }
+
 
     public function salvar(): RedirectResponse
     {
@@ -323,7 +344,6 @@ class AnunciosController extends BaseController
 
             return redirect()->to('/')
                 ->with('sucesso', 'Anúncio criado com sucesso!');
-
         } catch (Throwable $e) {
             // Desfaz as alterações no banco
             $db->transRollback();
