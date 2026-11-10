@@ -35,3 +35,10 @@ $routes->post('lojas/(:num)/desativar', 'LojasController::desativar/$1', [
 $routes->post('lojas/(:num)/reativar', 'LojasController::reativar/$1', [
     'filter' => 'auth'
 ]);
+
+
+$routes->get('teste-loja', static function () {
+    return view('lojas/TesteLoja');
+}, [
+    'filter' => 'auth'
+]);
