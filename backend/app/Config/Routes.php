@@ -27,3 +27,11 @@ $routes->get('criar-loja', 'LojasController::criar', [
 $routes->post('criar-loja', 'LojasController::salvar', [
     'filter' => 'auth'
 ]);
+
+// Desativar e reativar loja
+$routes->post('lojas/(:num)/desativar', 'LojasController::desativar/$1', [
+    'filter' => 'auth'
+]);
+$routes->post('lojas/(:num)/reativar', 'LojasController::reativar/$1', [
+    'filter' => 'auth'
+]);
