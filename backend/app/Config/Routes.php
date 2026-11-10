@@ -42,3 +42,8 @@ $routes->get('teste-loja', static function () {
 }, [
     'filter' => 'auth'
 ]);
+
+// Exibir o formulário de criação de anúncios
+$routes->get('criar-anuncio', 'AnunciosController::criar', ['filter' => 'auth']);
+// Receber os dados e as mídias enviados pelo formulário
+$routes->post('anuncios/salvar', 'AnunciosController::salvar', ['filter' => 'auth']);
