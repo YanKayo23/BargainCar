@@ -43,7 +43,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 - RF01: O sistema deve permitir que o usuário crie uma conta com nome, e-mail, CPF, cidade padrão, contato padrão e senha.
 - RF02: O sistema deve mostrar somente o nome, fotos, anúncios ativos e o tempo de criação da conta para as pessoas que estiverem vendo o perfil do usuário.
 - RF03: O sistema deve permitir que o usuário crie seus anúncios com informações básicas como ano, preço e cor, além de descrição do veículo, incluindo defeitos, débitos pendentes e situação da documentação.
-- RF04: O sistema deve permitir fotos e, opcionalmente, um vídeo ao anúncio; são exigidas pelo menos 3 fotos para publicação.
+- RF04: O sistema deve permitir fotos e, opcionalmente, um vídeo ao anúncio; são obrigatórias de 3 a 5 fotos para publicação.
 - RF05: O sistema deve permitir que o usuário defina a localização e o contato do anúncio, podendo usar a localização e contato padrão do perfil ou escolher outro.
 - RF06: O sistema deve permitir que o usuário marque anúncios pelos quais está interessado.
 - RF07: O sistema deve permitir que o usuário envie e responda perguntas (que serão públicas) nos anúncios.
@@ -88,11 +88,11 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 **Pré-condição:** Usuário está autenticado (CPF e senha)
 **Fluxo principal:**
 1. Usuário clica em "Novo Anúncio"
-2. Usuário preenche título do anúncio, descrição, informações de contato, no mínimo 3 fotos (vídeo opcional)
+2. Usuário preenche título do anúncio, descrição, informações de contato, de 3 a 5 fotos (vídeo opcional)
 3. Usuário clica em "Salvar"
 4. Sistema exibe o anúncio no perfil do usuário e na lista de anúncios para a região do anúncio
 
-**Fluxo alternativo:** Se o título estiver vazio ou o anúncio não tiver ao menos 3 fotos, sistema exibe erro e não salva.
+**Fluxo alternativo:** Se o título estiver vazio ou o anúncio tiver menos de 3 ou mais de 5 fotos, sistema exibe erro e não salva.
 
 ### Caso de Uso: Login
 **Ator:** Usuário
@@ -159,7 +159,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 3. Usuário clica em "Editar"
 4. Sistema exibe o anúncio com os dados atualizados, no perfil do usuário e na lista de anúncios da região
 
-**Fluxo alternativo:** Se o título estiver vazio ou o anúncio ficar sem ao menos 3 fotos, sistema exibe erro e não salva.
+**Fluxo alternativo:** Se o título estiver vazio ou o anúncio ficar com menos de 3 ou mais de 5 fotos, sistema exibe erro e não salva.
 
 ### Caso de Uso: Buscar Anúncios
 **Ator:** Usuário
@@ -248,7 +248,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 
 *Notas de modelagem:*
 - `Cidade` guarda latitude e longitude para calcular a distância entre cidades (ver seção Arquitetura). Os dados vêm do repositório público `kelvins/Municipios-Brasileiros` (https://github.com/kelvins/Municipios-Brasileiros), que traz código IBGE, nome, UF, latitude e longitude de 5.570 municípios, sob licença MIT (é preciso manter o aviso de licença do repositório de origem). Os dados são importados uma única vez para o MySQL por um script de carga, e o sistema não consulta nenhuma API externa durante o uso. A chave primária da `Cidade` é o código IBGE do município, e o campo `cidade_id` das outras entidades guarda esse código.
-- `Mídia` existe porque um anúncio pode ter várias fotos e vários vídeos. O arquivo em si fica no servidor; o banco guarda só o caminho.
+- `Mídia` existe porque um anúncio pode ter de 3 a 5 fotos e, opcionalmente, um vídeo. O arquivo em si fica no servidor; o banco guarda só o caminho.
 - `data_expiracao` no Anúncio permite ao sistema descobrir quais anúncios estão a 3 dias de expirar (RF08).
 - `Pergunta` guarda pergunta e resposta juntas: a resposta só pode ser escrita pelo dono do anúncio.
 - `TokenRecuperacaoSenha` guarda o token do link de redefinição (RF16). Guarda-se só o hash do token, com data de expiração, e o registro é marcado como usado depois da redefinição.
@@ -409,7 +409,7 @@ As rotas são declaradas em `app/Config/Routes.php` e direcionadas a Controllers
 | Recuperação de senha | RF16 | Reaproveita o SMTP já usado para a expiração de anúncios (RF08): envia um link de redefinição com token temporário. |
 | Proximidade entre cidades | RF10, RF11 | Tabela `Cidade` com latitude e longitude. A distância é estimada no MySQL pela distância euclidiana em um plano local, convertendo diferenças angulares em quilômetros e corrigindo a longitude pelo cosseno da latitude média. O raio é fixo em 100 km, sem API externa. Trata-se de distância aproximada em linha reta, não rodoviária. |
 | Padronização das cidades | RF01, RF05 | O usuário escolhe a cidade em uma lista (base de municípios importada para `Cidade`, conforme a nota na Modelagem de Dados), em vez de digitar texto livre. |
-| Fotos e vídeos | RF04, RNF03, RNF06 | Arquivos guardados no servidor, com o caminho na tabela `Mídia`. Mínimo de 3 fotos por anúncio; vídeo opcional (até 1). Imagens comprimidas no upload; limite de tamanho por arquivo. O back-end precisa aceitar uploads multipart e impor o limite de tamanho por arquivo. |
+| Fotos e vídeos | RF04, RNF03, RNF06 | Arquivos guardados no servidor, com o caminho na tabela `Mídia`. Mínimo de 3 e máximo de 5 fotos por anúncio; vídeo opcional (até 1). Imagens comprimidas no upload; limite de tamanho por arquivo. O back-end precisa aceitar uploads multipart e impor o limite de tamanho por arquivo. |
 | Expiração e renovação | RF08, RF09 | Tarefa agendada (cron) que roda todo dia e executa um comando CLI do CodeIgniter 4: marca como pendente os anúncios a 3 dias de expirar, notifica o vendedor e expira os vencidos. |
 | E-mail | RF08, RF16 | Envio via SMTP, usando o serviço de e-mail do CodeIgniter 4 via SMTP e o Brevo como provedor. O Brevo serve apenas para enviar e-mails. |
 | Aplicação web integrada | Decisão de arquitetura | O CodeIgniter entrega páginas e processa formulários na mesma aplicação; não é necessária uma API separada nem configuração CORS para um front-end distinto. |
@@ -496,8 +496,8 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 ## 6. Regras de Negócio
 
 **Anúncios**
-- RN01: Um anúncio só pode ser salvo com título, no mínimo 3 fotos (vídeo opcional).
-- RN02: Fotos devem ser JPG, PNG ou WebP, com até 5 MB cada (máximo de 10 por anúncio). Caso enviado, o vídeo deve ser MP4, com até 50 MB (máximo de 1 por anúncio).
+- RN01: Um anúncio só pode ser salvo com título, de 3 a 5 fotos (vídeo opcional).
+- RN02: Fotos devem ser JPG, PNG ou WebP, com até 5 MB cada (máximo de 5 por anúncio). Caso enviado, o vídeo deve ser MP4, com até 50 MB (máximo de 1 por anúncio).
 - RN03: Somente o dono do anúncio pode editá-lo ou excluí-lo.
 - RN04: A exclusão de um anúncio exige confirmação do usuário e é realizada por exclusão lógica (Soft Delete), preenchendo `deleted_at`. O anúncio deixa de aparecer em buscas e perfis públicos, mas seu registro e vínculos são preservados.
 - RN05: Cada anúncio pertence a um único usuário. Quando criado em nome da loja, `tipo_anunciante` é `loja` e `loja_id` referencia obrigatoriamente uma loja pertencente a esse usuário; em anúncios pessoais, `tipo_anunciante` é `pessoa` e `loja_id` é nulo.
@@ -583,7 +583,7 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 - [x] Dependências: Composer e recursos do PHP/CodeIgniter.
 - [x] Login: CPF e senha, autenticação por sessão e Filters.
 - [x] Segurança: hash de senha, CSRF, validação, limite de 5 tentativas incorretas com bloqueio de 1 minuto e controles de privacidade.
-- [x] Anúncios: mínimo de 3 fotos; vídeo opcional.
+- [x] Anúncios: mínimo de 3 e máximo de 5 fotos; vídeo opcional.
 - [x] Busca e visualização públicas sem login; ações interativas exigem login.
 - [x] Anúncios de loja: `loja_id` explícito e validado.
 - [x] Exclusão de anúncios: Soft Delete com `deleted_at`, sem restauração pelo vendedor na interface.
