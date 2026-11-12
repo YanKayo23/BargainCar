@@ -1,3 +1,8 @@
+
+/* =========================================
+   BARGAINCAR - VISUALIZAÇÃO DE ANÚNCIO
+========================================= */
+
 * {
     box-sizing: border-box;
 }
@@ -12,6 +17,10 @@ body {
 [hidden] {
     display: none !important;
 }
+
+/* =========================================
+   CABEÇALHO
+========================================= */
 
 .topo {
     background: #fff;
@@ -79,6 +88,10 @@ body {
     font-weight: bold;
 }
 
+/* =========================================
+   CONTEÚDO PRINCIPAL
+========================================= */
+
 .container {
     max-width: 1200px;
     margin: 30px auto;
@@ -95,17 +108,25 @@ body {
 
 .layout-superior {
     display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-columns:
+        minmax(0, 1.15fr)
+        minmax(0, 1fr);
     gap: 25px;
     align-items: start;
     margin-bottom: 25px;
 }
 
+/* =========================================
+   GALERIA DE FOTOS
+========================================= */
+
 .galeria {
     min-width: 0;
+    width: 100%;
 }
 
 .imagem-principal {
+    width: 100%;
     height: 390px;
     border-radius: 13px;
     background: #e4e9f0;
@@ -117,6 +138,7 @@ body {
 
 .imagem-principal img,
 .imagem-principal video {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: contain;
@@ -124,18 +146,26 @@ body {
 
 .sem-imagem {
     color: #64748b;
+    text-align: center;
 }
+
+/* Miniaturas centralizadas */
 
 .miniaturas {
     display: flex;
+    align-items: center;
+    justify-content: safe center;
     gap: 12px;
-    overflow-x: auto;
+    width: 100%;
     margin-top: 12px;
-    padding-bottom: 5px;
+    padding: 3px 0 8px;
+    overflow-x: auto;
+    scrollbar-width: thin;
 }
 
 .miniatura {
     flex: 0 0 115px;
+    width: 115px;
     height: 85px;
     padding: 3px;
     border: 2px solid transparent;
@@ -143,9 +173,13 @@ body {
     background: #e4e9f0;
     cursor: pointer;
     overflow: hidden;
+    transition:
+        border-color 0.2s,
+        transform 0.2s;
 }
 
 .miniatura img {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -158,6 +192,7 @@ body {
 
 .miniatura:hover {
     border-color: #83b3ed;
+    transform: translateY(-2px);
 }
 
 .miniatura:focus-visible {
@@ -176,6 +211,10 @@ body {
     color: #64748b;
 }
 
+/* =========================================
+   CARTÕES
+========================================= */
+
 .cartao {
     background: #fff;
     border: 1px solid #e2e6ee;
@@ -184,10 +223,27 @@ body {
     box-shadow: 0 4px 14px rgba(20, 40, 70, 0.04);
 }
 
+/* =========================================
+   RESUMO DO ANÚNCIO
+========================================= */
+
+.resumo-anuncio {
+    min-width: 0;
+}
+
 .resumo-anuncio h1 {
     font-size: 25px;
     line-height: 1.35;
     margin: 15px 0;
+}
+
+/* Etiquetas superiores */
+
+.etiquetas-anuncio {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .etiqueta-ativo {
@@ -200,12 +256,24 @@ body {
     font-weight: bold;
 }
 
+.etiqueta-tipo {
+    display: inline-block;
+    padding: 7px 12px;
+    background: #eaf2ff;
+    color: #1769d2;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
 .preco {
     color: #1769d2;
     font-size: 32px;
     font-weight: bold;
     margin-bottom: 20px;
 }
+
+/* Informações básicas */
 
 .linha-informacao {
     display: flex;
@@ -225,7 +293,89 @@ body {
     overflow-wrap: anywhere;
 }
 
+/* =========================================
+   IDENTIFICAÇÃO DO ANUNCIANTE
+========================================= */
+
+.identificacao-anunciante {
+    margin-top: 20px;
+    padding: 18px 0;
+    border-top: 1px solid #edf0f5;
+}
+
+.rotulo-anunciante {
+    margin: 0 0 12px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.perfil-anunciante {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f8faff;
+    border: 1px solid #e2e6ee;
+    border-radius: 10px;
+    min-width: 0;
+}
+
+.foto-anunciante {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #dceaff;
+    color: #1769d2;
+    font-size: 21px;
+    font-weight: bold;
+}
+
+.dados-anunciante {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    flex: 1;
+    min-width: 0;
+}
+
+.dados-anunciante strong {
+    display: block;
+    font-size: 14px;
+    color: #202a3b;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.dados-anunciante span {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.seta-perfil {
+    flex-shrink: 0;
+    font-size: 25px;
+    color: #1769d2;
+    line-height: 1;
+}
+
+.aviso-perfil {
+    margin: 9px 0 0;
+    font-size: 11px;
+    color: #64748b;
+}
+
+/* =========================================
+   BOTÕES
+========================================= */
+
 .botao {
+    display: block;
     width: 100%;
     padding: 14px;
     border-radius: 8px;
@@ -234,6 +384,9 @@ body {
     cursor: pointer;
     text-align: center;
     text-decoration: none;
+    transition:
+        background 0.2s,
+        opacity 0.2s;
 }
 
 .botao-principal {
@@ -246,7 +399,7 @@ body {
     background: #1054ad;
 }
 
-.resumo-anuncio>.botao-principal {
+.resumo-anuncio > .botao-principal {
     margin-top: 22px;
 }
 
@@ -261,6 +414,10 @@ body {
     opacity: 0.65;
     cursor: not-allowed;
 }
+
+/* =========================================
+   CONTATO DO VENDEDOR
+========================================= */
 
 .dados-contato {
     background: #f1f6ff;
@@ -281,6 +438,14 @@ body {
     color: #fff;
     border: none;
 }
+
+.botao-whatsapp:hover {
+    background: #126d39;
+}
+
+/* =========================================
+   SOBRE O VEÍCULO
+========================================= */
 
 .sobre-veiculo,
 .perguntas {
@@ -319,6 +484,10 @@ body {
     overflow-wrap: anywhere;
 }
 
+/* =========================================
+   PERGUNTAS AO VENDEDOR
+========================================= */
+
 .formulario-pergunta {
     display: flex;
     gap: 12px;
@@ -344,6 +513,10 @@ body {
     margin-top: 20px;
 }
 
+/* =========================================
+   RODAPÉ
+========================================= */
+
 .rodape {
     text-align: center;
     padding: 25px;
@@ -352,7 +525,12 @@ body {
     font-size: 13px;
 }
 
+/* =========================================
+   RESPONSIVIDADE - TABLETS
+========================================= */
+
 @media (max-width: 850px) {
+
     .layout-superior {
         grid-template-columns: 1fr;
     }
@@ -371,7 +549,12 @@ body {
     }
 }
 
+/* =========================================
+   RESPONSIVIDADE - CELULARES
+========================================= */
+
 @media (max-width: 600px) {
+
     .topo-conteudo {
         padding: 12px;
     }
@@ -393,8 +576,13 @@ body {
         height: 270px;
     }
 
+    .miniaturas {
+        gap: 8px;
+    }
+
     .miniatura {
         flex-basis: 90px;
+        width: 90px;
         height: 70px;
     }
 
@@ -410,6 +598,22 @@ body {
         font-size: 28px;
     }
 
+    .perfil-anunciante {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .foto-anunciante {
+        flex-basis: 42px;
+        width: 42px;
+        height: 42px;
+        font-size: 18px;
+    }
+
+    .dados-anunciante strong {
+        font-size: 13px;
+    }
+
     .formulario-pergunta {
         flex-direction: column;
     }
@@ -417,73 +621,4 @@ body {
     .formulario-pergunta button {
         width: 100%;
     }
-
-    /* Identificação do anunciante */
-
-    .identificacao-anunciante {
-        margin-top: 20px;
-        padding: 18px 0;
-        border-top: 1px solid #edf0f5;
-    }
-
-    .rotulo-anunciante {
-        margin: 0 0 12px;
-        font-size: 12px;
-        color: #64748b;
-    }
-
-    .perfil-anunciante {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px;
-        background: #f8faff;
-        border: 1px solid #e2e6ee;
-        border-radius: 10px;
-    }
-
-    .foto-anunciante {
-        width: 48px;
-        height: 48px;
-        min-width: 48px;
-        border-radius: 50%;
-        background: #dceaff;
-        color: #1769d2;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 21px;
-        font-weight: bold;
-    }
-
-    .dados-anunciante {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        flex: 1;
-        min-width: 0;
-    }
-
-    .dados-anunciante strong {
-        font-size: 14px;
-        color: #202a3b;
-        overflow-wrap: anywhere;
-    }
-
-    .dados-anunciante span {
-        font-size: 12px;
-        color: #64748b;
-    }
-
-    .seta-perfil {
-        font-size: 25px;
-        color: #1769d2;
-    }
-
-    .aviso-perfil {
-        margin: 9px 0 0;
-        font-size: 11px;
-        color: #64748b;
-    }
-
 }
