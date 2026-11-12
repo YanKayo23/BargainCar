@@ -47,3 +47,15 @@ $routes->get('teste-loja', static function () {
 $routes->get('criar-anuncio', 'AnunciosController::criar', ['filter' => 'auth']);
 // Receber os dados e as mídias enviados pelo formulário
 $routes->post('anuncios/salvar', 'AnunciosController::salvar', ['filter' => 'auth']);
+
+// caminho anuncio id
+$routes->get(
+    'anuncios/(:num)',
+    'AnunciosController::ver/$1'
+);
+
+$routes->get(
+    'anuncios/(:num)/midias/(:num)',
+    'AnunciosController::exibirMidia/$1/$2'
+);
+
