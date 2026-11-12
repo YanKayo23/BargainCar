@@ -1,4 +1,3 @@
-
 <?php
 
 /**
@@ -51,7 +50,7 @@ foreach ($fotos as $foto) {
         'tipo' => 'foto',
         'url' => site_url(
             'anuncios/' . $anuncioId
-            . '/midias/' . $foto['id']
+                . '/midias/' . $foto['id']
         ),
     ];
 }
@@ -61,7 +60,7 @@ if (! empty($video)) {
         'tipo' => 'video',
         'url' => site_url(
             'anuncios/' . $anuncioId
-            . '/midias/' . $video['id']
+                . '/midias/' . $video['id']
         ),
     ];
 }
@@ -96,362 +95,349 @@ $situacao = $situacoes[$situacaoOriginal]
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        content="width=device-width, initial-scale=1.0">
 
     <title><?= esc($titulo) ?> | BargainCar</title>
 
     <link
         rel="stylesheet"
-        href="<?= base_url('css/VerAnuncio.css') ?>"
-    >
+        href="<?= base_url('css/VerAnuncio.css') ?>">
 </head>
 
 <body>
 
-<header class="topo">
+    <header class="topo">
 
-    <div class="topo-conteudo">
+        <div class="topo-conteudo">
 
-        <a href="<?= site_url('/') ?>" class="marca">
-            <span class="marca-icone">B</span>
-            <span>BargainCar</span>
-        </a>
-
-        <nav
-            class="navegacao"
-            aria-label="Navegação principal"
-        >
-
-            <a href="<?= site_url('/') ?>">Buscar</a>
-
-            <span class="nav-futuro">Favoritos</span>
-
-            <span class="nav-futuro">Meu perfil</span>
-
-            <span class="tipo-conta">Pessoa</span>
-
-            <a
-                href="<?= site_url('criar-anuncio') ?>"
-                class="botao-anunciar"
-            >
-                + Anunciar
+            <a href="<?= site_url('/') ?>" class="marca">
+                <span class="marca-icone">B</span>
+                <span>BargainCar</span>
             </a>
 
-        </nav>
+            <nav
+                class="navegacao"
+                aria-label="Navegação principal">
 
-    </div>
+                <a href="<?= site_url('/') ?>">Buscar</a>
 
-</header>
+                <span class="nav-futuro">Favoritos</span>
 
-<main class="container">
+                <span class="nav-futuro">Meu perfil</span>
 
-    <a href="<?= site_url('/') ?>" class="voltar">
-        ← Voltar
-    </a>
+                <span class="tipo-conta">Pessoa</span>
 
-    <div class="layout-superior">
+                <a
+                    href="<?= site_url('criar-anuncio') ?>"
+                    class="botao-anunciar">
+                    + Anunciar
+                </a>
 
-        <!-- GALERIA -->
+            </nav>
 
-        <section
-            class="galeria"
-            aria-label="Fotos do veículo"
-        >
+        </div>
 
-            <div class="imagem-principal">
+    </header>
 
-                <?php if ($primeiraFoto !== ''): ?>
+    <main class="container">
 
-                    <img
-                        id="fotoPrincipal"
-                        src="<?= esc($primeiraFoto, 'attr') ?>"
-                        alt="<?= esc($titulo, 'attr') ?>"
-                    >
+        <a href="<?= site_url('/') ?>" class="voltar">
+            ← Voltar
+        </a>
 
-                    <video
-                        id="videoPrincipal"
-                        controls
-                        preload="metadata"
-                        playsinline
-                        hidden
-                    ></video>
+        <div class="layout-superior">
 
-                <?php else: ?>
+            <!-- GALERIA -->
 
-                    <div class="sem-imagem">
-                        Nenhuma foto disponível.
+            <section
+                class="galeria"
+                aria-label="Fotos do veículo">
+
+                <div class="imagem-principal">
+
+                    <?php if ($primeiraFoto !== ''): ?>
+
+                        <img
+                            id="fotoPrincipal"
+                            src="<?= esc($primeiraFoto, 'attr') ?>"
+                            alt="<?= esc($titulo, 'attr') ?>">
+
+                        <video
+                            id="videoPrincipal"
+                            controls
+                            preload="metadata"
+                            playsinline
+                            hidden></video>
+
+                    <?php else: ?>
+
+                        <div class="sem-imagem">
+                            Nenhuma foto disponível.
+                        </div>
+
+                    <?php endif; ?>
+
+                </div>
+
+                <?php if (! empty($midias)): ?>
+
+                    <div class="miniaturas">
+
+                        <?php foreach ($midias as $indice => $midia): ?>
+
+                            <button
+                                type="button"
+                                class="miniatura <?= $indice === 0 ? 'ativa' : '' ?>"
+                                data-tipo="<?= esc($midia['tipo'], 'attr') ?>"
+                                data-url="<?= esc($midia['url'], 'attr') ?>"
+                                aria-label="Visualizar mídia <?= $indice + 1 ?>"
+                                aria-pressed="<?= $indice === 0 ? 'true' : 'false' ?>">
+
+                                <?php if ($midia['tipo'] === 'foto'): ?>
+
+                                    <img
+                                        src="<?= esc($midia['url'], 'attr') ?>"
+                                        alt="Foto <?= $indice + 1 ?>"
+                                        loading="lazy">
+
+                                <?php else: ?>
+
+                                    <span class="icone-video">▶</span>
+                                    <span class="legenda-video">Vídeo</span>
+
+                                <?php endif; ?>
+
+                            </button>
+
+                        <?php endforeach; ?>
+
                     </div>
 
                 <?php endif; ?>
 
-            </div>
+            </section>
 
-            <?php if (! empty($midias)): ?>
+            <!-- INFORMAÇÕES PRINCIPAIS -->
 
-                <div class="miniaturas">
+            <aside class="cartao resumo-anuncio">
 
-                    <?php foreach ($midias as $indice => $midia): ?>
+                <div class="etiquetas-anuncio">
 
-                        <button
-                            type="button"
-                            class="miniatura <?= $indice === 0 ? 'ativa' : '' ?>"
-                            data-tipo="<?= esc($midia['tipo'], 'attr') ?>"
-                            data-url="<?= esc($midia['url'], 'attr') ?>"
-                            aria-label="Visualizar mídia <?= $indice + 1 ?>"
-                            aria-pressed="<?= $indice === 0 ? 'true' : 'false' ?>"
-                        >
+                    <span class="etiqueta-ativo">
+                        Ativo
+                    </span>
 
-                            <?php if ($midia['tipo'] === 'foto'): ?>
-
-                                <img
-                                    src="<?= esc($midia['url'], 'attr') ?>"
-                                    alt="Foto <?= $indice + 1 ?>"
-                                    loading="lazy"
-                                >
-
-                            <?php else: ?>
-
-                                <span class="icone-video">▶</span>
-                                <span class="legenda-video">Vídeo</span>
-
-                            <?php endif; ?>
-
-                        </button>
-
-                    <?php endforeach; ?>
-
-                </div>
-
-            <?php endif; ?>
-
-        </section>
-
-        <!-- INFORMAÇÕES PRINCIPAIS -->
-
-        <aside class="cartao resumo-anuncio">
-
-            <div class="etiquetas-anuncio">
-
-                <span class="etiqueta-ativo">
-                    Ativo
-                </span>
-
-                <span class="etiqueta-tipo">
-                    <?= esc($tipoTexto) ?>
-                </span>
-
-            </div>
-
-            <h1><?= esc($titulo) ?></h1>
-
-            <div class="preco">
-                R$ <?= number_format($preco, 2, ',', '.') ?>
-            </div>
-
-            <div class="linha-informacao">
-                <span>Ano</span>
-                <strong><?= esc($anuncio['ano']) ?></strong>
-            </div>
-
-            <div class="linha-informacao">
-                <span>Cor</span>
-                <strong><?= esc($anuncio['cor']) ?></strong>
-            </div>
-
-            <div class="linha-informacao">
-                <span>Cidade</span>
-                <strong><?= esc($localizacao) ?></strong>
-            </div>
-
-            <!-- PERFIL DO ANUNCIANTE -->
-
-            <div class="identificacao-anunciante">
-
-                <p class="rotulo-anunciante">
-                    Anunciado por
-                </p>
-
-                <div class="perfil-anunciante">
-
-                    <div class="foto-anunciante">
-
-                        <span>
-                            <?= esc($inicial) ?>
-                        </span>
-
-                    </div>
-
-                    <div class="dados-anunciante">
-
-                        <strong>
-                            <?= esc($nomeAnunciante) ?>
-                        </strong>
-
-                        <span>
-                            <?= esc($tipoTexto) ?>
-                        </span>
-
-                    </div>
-
-                    <span
-                        class="seta-perfil"
-                        aria-hidden="true"
-                    >
-                        ›
+                    <span class="etiqueta-tipo">
+                        Publicado por <?= esc(
+                                            $ehLoja ? 'loja' : 'pessoa física'
+                                        ) ?>
                     </span>
 
                 </div>
 
-                <p class="aviso-perfil">
-                    Visualização do perfil em breve.
-                </p>
+                <h1><?= esc($titulo) ?></h1>
 
-            </div>
+                <div class="preco">
+                    R$ <?= number_format($preco, 2, ',', '.') ?>
+                </div>
 
-            <!-- CONTATO -->
+                <div class="linha-informacao">
+                    <span>Ano</span>
+                    <strong><?= esc($anuncio['ano']) ?></strong>
+                </div>
 
-            <button
-                type="button"
-                id="mostrarContato"
-                class="botao botao-principal"
-                aria-expanded="false"
-                aria-controls="dadosContato"
-            >
-                Ver contato do vendedor
-            </button>
+                <div class="linha-informacao">
+                    <span>Cor</span>
+                    <strong><?= esc($anuncio['cor']) ?></strong>
+                </div>
 
-            <div
-                id="dadosContato"
-                class="dados-contato"
-                hidden
-            >
+                <div class="linha-informacao">
+                    <span>Cidade</span>
+                    <strong><?= esc($localizacao) ?></strong>
+                </div>
 
-                <?php if ($contato !== ''): ?>
+                <!-- PERFIL DO ANUNCIANTE -->
 
-                    <strong>
-                        <?= esc($contato) ?>
-                    </strong>
+                <div class="identificacao-anunciante">
 
-                    <?php if ($whatsapp): ?>
+                    <p class="rotulo-anunciante">
+                        Anunciado por
+                    </p>
 
-                        <a
-                            href="https://wa.me/<?= esc($whatsapp, 'attr') ?>"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="botao botao-whatsapp"
-                        >
-                            Conversar no WhatsApp
-                        </a>
+                    <div class="perfil-anunciante">
+
+                        <div class="foto-anunciante">
+
+                            <span>
+                                <?= esc($inicial) ?>
+                            </span>
+
+                        </div>
+
+                        <div class="dados-anunciante">
+
+                            <strong>
+                                <?= esc($nomeAnunciante) ?>
+                            </strong>
+
+                            <span>
+                                <?= esc($tipoTexto) ?>
+                            </span>
+
+                        </div>
+
+                        <span
+                            class="seta-perfil"
+                            aria-hidden="true">
+                            ›
+                        </span>
+
+                    </div>
+
+                    <p class="aviso-perfil">
+                        Visualização do perfil em breve.
+                    </p>
+
+                </div>
+
+                <!-- CONTATO -->
+
+                <button
+                    type="button"
+                    id="mostrarContato"
+                    class="botao botao-principal"
+                    aria-expanded="false"
+                    aria-controls="dadosContato">
+                    Ver contato do vendedor
+                </button>
+
+                <div
+                    id="dadosContato"
+                    class="dados-contato"
+                    hidden>
+
+                    <?php if ($contato !== ''): ?>
+
+                        <strong>
+                            <?= esc($contato) ?>
+                        </strong>
+
+                        <?php if ($whatsapp): ?>
+
+                            <a
+                                href="https://wa.me/<?= esc($whatsapp, 'attr') ?>"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="botao botao-whatsapp">
+                                Conversar no WhatsApp
+                            </a>
+
+                        <?php endif; ?>
+
+                    <?php else: ?>
+
+                        <p>Contato não informado.</p>
 
                     <?php endif; ?>
 
-                <?php else: ?>
+                </div>
 
-                    <p>Contato não informado.</p>
+                <button
+                    type="button"
+                    class="botao botao-favorito"
+                    disabled
+                    title="Funcionalidade em desenvolvimento">
+                    ♡ Favoritar (em breve)
+                </button>
 
-                <?php endif; ?>
+            </aside>
+
+        </div>
+
+        <!-- SOBRE O VEÍCULO -->
+
+        <section class="cartao sobre-veiculo">
+
+            <h2>Sobre o veículo</h2>
+
+            <div class="detalhe">
+                <h3>Descrição</h3>
+
+                <p>
+                    <?= nl2br(esc(
+                        $anuncio['descricao'] ?? ''
+                    )) ?>
+                </p>
+            </div>
+
+            <div class="detalhe">
+                <h3>Defeitos</h3>
+
+                <p>
+                    <?= nl2br(esc(
+                        $anuncio['defeitos']
+                            ?: 'Nenhum defeito informado.'
+                    )) ?>
+                </p>
+            </div>
+
+            <div class="detalhe">
+                <h3>Débitos pendentes</h3>
+
+                <p>
+                    <?= nl2br(esc(
+                        $anuncio['debitos_pendentes']
+                            ?: 'Nenhum débito informado.'
+                    )) ?>
+                </p>
+            </div>
+
+            <div class="detalhe">
+                <h3>Situação da documentação</h3>
+
+                <p><?= esc($situacao) ?></p>
+            </div>
+
+        </section>
+
+        <!-- PERGUNTAS -->
+
+        <section class="cartao perguntas">
+
+            <h2>Perguntas ao vendedor</h2>
+
+            <div class="formulario-pergunta">
+
+                <input
+                    type="text"
+                    placeholder="Escreva sua pergunta"
+                    aria-label="Escreva sua pergunta"
+                    disabled>
+
+                <button
+                    type="button"
+                    class="botao botao-principal"
+                    disabled>
+                    Perguntar
+                </button>
 
             </div>
 
-            <button
-                type="button"
-                class="botao botao-favorito"
-                disabled
-                title="Funcionalidade em desenvolvimento"
-            >
-                ♡ Favoritar (em breve)
-            </button>
-
-        </aside>
-
-    </div>
-
-    <!-- SOBRE O VEÍCULO -->
-
-    <section class="cartao sobre-veiculo">
-
-        <h2>Sobre o veículo</h2>
-
-        <div class="detalhe">
-            <h3>Descrição</h3>
-
-            <p>
-                <?= nl2br(esc(
-                    $anuncio['descricao'] ?? ''
-                )) ?>
+            <p class="mensagem-perguntas">
+                Em breve você poderá enviar perguntas públicas
+                ao vendedor e acompanhar as respostas aqui.
             </p>
-        </div>
 
-        <div class="detalhe">
-            <h3>Defeitos</h3>
+        </section>
 
-            <p>
-                <?= nl2br(esc(
-                    $anuncio['defeitos']
-                    ?: 'Nenhum defeito informado.'
-                )) ?>
-            </p>
-        </div>
+    </main>
 
-        <div class="detalhe">
-            <h3>Débitos pendentes</h3>
+    <footer class="rodape">
+        BargainCar — Compre e venda carros perto de você.
+    </footer>
 
-            <p>
-                <?= nl2br(esc(
-                    $anuncio['debitos_pendentes']
-                    ?: 'Nenhum débito informado.'
-                )) ?>
-            </p>
-        </div>
-
-        <div class="detalhe">
-            <h3>Situação da documentação</h3>
-
-            <p><?= esc($situacao) ?></p>
-        </div>
-
-    </section>
-
-    <!-- PERGUNTAS -->
-
-    <section class="cartao perguntas">
-
-        <h2>Perguntas ao vendedor</h2>
-
-        <div class="formulario-pergunta">
-
-            <input
-                type="text"
-                placeholder="Escreva sua pergunta"
-                aria-label="Escreva sua pergunta"
-                disabled
-            >
-
-            <button
-                type="button"
-                class="botao botao-principal"
-                disabled
-            >
-                Perguntar
-            </button>
-
-        </div>
-
-        <p class="mensagem-perguntas">
-            Em breve você poderá enviar perguntas públicas
-            ao vendedor e acompanhar as respostas aqui.
-        </p>
-
-    </section>
-
-</main>
-
-<footer class="rodape">
-    BargainCar — Compre e venda carros perto de você.
-</footer>
-
-<script src="<?= base_url('js/VerAnuncio.js') ?>"></script>
+    <script src="<?= base_url('js/VerAnuncio.js') ?>"></script>
 
 </body>
+
 </html>
