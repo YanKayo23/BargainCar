@@ -1,0 +1,446 @@
+/* ========================================
+   BARGAINCAR - NAVBAR
+======================================== */
+
+.bc-navbar,
+.bc-navbar * {
+    box-sizing: border-box;
+}
+
+.bc-navbar {
+    width: 100%;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e6ee;
+    font-family: Arial, sans-serif;
+    position: relative;
+    z-index: 1000;
+}
+
+.bc-navbar-conteudo {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+/* LOGOTIPO */
+
+.bc-navbar-marca {
+    color: #202a3b;
+    font-size: 23px;
+    font-weight: bold;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.bc-navbar-marca span {
+    color: #0866c9;
+}
+
+/* BARRA DE PESQUISA */
+
+.bc-navbar-pesquisa {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    max-width: 510px;
+    min-width: 260px;
+    height: 44px;
+    padding: 4px;
+    border: 1px solid #b9c4d3;
+    border-radius: 25px;
+    background: #fff;
+    gap: 0;
+}
+
+.bc-navbar-campo {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    height: 30px;
+    gap: 8px;
+    padding: 0 10px;
+    position: relative;
+}
+
+.bc-navbar-campo>span {
+    font-size: 20px;
+    color: #687587;
+    flex-shrink: 0;
+}
+
+.bc-navbar-termo {
+    flex: 1.4;
+    border-right: 1px solid #e1e5ec;
+}
+
+.bc-navbar-cidade {
+    flex: 0.8;
+}
+
+.bc-navbar-campo input {
+    width: 100%;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #202a3b;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.bc-navbar-campo input::placeholder {
+    color: #858c97;
+}
+
+.bc-navbar-buscar {
+    height: 34px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 20px;
+    background: #0866c9;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.bc-navbar-buscar:hover {
+    background: #0755a8;
+}
+
+/* SUGESTÕES DE CIDADES */
+
+.bc-navbar-sugestoes {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 0;
+    width: 280px;
+    max-height: 240px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #d7e0ed;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(20, 40, 70, 0.12);
+    z-index: 1100;
+}
+
+.bc-navbar-sugestoes[hidden],
+.bc-navbar-menu[hidden] {
+    display: none !important;
+}
+
+/* FAVORITOS */
+
+.bc-navbar-favoritos {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #0866c9;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.bc-navbar-favoritos span {
+    font-size: 25px;
+    line-height: 1;
+}
+
+.bc-navbar-favoritos:hover {
+    color: #0755a8;
+}
+
+/* SELETOR PESSOA / LOJA */
+
+.bc-navbar-perfis {
+    position: relative;
+    flex: 0 1 220px;
+    min-width: 130px;
+}
+
+.bc-navbar-perfil-botao {
+    width: 100%;
+    height: 42px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: #eaf2ff;
+    color: #0866c9;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.bc-navbar-perfil-botao:hover,
+.bc-navbar-perfil-botao[aria-expanded="true"] {
+    border-color: #0866c9;
+}
+
+.bc-navbar-perfil-botao span {
+    margin-left: 6px;
+}
+
+/* MENU FLUTUANTE */
+
+.bc-navbar-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 310px;
+    padding: 14px;
+    background: #ffffff;
+    border: 1px solid #0866c9;
+    border-radius: 16px;
+    box-shadow: 0 10px 28px rgba(20, 40, 70, 0.12);
+    z-index: 1200;
+}
+
+.bc-navbar-menu h3 {
+    margin: 0 0 12px;
+    color: #202a3b;
+    font-size: 15px;
+}
+
+.bc-navbar-opcao {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-height: 55px;
+    padding: 10px 12px;
+    margin-bottom: 9px;
+    border: 1px solid #d5e1f0;
+    border-radius: 9px;
+    background: #f7f9fd;
+    color: #202a3b;
+    text-decoration: none;
+}
+
+.bc-navbar-opcao>span:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.bc-navbar-opcao strong {
+    font-size: 13px;
+}
+
+.bc-navbar-opcao small {
+    color: #6b7a90;
+    font-size: 12px;
+}
+
+.bc-navbar-atual {
+    background: #e8f2ff;
+    border-color: #0866c9;
+}
+
+.bc-navbar-atual>strong,
+.bc-navbar-acao {
+    color: #0866c9;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.bc-navbar-aviso {
+    color: #6b7a90;
+    font-size: 12px;
+    line-height: 1.6;
+    margin: 12px 2px;
+}
+
+/* BOTÕES DO MENU */
+
+.bc-navbar-botao-azul {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: #0866c9;
+    border-radius: 9px;
+    color: white;
+    text-align: center;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.bc-navbar-botao-azul:hover {
+    background: #0755a8;
+}
+
+/* LOJAS DESATIVADAS */
+
+.bc-navbar-desativadas {
+    border-top: 1px solid #dce4ef;
+    padding-top: 12px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.bc-navbar-desativadas summary {
+    cursor: pointer;
+    color: #202a3b;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 3px 0;
+}
+
+.bc-navbar-loja-desativada {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 5px;
+}
+
+.bc-navbar-loja-desativada strong {
+    font-size: 12px;
+    color: #202a3b;
+}
+
+.bc-navbar-loja-desativada form {
+    margin: 0;
+}
+
+.bc-navbar-loja-desativada button {
+    background: transparent;
+    border: none;
+    color: #0866c9;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.bc-navbar-loja-desativada button:hover {
+    text-decoration: underline;
+}
+
+/* BOTÃO ANUNCIAR */
+
+.bc-navbar-anunciar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-width: 125px;
+    height: 42px;
+    padding: 0 15px;
+    background: #0866c9;
+    color: #ffffff;
+    border-radius: 9px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.bc-navbar-anunciar span {
+    font-size: 23px;
+    font-weight: normal;
+}
+
+.bc-navbar-anunciar:hover {
+    background: #0755a8;
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 1050px) {
+    .bc-navbar-conteudo {
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .bc-navbar-pesquisa {
+        order: 5;
+        flex-basis: 100%;
+        max-width: none;
+    }
+
+    .bc-navbar-perfis {
+        flex: 0 1 180px;
+    }
+}
+
+@media (max-width: 600px) {
+    .bc-navbar-conteudo {
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .bc-navbar-marca {
+        font-size: 21px;
+    }
+
+    .bc-navbar-favoritos {
+        font-size: 0;
+    }
+
+    .bc-navbar-favoritos span {
+        font-size: 25px;
+    }
+
+    .bc-navbar-perfis {
+        flex: 0 1 110px;
+        min-width: 110px;
+    }
+
+    .bc-navbar-anunciar {
+        min-width: 105px;
+        padding: 0 10px;
+        font-size: 12px;
+    }
+
+    .bc-navbar-menu {
+        width: min(310px, calc(100vw - 24px));
+    }
+
+    .bc-navbar-pesquisa {
+        min-width: 0;
+    }
+
+    .bc-navbar-campo {
+        padding: 0 6px;
+        gap: 4px;
+    }
+
+    .bc-navbar-campo input {
+        font-size: 12px;
+    }
+
+    .bc-navbar-buscar {
+        padding: 0 12px;
+        font-size: 12px;
+    }
+
+
+    /* ITENS DO AUTOCOMPLETE DE CIDADES */
+
+    .bc-navbar-sugestao {
+        display: block;
+        width: 100%;
+        padding: 11px 13px;
+        border: none;
+        background: #ffffff;
+        color: #202a3b;
+        text-align: left;
+        font-family: inherit;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    .bc-navbar-sugestao:hover,
+    .bc-navbar-sugestao:focus {
+        background: #eaf2ff;
+        color: #0866c9;
+        outline: none;
+    }
+
+}
