@@ -59,3 +59,9 @@ $routes->get(
     'AnunciosController::exibirMidia/$1/$2'
 );
 
+
+// Perfil pessoal do usuário autenticado
+$routes->get('meu-perfil', 'PerfilController::index', [
+    'filter' => 'auth'
+]);
+
