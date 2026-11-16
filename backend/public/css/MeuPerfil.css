@@ -1,0 +1,405 @@
+
+/* BARGAINCAR - MEU PERFIL */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f5f9;
+    color: #202a3b;
+}
+
+.perfil-container {
+    max-width: 1200px;
+    margin: 35px auto;
+    padding: 0 20px 60px;
+}
+
+.perfil-titulo {
+    margin: 0 0 25px;
+    font-size: 28px;
+}
+
+.perfil-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 28px;
+    background: #fff;
+    border: 1px solid #e1e6ef;
+    border-radius: 14px;
+}
+
+.perfil-identidade {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.perfil-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 78px;
+    height: 78px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #1769d2;
+    color: #fff;
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.perfil-identidade-texto h2 {
+    margin: 0 0 9px;
+    font-size: 23px;
+}
+
+.perfil-identidade-texto p {
+    margin: 0;
+    color: #6b778a;
+    font-size: 14px;
+}
+
+.perfil-botao-contorno {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 18px;
+    border: 1px solid #1769d2;
+    border-radius: 9px;
+    background: #fff;
+    color: #1769d2;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.perfil-botao-contorno:hover {
+    background: #eaf2ff;
+}
+
+.perfil-desabilitado {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.perfil-aviso {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 14px 18px;
+    background: #eaf2ff;
+    border: 1px solid #d5e5fb;
+    border-radius: 10px;
+    color: #355c8a;
+    font-size: 13px;
+}
+
+.perfil-aviso span {
+    font-size: 19px;
+}
+
+.perfil-secao {
+    margin-top: 35px;
+}
+
+.perfil-secao-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 18px;
+}
+
+.perfil-secao-cabecalho h2 {
+    margin: 0 0 7px;
+    font-size: 22px;
+}
+
+.perfil-secao-cabecalho p {
+    margin: 0;
+    color: #6b778a;
+    font-size: 14px;
+}
+
+.perfil-botao-azul {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 18px;
+    background: #1769d2;
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: bold;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.perfil-botao-azul:hover {
+    background: #0755a8;
+}
+
+/* LOJAS */
+
+.perfil-loja-card,
+.perfil-loja-vazia {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 25px;
+    background: #fff;
+    border: 1px solid #e1e6ef;
+    border-radius: 12px;
+}
+
+.perfil-loja-informacoes {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.perfil-loja-icone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 55px;
+    height: 55px;
+    border-radius: 11px;
+    background: #eaf2ff;
+    color: #1769d2;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.perfil-loja-card h3,
+.perfil-loja-vazia h3 {
+    margin: 0 0 10px;
+    font-size: 17px;
+}
+
+.perfil-loja-vazia p {
+    margin: 0;
+    color: #6b778a;
+    font-size: 14px;
+}
+
+.perfil-status {
+    display: inline-block;
+    padding: 6px 11px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.perfil-status-ativa,
+.perfil-status-ativo {
+    background: #e1f6e9;
+    color: #188044;
+}
+
+.perfil-status-desativada,
+.perfil-status-expirado {
+    background: #f0f1f4;
+    color: #687385;
+}
+
+.perfil-status-pendente {
+    background: #fff2d7;
+    color: #9a6700;
+}
+
+.perfil-lojas-historico {
+    margin-top: 15px;
+    padding: 18px 22px;
+    background: #fff;
+    border: 1px solid #e1e6ef;
+    border-radius: 12px;
+}
+
+.perfil-lojas-historico summary {
+    font-size: 14px;
+    font-weight: bold;
+    color: #1769d2;
+    cursor: pointer;
+}
+
+.perfil-historico-conteudo {
+    padding-top: 15px;
+}
+
+.perfil-loja-desativada {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid #e1e6ef;
+}
+
+.perfil-loja-desativada h3 {
+    margin: 0 0 9px;
+    font-size: 15px;
+}
+
+.perfil-loja-desativada form {
+    margin: 0;
+}
+
+.perfil-historico-aviso {
+    margin: 15px 0 0;
+    color: #6b778a;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* ANÚNCIOS */
+
+.perfil-anuncios-vazio {
+    padding: 35px;
+    text-align: center;
+    background: #fff;
+    border: 1px solid #e1e6ef;
+    border-radius: 12px;
+}
+
+.perfil-anuncios-vazio h3 {
+    margin: 0 0 12px;
+    font-size: 17px;
+}
+
+.perfil-anuncios-vazio p {
+    margin: 0;
+    color: #6b778a;
+    font-size: 14px;
+}
+
+.perfil-anuncios-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.perfil-anuncio-card {
+    display: flex;
+    gap: 22px;
+    padding: 18px;
+    background: #fff;
+    border: 1px solid #e1e6ef;
+    border-radius: 12px;
+}
+
+.perfil-anuncio-imagem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 215px;
+    min-height: 145px;
+    flex-shrink: 0;
+    background: #e7ebf1;
+    border-radius: 9px;
+    color: #8793a3;
+    font-size: 13px;
+}
+
+.perfil-anuncio-conteudo {
+    flex: 1;
+    min-width: 0;
+}
+
+.perfil-anuncio-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.perfil-anuncio-topo h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.perfil-anuncio-detalhes {
+    margin: 12px 0;
+    color: #6b778a;
+    font-size: 13px;
+}
+
+.perfil-anuncio-preco {
+    display: block;
+    color: #1769d2;
+    font-size: 21px;
+}
+
+.perfil-anuncio-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 20px;
+}
+
+.perfil-anuncio-acoes a,
+.perfil-anuncio-acoes span {
+    color: #1769d2;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.perfil-anuncio-acoes span {
+    color: #8893a2;
+    cursor: default;
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 700px) {
+    .perfil-card,
+    .perfil-loja-card,
+    .perfil-loja-vazia {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .perfil-secao-cabecalho {
+        flex-wrap: wrap;
+    }
+
+    .perfil-anuncio-card {
+        flex-direction: column;
+    }
+
+    .perfil-anuncio-imagem {
+        width: 100%;
+        min-height: 180px;
+    }
+
+    .perfil-anuncio-topo {
+        align-items: flex-start;
+    }
+
+    .perfil-identidade {
+        gap: 12px;
+    }
+
+    .perfil-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 25px;
+    }
+
+    .perfil-identidade-texto h2 {
+        font-size: 19px;
+    }
+}
