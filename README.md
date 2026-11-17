@@ -162,15 +162,30 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 **Fluxo alternativo:** Se o título estiver vazio ou o anúncio ficar com menos de 3 ou mais de 5 fotos, sistema exibe erro e não salva.
 
 ### Caso de Uso: Buscar Anúncios
-**Ator:** Usuário
-**Pré-condição:** Nenhuma; a busca é pública
-**Fluxo principal:**
-1. Usuário clica na barra de pesquisa
-2. Usuário digita o título do anúncio e a região
-3. Usuário clica em "Buscar"
-4. Sistema exibe os anúncios com o nome buscado na região mais próxima da localização padrão
+**Ator:** Usuário autenticado ou visitante
+**Pré-condição:** Nenhuma; a busca é pública. Para visitantes sem cidade de referência definida, solicitar a seleção de uma cidade.
 
-**Fluxo alternativo:** Para ver anúncios de locais mais distantes, o usuário pode escolher outras regiões manualmente.
+**Interface da barra de pesquisa:**
+- Campo de texto "O que você procura?", para pesquisar pelo nome/título do anúncio.
+- Campo "Cidade", com sugestões de municípios identificados por nome e UF e seleção pelo código IBGE (`cidade_id`).
+- Botão azul destacado "Buscar", com ícone de lupa, para confirmar a pesquisa. A pesquisa não é executada apenas por preencher um dos campos.
+- Os campos são independentes: o usuário pode preencher apenas o termo, apenas a cidade ou ambos.
+
+**Fluxo principal:**
+1. O usuário informa opcionalmente um termo de pesquisa e/ou seleciona uma cidade.
+2. O usuário confirma a operação pelo botão "Buscar".
+3. O sistema determina a cidade de referência: cidade selecionada, quando houver; caso contrário, cidade padrão do usuário autenticado. Se um visitante não tiver cidade de referência, o sistema solicita que selecione uma.
+4. O sistema pesquisa anúncios na cidade de referência e nas cidades a até 100 km dela, com distância euclidiana local aproximada entre os centros geográficos das cidades.
+5. Se houver termo informado, o sistema também filtra os anúncios por correspondência com o título pesquisado.
+6. O sistema apresenta os anúncios disponíveis que atendem aos filtros.
+
+**Combinações de filtros:**
+- **Somente termo:** busca anúncios com título correspondente, na cidade padrão do usuário e em municípios a até 100 km. Para visitante sem cidade definida, solicita uma cidade de referência.
+- **Somente cidade:** mostra anúncios disponíveis na cidade selecionada e em municípios a até 100 km, sem restringir o título.
+- **Termo e cidade:** combina o filtro de título com a cidade selecionada e os municípios a até 100 km.
+- **Nenhum campo:** mostra anúncios disponíveis na região padrão do usuário, com raio de 100 km; para visitante sem cidade definida, solicita uma cidade.
+
+**Regras complementares:** O raio é fixo em 100 km, não configurável pelo usuário. O cálculo representa uma aproximação em linha reta, não distância por estrada. A busca é pública, mas não exibe anúncios expirados ou excluídos logicamente; anúncios `ativo` e `pendente` podem aparecer.
 
 ### Caso de Uso: Selecionar Cidade
 **Ator:** Usuário
@@ -528,6 +543,11 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 - RN14: A busca sem cidade informada usa a cidade padrão do usuário autenticado e mostra também municípios cuja distância euclidiana local aproximada seja de até 100 km, calculada pelas coordenadas geográficas convertidas para quilômetros. Visitantes devem escolher uma cidade de referência antes de uma busca regional, sem depender de geolocalização automática.
 - RN15: Na busca, o usuário pode escolher outra cidade para ver anúncios de locais mais distantes. O raio é fixo em 100 km e não pode ser ajustado; o que muda é a cidade de referência.
 - RN15.1: A cidade é sempre escolhida em uma lista de sugestões, e o sistema guarda o `cidade_id`, nunca um texto digitado livremente.
+- RN15.2: A barra de pesquisa possui dois campos independentes (`termo` e `cidade_id`) e um botão destacado "Buscar" para confirmar a pesquisa. É permitido preencher um, ambos ou nenhum dos campos.
+- RN15.3: Quando `termo` estiver preenchido, a busca filtra os anúncios pelo título. Quando estiver vazio, não aplica filtro de título.
+- RN15.4: Quando `cidade_id` for informado, a cidade selecionada substitui a cidade padrão como centro do raio de 100 km. Quando não for informado, usa a cidade padrão do usuário autenticado; visitantes sem cidade de referência devem selecionar uma cidade.
+- RN15.5: O filtro geográfico e o filtro por título são combinados quando ambos estiverem preenchidos. A confirmação ocorre pelo botão "Buscar".
+
 
 **Perfil, loja e privacidade**
 - RN16: O perfil público do usuário mostra apenas nome, fotos, anúncios ativos e tempo de criação da conta. CPF, CNPJ, contato padrão e localização padrão nunca são exibidos publicamente.
