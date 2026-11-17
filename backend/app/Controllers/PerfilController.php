@@ -7,6 +7,7 @@ use App\Models\LojaModel;
 use App\Models\AnuncioModel;
 use CodeIgniter\HTTP\RedirectResponse;
 use App\Models\MidiaModel;
+use App\Models\CidadeModel;
 
 class PerfilController extends BaseController
 {
@@ -31,6 +32,16 @@ class PerfilController extends BaseController
             session()->destroy();
             return redirect()->to('/login');
         }
+
+        // Converte o código IBGE da cidade em nome e UF.
+        $cidadeModel = new CidadeModel();
+        $cidade = $cidadeModel
+            ->where('codigo_ibge', $usuario['cidade_id'])
+            ->first();
+
+        $nomeCidade = $cidade
+            ? $cidade['nome'] . ' - ' . $cidade['uf']
+            : 'Não informada';
 
         // Busca a loja ativa.
         $lojaAtiva = $lojaModel
@@ -109,10 +120,18 @@ class PerfilController extends BaseController
 
         // Envia apenas os dados necessários para a tela.
         $dados = [
+
             'usuario' => [
-                'id'   => $usuario['id'],
-                'nome' => $usuario['nome'],
+                'id'             => $usuario['id'],
+                'nome'           => $usuario['nome'],
+                'cpf'            => $usuario['cpf'],
+                'email'          => $usuario['email'],
+                'cidade_id'      => $usuario['cidade_id'],
+                'contato_padrao' => $usuario['contato_padrao'],
+                'foto_perfil'    => $usuario['foto_perfil'] ?? null,
             ],
+
+            'nomeCidade' => $nomeCidade,
             'tempoCadastro' => $tempoCadastro,
             'totalAnunciosAtivos' => $totalAnunciosAtivos,
             'lojaAtiva' => $lojaAtiva,
