@@ -3,7 +3,7 @@
 use CodeIgniter\Router\RouteCollection;
 
 /** @var RouteCollection $routes */
-$routes->get('/', 'Home::index');
+$routes->get('/', 'HomeController::index');
 
 
 $routes->get('cidades', 'CidadesController::index');
@@ -96,4 +96,3 @@ $routes->get(
     'AnunciosController::exibirMidiaEdicao/$1/$2',
     ['filter' => 'auth']
 );
-
