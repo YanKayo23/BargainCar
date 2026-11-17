@@ -10,6 +10,8 @@
 
 <body>
 
+    <?= view('layouts/Navbar') ?>
+
     <main class="cadastro-container">
 
         <aside class="painel-azul">
@@ -53,8 +55,23 @@
                 </div>
             <?php endif; ?>
 
-            <form action="<?= site_url('cadastro') ?>" method="post">
+            <form id="formulario-cadastro" action="<?= site_url('cadastro') ?>" method="post" enctype="multipart/form-data">
                 <?= csrf_field() ?>
+
+                <div class="campo campo-foto">
+                    <label for="foto_perfil">Foto de perfil <span class="opcional">(opcional)</span></label>
+                    <div class="foto-seletor">
+                        <div class="foto-preview" aria-hidden="true">
+                            <img id="foto-preview-imagem" alt="" hidden>
+                            <span id="foto-preview-iniciais">👤</span>
+                        </div>
+                        <div class="foto-acoes">
+                            <input id="foto_perfil" name="foto_perfil" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-describedby="foto-ajuda foto-erro">
+                            <small id="foto-ajuda">JPG, PNG ou WebP. Máximo de 2 MB.</small>
+                            <small id="foto-erro" class="foto-erro" role="alert" hidden></small>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="campo">
                     <label for="nome">Nome completo</label>
