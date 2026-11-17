@@ -444,3 +444,27 @@
     }
 
 }
+
+/* ACESSO AO PERFIL OU LOGIN */
+.bc-navbar-meu-perfil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 12px;
+    min-height: 42px;
+    border: 1px solid #d5e1f0;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #0866c9;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s, border-color 0.2s;
+}
+.bc-navbar-meu-perfil span { font-size: 19px; line-height: 1; }
+.bc-navbar-meu-perfil:hover { background: #eaf2ff; border-color: #0866c9; }
+@media (max-width: 600px) {
+    .bc-navbar-meu-perfil { padding: 8px; font-size: 12px; }
+}
