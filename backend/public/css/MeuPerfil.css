@@ -366,6 +366,34 @@ body {
     text-decoration: none;
 }
 
+
+/* Botão Excluir */
+
+.perfil-anuncio-acoes .perfil-form-excluir {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+}
+
+.perfil-anuncio-acoes .perfil-acao-excluir {
+    appearance: none;
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: #dc3545;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: inherit;
+    cursor: pointer;
+}
+
+.perfil-anuncio-acoes .perfil-acao-excluir:hover {
+    color: #a71d2a;
+    text-decoration: underline;
+}
+
+
 .perfil-anuncio-acoes span {
     color: #8893a2;
     cursor: default;
@@ -411,10 +439,101 @@ body {
         font-size: 25px;
     }
 
+
     .perfil-identidade-texto h2 {
         font-size: 19px;
     }
 
+}
+
+/* Fim do @media */
+
+/* Janela de confirmação */
+
+.perfil-modal {
+    width: min(420px, calc(100% - 32px));
+    max-width: 420px;
+    padding: 0;
+    border: none;
+    border-radius: 14px;
+    background: #fff;
+    color: #202a3b;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
+}
+
+.perfil-modal::backdrop {
+    background: rgba(15, 23, 42, 0.55);
+}
+
+.perfil-modal-conteudo {
+    padding: 28px;
+}
+
+.perfil-modal h2 {
+    margin: 0 0 15px;
+    font-size: 21px;
+}
+
+.perfil-modal p {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.perfil-modal-aviso {
+    color: #6b778a;
+}
+
+.perfil-modal-acoes {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.perfil-modal-acoes button {
+    padding: 11px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.perfil-modal-cancelar {
+    border: 1px solid #d5dce6;
+    background: #fff;
+    color: #202a3b;
+}
+
+.perfil-modal-confirmar {
+    border: none;
+    background: #dc3545;
+    color: #fff;
+}
+
+.perfil-modal-confirmar:hover {
+    background: #b52a37;
+}
 
 
+/* Mensagens de confirmação do Meu Perfil */
+
+.perfil-mensagem-sucesso {
+    background: #eaf7ed;
+    color: #18803c;
+    border: 1px solid #b7e2c1;
+    border-radius: 8px;
+    padding: 15px 18px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.perfil-mensagem-erro {
+    background: #fff0ee;
+    color: #9b2419;
+    border: 1px solid #f1c0ba;
+    border-radius: 8px;
+    padding: 15px 18px;
+    margin-bottom: 20px;
+    font-size: 14px;
 }
