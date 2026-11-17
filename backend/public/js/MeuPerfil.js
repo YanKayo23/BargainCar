@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-
     // ======================================
     // 2. CONFIRMAÇÃO DE EXCLUSÃO DE ANÚNCIO
     // ======================================
@@ -54,12 +53,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let formularioSelecionado = null;
 
-    if (modalExcluir && textoExcluir && botaoCancelar && botaoConfirmar) {
+    if (
+        modalExcluir &&
+        textoExcluir &&
+        botaoCancelar &&
+        botaoConfirmar
+    ) {
 
         document.querySelectorAll('.perfil-form-excluir')
             .forEach((formulario) => {
 
                 formulario.addEventListener('submit', (evento) => {
+
                     evento.preventDefault();
 
                     formularioSelecionado = formulario;
@@ -74,23 +79,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
 
+
         botaoCancelar.addEventListener('click', () => {
             modalExcluir.close();
         });
 
+
         botaoConfirmar.addEventListener('click', () => {
+
             if (formularioSelecionado) {
+
                 botaoConfirmar.disabled = true;
+
                 formularioSelecionado.submit();
             }
         });
 
+
         modalExcluir.addEventListener('close', () => {
+
             formularioSelecionado = null;
+
             botaoConfirmar.disabled = false;
         });
     }
-
 
 
     // ======================================
@@ -131,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         if (botaoFechar) {
+
             botaoFechar.addEventListener('click', () => {
                 mensagem.remove();
             });
@@ -153,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const resumo = historico.querySelector('summary');
 
             if (resumo) {
+
                 resumo.setAttribute(
                     'aria-expanded',
                     String(historico.open)
