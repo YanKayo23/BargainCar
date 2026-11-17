@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Variáveis recebidas do PerfilController.
  *
@@ -165,6 +166,7 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
                                     </span>
                                 </div>
 
+
                                 <?php if (! $temLojaAtiva): ?>
 
                                     <form
@@ -172,7 +174,19 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
                                         class="perfil-form-reativar"
                                         data-nome-loja="<?= esc($loja['nome_empresa'], 'attr') ?>"
                                         action="<?= site_url('lojas/' . $loja['id'] . '/reativar') ?>">
-                                    <?php endif; ?>
+
+                                        <?= csrf_field() ?>
+
+                                        <button
+                                            type="submit"
+                                            class="perfil-botao-contorno">
+                                            Reativar
+                                        </button>
+
+                                    </form>
+
+                                <?php endif; ?>
+
 
                             </div>
 
@@ -255,9 +269,27 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
 
                         <article class="perfil-anuncio-card">
 
+
                             <div class="perfil-anuncio-imagem">
-                                <span>Sem foto</span>
+
+                                <?php if (! empty($anuncio['primeira_foto'])): ?>
+
+                                    <img
+                                        src="<?= site_url(
+                                                    'anuncios/' . $anuncio['id']
+                                                        . '/midias/' . $anuncio['primeira_foto']['id']
+                                                ) ?>"
+                                        alt="Foto de <?= esc($anuncio['titulo'], 'attr') ?>"
+                                        loading="lazy">
+
+                                <?php else: ?>
+
+                                    <span>Sem foto</span>
+
+                                <?php endif; ?>
+
                             </div>
+
 
                             <div class="perfil-anuncio-conteudo">
 
