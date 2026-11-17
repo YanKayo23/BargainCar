@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
     // =========================================
     // 2. AUTOCOMPLETE DE CIDADES
     // =========================================
@@ -67,8 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     campoCidade.addEventListener('input', () => {
 
-        // A cidade anterior deixa de ser válida
-        // quando o usuário altera o texto.
+        // Invalida a cidade anterior quando o texto muda.
         campoCidadeId.value = '';
 
         clearTimeout(temporizador);
@@ -164,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
     });
 
-
     // =========================================
     // 3. VALIDAÇÃO DA CIDADE
     // =========================================
@@ -178,15 +175,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const cidadeDigitada = campoCidade.value.trim();
             const cidadeSelecionada = campoCidadeId.value;
 
-            // Sem cidade digitada: o backend utilizará
-            // a cidade padrão do usuário.
+            // Sem cidade digitada, o backend decide
+            // qual cidade padrão utilizar.
             if (cidadeDigitada === '') {
                 campoCidadeId.value = '';
                 return;
             }
 
-            // Impede enviar uma cidade que não foi
-            // selecionada na lista de sugestões.
+            // Exige uma cidade selecionada da lista.
             if (!cidadeSelecionada) {
                 evento.preventDefault();
 
@@ -199,8 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
-    // Fecha sugestões ao clicar fora.
+    // Fecha as sugestões ao clicar fora.
     document.addEventListener('click', (evento) => {
 
         if (
