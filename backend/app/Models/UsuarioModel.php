@@ -21,5 +21,6 @@ class UsuarioModel extends Model
         'cidade_id',
         'contato_padrao',
         'senha_hash',
+        'foto_perfil',
     ];
 }
