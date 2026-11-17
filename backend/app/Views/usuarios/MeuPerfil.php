@@ -12,6 +12,7 @@
  * @var int $totalAnunciosAtivos
  * @var array|null $lojaAtiva
  * @var array $lojasDesativadas
+ * @var string $nomeCidade
  * @var array $anunciosPessoais
  */
 
@@ -21,6 +22,7 @@ $totalAnunciosAtivos = $totalAnunciosAtivos ?? 0;
 $lojaAtiva = $lojaAtiva ?? null;
 $lojasDesativadas = $lojasDesativadas ?? [];
 $anunciosPessoais = $anunciosPessoais ?? [];
+$nomeCidade = $nomeCidade ?? 'Não informada';
 
 $nome = $usuario['nome'] ?? 'Usuário';
 $inicial = mb_strtoupper(mb_substr($nome, 0, 1));
@@ -117,15 +119,74 @@ $mensagemErro = session()->getFlashdata('erro');
 
             </div>
 
-            <a
-                href="#"
-                class="perfil-botao-contorno"
-                aria-disabled="true"
-                onclick="return false;"
-            >
-                Editar meus dados
-            </a>
+            <!-- Encerrar a sessão do usuário -->
+            <form action="<?= site_url('logout') ?>" method="post" class="perfil-form-logout">
+                <?= csrf_field() ?>
+                <button type="submit" class="perfil-botao-logout">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    Sair da conta
+                </button>
+            </form>
 
+        </section>
+
+        <!-- INFORMAÇÕES PRIVADAS: somente o próprio usuário autenticado -->
+        <section class="perfil-informacoes">
+            <h2>Minhas informações</h2>
+
+            <div class="perfil-informacoes-grid">
+                <div class="perfil-informacao">
+                    <span>Nome completo</span>
+                    <strong><?= esc($usuario['nome'] ?? 'Não informado') ?></strong>
+                </div>
+
+                <div class="perfil-informacao">
+                    <span>CPF</span>
+                    <strong>
+                        <?php
+                        $cpfNumeros = preg_replace('/\D/', '', (string) ($usuario['cpf'] ?? ''));
+                        $cpfFormatado = strlen($cpfNumeros) === 11
+                            ? preg_replace('/^(\d{3})(\d{3})(\d{3})(\d{2})$/', '$1.$2.$3-$4', $cpfNumeros)
+                            : 'Não informado';
+                        ?>
+                        <?= esc($cpfFormatado) ?>
+                    </strong>
+                </div>
+
+                <div class="perfil-informacao">
+                    <span>E-mail</span>
+                    <strong><?= esc($usuario['email'] ?? 'Não informado') ?></strong>
+                </div>
+
+                <div class="perfil-informacao">
+                    <span>Cidade cadastrada</span>
+                    <strong><?= esc($nomeCidade) ?></strong>
+                </div>
+
+                <div class="perfil-informacao">
+                    <span>Contato padrão</span>
+                    <strong><?= esc($usuario['contato_padrao'] ?: 'Não informado') ?></strong>
+                </div>
+
+                <div class="perfil-informacao">
+                    <span>Senha</span>
+                    <strong>••••••••</strong>
+                </div>
+            </div>
+
+            <div class="perfil-informacoes-acoes">
+                <span class="perfil-botao-contorno perfil-desabilitado"
+                      aria-label="Edição dos dados pessoais em desenvolvimento">
+                    Editar meus dados
+                </span>
+            </div>
         </section>
 
         <div class="perfil-aviso">
