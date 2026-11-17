@@ -17,6 +17,8 @@ class LojaModel extends Model
         'contato',
         'nome_empresa',
         'cnpj',
+        'foto_perfil',
+        'foto_capa',
     ];
 
     // Ativa a exclusão lógica
