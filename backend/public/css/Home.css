@@ -1,0 +1,48 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, sans-serif; color: #202a3b; background: #f3f5f9; }
+[hidden] { display: none !important; }
+.home-container { max-width: 1240px; margin: 32px auto; padding: 0 20px 65px; }
+.home-hero { display: flex; align-items: center; justify-content: space-between; gap: 25px; padding: 38px 42px; border-radius: 16px; background: linear-gradient(110deg, #0b4c99, #1975d3); color: #fff; }
+.home-hero h1 { font-size: clamp(25px, 3.5vw, 37px); line-height: 1.18; max-width: 650px; margin: 15px 0; }
+.home-hero p { max-width: 620px; line-height: 1.6; color: #e7f2ff; margin: 0 0 18px; }
+.home-selo { display: inline-block; font-size: 12px; font-weight: 700; border-radius: 50px; padding: 8px 13px; background: rgba(255,255,255,.15); }
+.home-local-atual { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; font-size: 14px; }
+.home-hero-icone { font-size: 94px; opacity: .9; }
+.home-regiao { position: relative; margin: 24px 0 34px; padding: 25px 28px; border-radius: 14px; border: 1px solid #e1e6ef; background: #fff; }
+.home-secao-cabecalho { display: flex; justify-content: space-between; gap: 12px; align-items: end; margin-bottom: 20px; }
+.home-secao-cabecalho h2 { font-size: 23px; margin: 0 0 7px; }
+.home-secao-cabecalho p { font-size: 14px; color: #6b778a; margin: 0; }
+.home-form-cidade { display: flex; align-items: end; gap: 12px; max-width: 700px; }
+.home-cidade-campo { flex: 1; min-width: 0; position: relative; }
+.home-cidade-campo label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 13px; }
+.home-cidade-campo input { display: block; width: 100%; border: 1px solid #cbd5e2; border-radius: 9px; height: 45px; padding: 0 14px; font: inherit; font-size: 14px; }
+.home-cidade-campo input:focus { outline: 2px solid #b9d7ff; border-color: #1769d2; }
+.home-form-cidade > button { border: 0; border-radius: 9px; height: 45px; padding: 0 22px; background: #1769d2; color: #fff; font-weight: bold; cursor: pointer; white-space: nowrap; }
+.home-form-cidade > button:hover { background: #0c56ad; }
+.home-sugestoes { position: absolute; z-index: 25; top: 75px; left: 0; right: 0; background: #fff; border: 1px solid #d4dce7; border-radius: 9px; box-shadow: 0 8px 22px #182b4a20; max-height: 235px; overflow: auto; }
+.home-sugestoes button { display: block; width: 100%; background: #fff; border: 0; text-align: left; font: inherit; font-size: 14px; padding: 12px 14px; cursor: pointer; }
+.home-sugestoes button:hover, .home-sugestoes button:focus { background: #edf5ff; }
+.home-sugestoes p { margin: 0; padding: 13px; font-size: 13px; color: #6b778a; }
+.home-erro-texto { color: #b42318; font-size: 14px; }
+.home-mensagem { border-radius: 9px; padding: 13px 16px; margin-bottom: 20px; }
+.home-sucesso { color: #17603a; background: #e6f5ec; }
+.home-erro { color: #9b2419; background: #fff0ee; }
+.home-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+.home-anuncio { display: block; min-width: 0; text-decoration: none; color: inherit; background: #fff; border: 1px solid #e1e6ef; border-radius: 13px; overflow: hidden; transition: box-shadow .2s, transform .2s; }
+.home-anuncio:hover { transform: translateY(-3px); box-shadow: 0 9px 22px #263d601c; }
+.home-anuncio-foto { height: 175px; position: relative; background: #e7edf5; }
+.home-anuncio-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.home-sem-foto { display: grid; place-items: center; height: 100%; font-size: 58px; }
+.home-tipo { position: absolute; top: 12px; left: 12px; padding: 5px 9px; background: #fff; border-radius: 7px; font-size: 11px; font-weight: 700; }
+.home-anuncio-dados { padding: 17px; }
+.home-anuncio-dados h3 { margin: 0 0 10px; font-size: 16px; line-height: 1.4; min-height: 42px; overflow-wrap: anywhere; }
+.home-preco { display: block; color: #1769d2; font-size: 20px; margin-bottom: 8px; }
+.home-ano, .home-loja { color: #6b778a; font-size: 13px; margin: 0 0 9px; }
+.home-anuncio-rodape { border-top: 1px solid #edf0f5; padding-top: 12px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; color: #66758a; font-size: 12px; }
+.home-vazio { text-align: center; padding: 65px 20px; background: #fff; border: 1px solid #e1e6ef; border-radius: 14px; }
+.home-vazio > span { font-size: 48px; }
+.home-vazio h3 { margin: 15px 0 8px; }
+.home-vazio p { color: #6b778a; margin: 0; }
+@media (max-width: 1080px) { .home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .home-hero { padding: 28px; } .home-hero-icone { display: none; } }
+@media (max-width: 520px) { .home-grid { grid-template-columns: 1fr; } .home-form-cidade { flex-direction: column; align-items: stretch; } .home-form-cidade > button { width: 100%; } .home-regiao { padding: 20px; } .home-anuncio-foto { height: 210px; } }
