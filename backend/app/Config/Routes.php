@@ -69,3 +69,31 @@ $routes->get(
 $routes->get('meu-perfil', 'PerfilController::index', [
     'filter' => 'auth'
 ]);
+
+
+$routes->post(
+    'anuncios/(:num)/excluir',
+    'AnunciosController::excluir/$1',
+    ['filter' => 'auth']
+);
+
+
+$routes->get(
+    'anuncios/(:num)/editar',
+    'AnunciosController::editar/$1',
+    ['filter' => 'auth']
+);
+
+
+$routes->post(
+    'anuncios/(:num)/atualizar',
+    'AnunciosController::atualizar/$1',
+    ['filter' => 'auth']
+);
+
+$routes->get(
+    'anuncios/(:num)/midias-edicao/(:num)',
+    'AnunciosController::exibirMidiaEdicao/$1/$2',
+    ['filter' => 'auth']
+);
+
