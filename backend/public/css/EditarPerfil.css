@@ -1,0 +1,38 @@
+/* BargainCar — edição de dados pessoais */
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, sans-serif; background: #f3f5f9; color: #202a3b; }
+[hidden] { display: none !important; }
+.editar-perfil-container { max-width: 1000px; margin: 32px auto; padding: 0 20px 60px; }
+.editar-perfil-voltar { display: inline-block; color: #1769d2; font-size: 14px; font-weight: 600; text-decoration: none; margin-bottom: 22px; }
+.editar-perfil-voltar:hover { text-decoration: underline; }
+.editar-perfil-cabecalho { margin-bottom: 25px; }
+.editar-perfil-cabecalho h1 { font-size: 28px; margin: 0 0 10px; }
+.editar-perfil-cabecalho p { margin: 0; color: #6b778a; font-size: 14px; }
+.editar-perfil-card { background: #fff; border: 1px solid #e1e6ef; border-radius: 14px; padding: 28px; margin-bottom: 20px; }
+.editar-perfil-card h2 { margin: 0 0 24px; font-size: 20px; }
+.editar-perfil-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.editar-perfil-largo { grid-column: 1 / -1; }
+.editar-perfil-campo { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.editar-perfil-campo label { font-size: 14px; font-weight: 600; }
+.editar-perfil-campo input { width: 100%; min-height: 44px; border: 1px solid #cfd8e4; border-radius: 8px; background: #fff; color: #202a3b; padding: 11px 13px; font: inherit; font-size: 14px; }
+.editar-perfil-campo input:focus { outline: 2px solid #b9d7ff; border-color: #1769d2; }
+.editar-perfil-campo small { color: #6b778a; font-size: 12px; }
+.campo-cidade { position: relative; }
+.editar-perfil-sugestoes { position: absolute; top: 75px; left: 0; right: 0; z-index: 30; background: #fff; border: 1px solid #cfd8e4; border-radius: 9px; box-shadow: 0 10px 25px rgba(25, 45, 75, .15); max-height: 240px; overflow-y: auto; }
+.editar-perfil-sugestoes button { display: block; width: 100%; border: 0; background: #fff; color: #202a3b; padding: 12px 14px; text-align: left; font: inherit; font-size: 14px; cursor: pointer; }
+.editar-perfil-sugestoes button:hover, .editar-perfil-sugestoes button:focus { background: #eaf2ff; }
+.editar-perfil-sugestoes .editar-perfil-aviso-cidade { padding: 12px 14px; font-size: 13px; color: #6b778a; }
+.editar-perfil-explicacao { color: #6b778a; font-size: 14px; line-height: 1.6; margin: -10px 0 20px; }
+.editar-perfil-senha { max-width: 470px; }
+.editar-perfil-senha-linha { display: flex; gap: 8px; }
+.editar-perfil-senha-linha button { border: 1px solid #1769d2; border-radius: 8px; padding: 0 14px; background: #fff; color: #1769d2; cursor: pointer; }
+.editar-perfil-erros { background: #fff0ee; border: 1px solid #f1c0ba; border-radius: 10px; color: #9b2419; padding: 16px 20px; margin-bottom: 20px; font-size: 14px; }
+.editar-perfil-erros ul { margin: 10px 0 0; padding-left: 22px; }
+.editar-perfil-erros li + li { margin-top: 5px; }
+.editar-perfil-acoes { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.editar-perfil-acoes a, .editar-perfil-acoes button { border-radius: 9px; padding: 13px 20px; font: bold 14px Arial, sans-serif; text-decoration: none; cursor: pointer; }
+.editar-perfil-cancelar { border: 1px solid #cfd8e4; background: #fff; color: #202a3b; }
+#botaoSalvar { border: 1px solid #1769d2; background: #1769d2; color: #fff; }
+#botaoSalvar:hover { background: #0755a8; }
+#botaoSalvar:disabled { opacity: .7; cursor: wait; }
+@media (max-width: 650px) { .editar-perfil-container { margin-top: 22px; } .editar-perfil-card { padding: 20px; } .editar-perfil-grid { grid-template-columns: 1fr; } .editar-perfil-largo { grid-column: auto; } .editar-perfil-acoes { flex-wrap: wrap; } .editar-perfil-acoes a, .editar-perfil-acoes button { flex: 1; text-align: center; } }
