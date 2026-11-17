@@ -182,10 +182,9 @@ $mensagemErro = session()->getFlashdata('erro');
             </div>
 
             <div class="perfil-informacoes-acoes">
-                <span class="perfil-botao-contorno perfil-desabilitado"
-                      aria-label="Edição dos dados pessoais em desenvolvimento">
+                <a href="<?= site_url('editar-perfil') ?>" class="perfil-botao-contorno">
                     Editar meus dados
-                </span>
+                </a>
             </div>
         </section>
 
