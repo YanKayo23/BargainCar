@@ -537,3 +537,94 @@ body {
     margin-bottom: 20px;
     font-size: 14px;
 }
+
+
+/* INFORMAÇÕES PRIVADAS DO PERFIL */
+.perfil-informacoes {
+    margin-top: 15px;
+    padding: 26px 28px;
+    background: #fff;
+    border: 1px solid #e1e6ef;
+    border-radius: 14px;
+}
+
+.perfil-informacoes h2 {
+    margin: 0 0 25px;
+    font-size: 19px;
+    color: #202a3b;
+}
+
+.perfil-informacoes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px 35px;
+}
+
+.perfil-informacao {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.perfil-informacao span {
+    color: #6b778a;
+    font-size: 13px;
+}
+
+.perfil-informacao strong {
+    color: #202a3b;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.perfil-informacoes-acoes {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid #e1e6ef;
+}
+
+@media (max-width: 600px) {
+    .perfil-informacoes { padding: 20px; }
+    .perfil-informacoes-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+
+/* BOTÃO SAIR DA CONTA — cartão superior do perfil */
+.perfil-form-logout {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.perfil-botao-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 16px;
+    border: 1px solid #dc3545;
+    border-radius: 9px;
+    background: #fff;
+    color: #dc3545;
+    font: bold 13px Arial, sans-serif;
+    cursor: pointer;
+    transition: background-color .2s, color .2s;
+}
+
+.perfil-botao-logout:hover,
+.perfil-botao-logout:focus-visible {
+    background: #dc3545;
+    color: #fff;
+}
+
+.perfil-botao-logout svg { flex-shrink: 0; }
+
+@media (max-width: 700px) {
+    .perfil-form-logout,
+    .perfil-botao-logout { width: 100%; }
+}
