@@ -5,10 +5,7 @@
 body {
     margin: 0;
     min-height: 100vh;
-    padding: 32px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 0;
     background: #f5f6fa;
     font-family: Arial, sans-serif;
     color: #222;
@@ -19,6 +16,7 @@ body {
     grid-template-columns: 37% 63%;
     width: 100%;
     max-width: 960px;
+    margin: 32px auto;
     min-height: 630px;
     border-radius: 22px;
     background: white;
@@ -113,7 +111,7 @@ body {
     font-size: 30px;
 }
 
-form {
+.painel-formulario form {
     display: flex;
     flex-direction: column;
     gap: 25px;
@@ -276,7 +274,11 @@ form {
 
 @media (max-width: 750px) {
     body {
-        padding: 16px;
+        padding: 0;
+    }
+    .cadastro-container {
+        margin: 16px auto;
+        width: calc(100% - 32px);
     }
 
     .cadastro-container {
@@ -327,3 +329,15 @@ form {
         font-weight: bold;
     }
 }
+
+/* Foto de perfil no cadastro */
+.campo-foto .opcional { color: #687587; font-size: 13px; font-weight: normal; }
+.foto-seletor { display: flex; align-items: center; gap: 18px; padding: 16px; border: 1px dashed #b9c4d3; border-radius: 12px; background: #f8fbff; }
+.foto-preview { width: 88px; height: 88px; border-radius: 50%; flex-shrink: 0; background: #e8f2ff; color: #0866c9; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 36px; }
+.foto-preview img { width: 100%; height: 100%; object-fit: cover; }
+.foto-preview img[hidden], .foto-erro[hidden] { display: none !important; }
+.foto-acoes { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.campo .foto-acoes input[type="file"] { width: 100%; height: auto; padding: 8px; font-size: 13px; background: white; }
+.foto-acoes small { color: #687587; line-height: 1.4; }
+.foto-acoes .foto-erro { color: #a21d25; }
+@media (max-width: 420px) { .foto-seletor { align-items: flex-start; flex-direction: column; } }
