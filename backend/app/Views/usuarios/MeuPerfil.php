@@ -1,6 +1,10 @@
+
+
 <?php
 
 /**
+ * BargainCar - Meu Perfil
+ *
  * Variáveis recebidas do PerfilController.
  *
  * @var array $usuario
@@ -11,38 +15,84 @@
  * @var array $anunciosPessoais
  */
 
+$usuario = $usuario ?? [];
+$tempoCadastro = $tempoCadastro ?? '';
+$totalAnunciosAtivos = $totalAnunciosAtivos ?? 0;
+$lojaAtiva = $lojaAtiva ?? null;
+$lojasDesativadas = $lojasDesativadas ?? [];
+$anunciosPessoais = $anunciosPessoais ?? [];
+
 $nome = $usuario['nome'] ?? 'Usuário';
 $inicial = mb_strtoupper(mb_substr($nome, 0, 1));
 
 $temLojaAtiva = ! empty($lojaAtiva);
-$totalLojasDesativadas = count($lojasDesativadas ?? []);
+$totalLojasDesativadas = count($lojasDesativadas);
+
+$mensagemSucesso = session()->getFlashdata('sucesso');
+$mensagemErro = session()->getFlashdata('erro');
+
 ?>
+
 
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Meu Perfil | BargainCar</title>
 
-    <link rel="stylesheet"
-        href="<?= base_url('css/MeuPerfil.css') ?>">
+    <link
+        rel="stylesheet"
+        href="<?= base_url('css/MeuPerfil.css') ?>"
+    >
 
-    <script src="<?= base_url('js/MeuPerfil.js') ?>" defer></script>
+    <script
+        src="<?= base_url('js/MeuPerfil.js') ?>"
+        defer
+    ></script>
 </head>
 
 <body>
 
-    <!-- Navbar compartilhada -->
+    <!-- NAVBAR COMPARTILHADA -->
     <?= view('layouts/Navbar') ?>
 
     <main class="perfil-container">
 
         <h1 class="perfil-titulo">Meu perfil</h1>
 
+        <!-- MENSAGENS DE CONFIRMAÇÃO -->
+
+        <?php if ($mensagemSucesso): ?>
+
+            <div
+                class="perfil-mensagem-sucesso"
+                role="status"
+            >
+                <?= esc($mensagemSucesso) ?>
+            </div>
+
+        <?php endif; ?>
+
+        <?php if ($mensagemErro): ?>
+
+            <div
+                class="perfil-mensagem-erro"
+                role="alert"
+            >
+                <?= esc($mensagemErro) ?>
+            </div>
+
+        <?php endif; ?>
+
         <!-- INFORMAÇÕES PESSOAIS -->
+
         <section class="perfil-card">
 
             <div class="perfil-identidade">
@@ -52,41 +102,55 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
                 </div>
 
                 <div class="perfil-identidade-texto">
+
                     <h2><?= esc($nome) ?></h2>
 
                     <p>
                         Na plataforma há
-                        <?= esc($tempoCadastro) ?>
+                        <?= esc($tempoCadastro ?? '') ?>
                         ·
-                        <?= (int) $totalAnunciosAtivos ?>
+                        <?= (int) ($totalAnunciosAtivos ?? 0) ?>
                         anúncios ativos
                     </p>
+
                 </div>
 
             </div>
 
-            <a href="#"
+            <a
+                href="#"
                 class="perfil-botao-contorno"
                 aria-disabled="true"
-                onclick="return false;">
+                onclick="return false;"
+            >
                 Editar meus dados
             </a>
 
         </section>
 
         <div class="perfil-aviso">
+
             <span aria-hidden="true">ⓘ</span>
-            Seu CPF, contato e cidade padrão não aparecem para outras pessoas.
+
+            Seu CPF, contato e cidade padrão não
+            aparecem para outras pessoas.
+
         </div>
 
         <!-- MINHAS LOJAS -->
+
         <section class="perfil-secao">
 
             <div class="perfil-secao-cabecalho">
+
                 <div>
                     <h2>Minhas lojas</h2>
-                    <p>Gerencie seus perfis de empresa.</p>
+
+                    <p>
+                        Gerencie seus perfis de empresa.
+                    </p>
                 </div>
+
             </div>
 
             <?php if ($temLojaAtiva): ?>
@@ -94,20 +158,30 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
                 <div class="perfil-loja-card">
 
                     <div class="perfil-loja-informacoes">
-                        <div class="perfil-loja-icone">L</div>
+
+                        <div class="perfil-loja-icone">
+                            L
+                        </div>
 
                         <div>
+
                             <h3>
                                 <?= esc($lojaAtiva['nome_empresa']) ?>
                             </h3>
 
-                            <span class="perfil-status perfil-status-ativa">
+                            <span
+                                class="perfil-status perfil-status-ativa"
+                            >
                                 Ativa
                             </span>
+
                         </div>
+
                     </div>
 
-                    <span class="perfil-botao-contorno perfil-desabilitado">
+                    <span
+                        class="perfil-botao-contorno perfil-desabilitado"
+                    >
                         Gerenciar
                     </span>
 
@@ -118,6 +192,7 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
                 <div class="perfil-loja-vazia">
 
                     <div>
+
                         <h3>
                             <?= $totalLojasDesativadas > 0
                                 ? 'Nenhuma loja ativa'
@@ -125,13 +200,16 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
                         </h3>
 
                         <p>
-                            Crie uma loja para anunciar seus veículos
-                            como empresa.
+                            Crie uma loja para anunciar seus
+                            veículos como empresa.
                         </p>
+
                     </div>
 
-                    <a href="<?= site_url('criar-loja') ?>"
-                        class="perfil-botao-azul">
+                    <a
+                        href="<?= site_url('criar-loja') ?>"
+                        class="perfil-botao-azul"
+                    >
                         <?= $totalLojasDesativadas > 0
                             ? 'Criar nova loja'
                             : 'Criar minha loja' ?>
@@ -140,6 +218,8 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
                 </div>
 
             <?php endif; ?>
+
+            <!-- LOJAS DESATIVADAS -->
 
             <?php if ($totalLojasDesativadas > 0): ?>
 
@@ -157,15 +237,18 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
                             <div class="perfil-loja-desativada">
 
                                 <div>
+
                                     <h3>
                                         <?= esc($loja['nome_empresa']) ?>
                                     </h3>
 
-                                    <span class="perfil-status perfil-status-desativada">
+                                    <span
+                                        class="perfil-status perfil-status-desativada"
+                                    >
                                         Desativada
                                     </span>
-                                </div>
 
+                                </div>
 
                                 <?php if (! $temLojaAtiva): ?>
 
@@ -173,13 +256,15 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
                                         method="post"
                                         class="perfil-form-reativar"
                                         data-nome-loja="<?= esc($loja['nome_empresa'], 'attr') ?>"
-                                        action="<?= site_url('lojas/' . $loja['id'] . '/reativar') ?>">
+                                        action="<?= site_url('lojas/' . $loja['id'] . '/reativar') ?>"
+                                    >
 
                                         <?= csrf_field() ?>
 
                                         <button
                                             type="submit"
-                                            class="perfil-botao-contorno">
+                                            class="perfil-botao-contorno"
+                                        >
                                             Reativar
                                         </button>
 
@@ -187,21 +272,22 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
 
                                 <?php endif; ?>
 
-
                             </div>
 
                         <?php endforeach; ?>
 
                         <p class="perfil-historico-aviso">
-                            Ao reativar uma loja, os anúncios antigos
-                            permanecem arquivados.
+                            Ao reativar uma loja, os anúncios
+                            antigos permanecem arquivados.
                         </p>
 
                         <?php if ($temLojaAtiva): ?>
+
                             <p class="perfil-historico-aviso">
-                                Para reativar outra loja, não pode
-                                existir uma loja ativa.
+                                Para reativar outra loja,
+                                não pode existir uma loja ativa.
                             </p>
+
                         <?php endif; ?>
 
                     </div>
@@ -213,17 +299,25 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
         </section>
 
         <!-- MEUS ANÚNCIOS PESSOAIS -->
+
         <section class="perfil-secao">
 
             <div class="perfil-secao-cabecalho">
 
                 <div>
+
                     <h2>Meus anúncios</h2>
-                    <p>Anúncios publicados como pessoa física.</p>
+
+                    <p>
+                        Anúncios publicados como pessoa física.
+                    </p>
+
                 </div>
 
-                <a href="<?= site_url('criar-anuncio') ?>"
-                    class="perfil-botao-azul">
+                <a
+                    href="<?= site_url('criar-anuncio') ?>"
+                    class="perfil-botao-azul"
+                >
                     + Novo anúncio
                 </a>
 
@@ -232,12 +326,16 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
             <?php if (empty($anunciosPessoais)): ?>
 
                 <div class="perfil-anuncios-vazio">
-                    <h3>Você ainda não possui anúncios pessoais.</h3>
+
+                    <h3>
+                        Você ainda não possui anúncios pessoais.
+                    </h3>
 
                     <p>
-                        Publique seu primeiro veículo para começar
-                        a anunciar no BargainCar.
+                        Publique seu primeiro veículo para
+                        começar a anunciar no BargainCar.
                     </p>
+
                 </div>
 
             <?php else: ?>
@@ -247,12 +345,13 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
                     <?php foreach ($anunciosPessoais as $anuncio): ?>
 
                         <?php
+
                         $status = $anuncio['status'] ?? '';
 
                         if (
                             $status === 'ativo'
                             && ! empty($anuncio['data_expiracao'])
-                            && strtotime($anuncio['data_expiracao']) < time()
+                            && strtotime($anuncio['data_expiracao']) <= time()
                         ) {
                             $status = 'expirado';
                         }
@@ -265,10 +364,12 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
 
                         $statusTexto = $rotulos[$status]
                             ?? ucfirst($status);
+
                         ?>
 
                         <article class="perfil-anuncio-card">
 
+                            <!-- IMAGEM DO ANÚNCIO -->
 
                             <div class="perfil-anuncio-imagem">
 
@@ -276,11 +377,14 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
 
                                     <img
                                         src="<?= site_url(
-                                                    'anuncios/' . $anuncio['id']
-                                                        . '/midias/' . $anuncio['primeira_foto']['id']
-                                                ) ?>"
+                                            'anuncios/'
+                                            . $anuncio['id']
+                                            . '/midias/'
+                                            . $anuncio['primeira_foto']['id']
+                                        ) ?>"
                                         alt="Foto de <?= esc($anuncio['titulo'], 'attr') ?>"
-                                        loading="lazy">
+                                        loading="lazy"
+                                    >
 
                                 <?php else: ?>
 
@@ -290,25 +394,33 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
 
                             </div>
 
+                            <!-- DADOS DO ANÚNCIO -->
 
                             <div class="perfil-anuncio-conteudo">
 
                                 <div class="perfil-anuncio-topo">
+
                                     <h3>
                                         <?= esc($anuncio['titulo']) ?>
                                     </h3>
 
-                                    <span class="perfil-status perfil-status-<?= esc($status, 'attr') ?>">
+                                    <span
+                                        class="perfil-status perfil-status-<?= esc($status, 'attr') ?>"
+                                    >
                                         <?= esc($statusTexto) ?>
                                     </span>
+
                                 </div>
 
                                 <p class="perfil-anuncio-detalhes">
+
                                     Ano:
                                     <?= esc($anuncio['ano'] ?? 'Não informado') ?>
+
                                 </p>
 
                                 <strong class="perfil-anuncio-preco">
+
                                     R$
                                     <?= number_format(
                                         (float) ($anuncio['preco'] ?? 0),
@@ -316,25 +428,62 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
                                         ',',
                                         '.'
                                     ) ?>
+
                                 </strong>
+
+                                <!-- AÇÕES DO ANÚNCIO -->
 
                                 <div class="perfil-anuncio-acoes">
 
-                                    <a href="<?= site_url(
-                                                    'anuncios/' . $anuncio['id']
-                                                ) ?>">
-                                        Visualizar
+                                    <?php if ($status === 'ativo'): ?>
+
+                                        <a
+                                            href="<?= site_url('anuncios/' . $anuncio['id']) ?>"
+                                        >
+                                            Visualizar
+                                        </a>
+
+                                    <?php endif; ?>
+
+                                    <a
+                                        href="<?= site_url(
+                                            'anuncios/'
+                                            . $anuncio['id']
+                                            . '/editar'
+                                        ) ?>"
+                                    >
+                                        Editar
                                     </a>
 
-                                    <?php if ($status === 'ativo'): ?>
-                                        <span>Editar</span>
-                                        <span>Excluir</span>
-                                    <?php elseif ($status === 'pendente'): ?>
+                                    <?php if ($status === 'pendente'): ?>
+
                                         <span>Renovar</span>
-                                        <span>Excluir</span>
-                                    <?php else: ?>
-                                        <span>Excluir</span>
+
                                     <?php endif; ?>
+
+                                    <!-- EXCLUSÃO LÓGICA -->
+
+                                    <form
+                                        method="post"
+                                        class="perfil-form-excluir"
+                                        data-titulo-anuncio="<?= esc($anuncio['titulo'], 'attr') ?>"
+                                        action="<?= site_url(
+                                            'anuncios/'
+                                            . $anuncio['id']
+                                            . '/excluir'
+                                        ) ?>"
+                                    >
+
+                                        <?= csrf_field() ?>
+
+                                        <button
+                                            type="submit"
+                                            class="perfil-acao-excluir"
+                                        >
+                                            Excluir
+                                        </button>
+
+                                    </form>
 
                                 </div>
 
@@ -351,6 +500,49 @@ $totalLojasDesativadas = count($lojasDesativadas ?? []);
         </section>
 
     </main>
+
+    <!-- MODAL DE CONFIRMAÇÃO DA EXCLUSÃO -->
+
+    <dialog
+        id="modal-excluir-anuncio"
+        class="perfil-modal"
+        aria-labelledby="modal-excluir-titulo"
+        aria-describedby="modal-excluir-texto"
+    >
+
+        <h2 id="modal-excluir-titulo">
+            Excluir anúncio?
+        </h2>
+
+        <p id="modal-excluir-texto">
+            Tem certeza de que deseja excluir este anúncio?
+        </p>
+
+        <p class="perfil-modal-aviso">
+            O anúncio deixará de aparecer publicamente.
+        </p>
+
+        <div class="perfil-modal-acoes">
+
+            <button
+                type="button"
+                id="modal-excluir-cancelar"
+                class="perfil-modal-cancelar"
+            >
+                Cancelar
+            </button>
+
+            <button
+                type="button"
+                id="modal-excluir-confirmar"
+                class="perfil-modal-confirmar"
+            >
+                Sim, excluir
+            </button>
+
+        </div>
+
+    </dialog>
 
 </body>
 
