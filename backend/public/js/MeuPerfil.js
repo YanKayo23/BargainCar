@@ -31,30 +31,66 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
+
     // ======================================
     // 2. CONFIRMAÇÃO DE EXCLUSÃO DE ANÚNCIO
     // ======================================
 
-    const formulariosExclusao = document.querySelectorAll(
-        '.perfil-form-excluir'
+    const modalExcluir = document.getElementById(
+        'modal-excluir-anuncio'
     );
 
-    formulariosExclusao.forEach((formulario) => {
+    const textoExcluir = document.getElementById(
+        'modal-excluir-texto'
+    );
 
-        formulario.addEventListener('submit', (evento) => {
+    const botaoCancelar = document.getElementById(
+        'modal-excluir-cancelar'
+    );
 
-            const titulo = formulario.dataset.titulo || 'este anúncio';
+    const botaoConfirmar = document.getElementById(
+        'modal-excluir-confirmar'
+    );
 
-            const confirmado = confirm(
-                `Deseja excluir o anúncio "${titulo}"?\n\n` +
-                'Ele deixará de aparecer publicamente.'
-            );
+    let formularioSelecionado = null;
 
-            if (!confirmado) {
-                evento.preventDefault();
+    if (modalExcluir && textoExcluir && botaoCancelar && botaoConfirmar) {
+
+        document.querySelectorAll('.perfil-form-excluir')
+            .forEach((formulario) => {
+
+                formulario.addEventListener('submit', (evento) => {
+                    evento.preventDefault();
+
+                    formularioSelecionado = formulario;
+
+                    const titulo =
+                        formulario.dataset.tituloAnuncio || 'este anúncio';
+
+                    textoExcluir.textContent =
+                        `Tem certeza de que deseja excluir o anúncio "${titulo}"?`;
+
+                    modalExcluir.showModal();
+                });
+            });
+
+        botaoCancelar.addEventListener('click', () => {
+            modalExcluir.close();
+        });
+
+        botaoConfirmar.addEventListener('click', () => {
+            if (formularioSelecionado) {
+                botaoConfirmar.disabled = true;
+                formularioSelecionado.submit();
             }
         });
-    });
+
+        modalExcluir.addEventListener('close', () => {
+            formularioSelecionado = null;
+            botaoConfirmar.disabled = false;
+        });
+    }
+
 
 
     // ======================================
