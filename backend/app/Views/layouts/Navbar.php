@@ -72,6 +72,19 @@ $temLojaAtiva = ! empty($lojaAtiva);
             </button>
         </form>
 
+        <!-- Acesso ao perfil ou à autenticação -->
+        <?php if ($logado): ?>
+            <a href="<?= site_url('meu-perfil') ?>" class="bc-navbar-meu-perfil" title="Acessar meu perfil">
+                <span aria-hidden="true">♙</span>
+                Meu Perfil
+            </a>
+        <?php else: ?>
+            <a href="<?= site_url('login') ?>" class="bc-navbar-meu-perfil" title="Entrar ou criar uma conta">
+                <span aria-hidden="true">♙</span>
+                Entrar / Cadastrar
+            </a>
+        <?php endif; ?>
+
         <!-- Favoritos -->
         <a
             href="<?= site_url('favoritos') ?>"
