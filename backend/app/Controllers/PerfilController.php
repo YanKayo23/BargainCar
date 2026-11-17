@@ -6,6 +6,7 @@ use App\Models\UsuarioModel;
 use App\Models\LojaModel;
 use App\Models\AnuncioModel;
 use CodeIgniter\HTTP\RedirectResponse;
+use App\Models\MidiaModel;
 
 class PerfilController extends BaseController
 {
@@ -50,6 +51,25 @@ class PerfilController extends BaseController
             ->where('tipo_anunciante', 'pessoa')
             ->orderBy('id', 'DESC')
             ->findAll();
+
+
+        // Busca a primeira foto de cada anúncio pessoal.
+        $midiaModel = new MidiaModel();
+
+        foreach ($anunciosPessoais as &$anuncio) {
+            $primeiraFoto = $midiaModel
+                ->where('anuncio_id', $anuncio['id'])
+                ->where('tipo', 'foto')
+                ->orderBy('ordem', 'ASC')
+                ->orderBy('id', 'ASC')
+                ->first();
+
+            $anuncio['primeira_foto'] = $primeiraFoto;
+        }
+
+        // Encerra a referência utilizada no foreach.
+        unset($anuncio);
+
 
         // Conta anúncios pessoais ativos.
         $totalAnunciosAtivos = 0;
