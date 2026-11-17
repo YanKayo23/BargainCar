@@ -36,6 +36,7 @@ CREATE TABLE cidades (
 CREATE TABLE usuarios (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
+    foto_perfil VARCHAR(255) NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
     cpf CHAR(11) NOT NULL UNIQUE,
     cidade_id INT UNSIGNED NOT NULL,
@@ -56,6 +57,8 @@ CREATE TABLE lojas (
     cidade_id INT UNSIGNED NOT NULL,
     contato VARCHAR(30) NOT NULL,
     nome_empresa VARCHAR(150) NOT NULL,
+    foto_perfil VARCHAR(255) NULL,
+    foto_capa VARCHAR(255) NULL,
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     cnpj CHAR(14) UNIQUE,
 
