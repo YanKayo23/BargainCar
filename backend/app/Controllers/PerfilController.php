@@ -20,6 +20,8 @@ class PerfilController extends BaseController
             return redirect()->to('/login');
         }
 
+        session()->set('modo_perfil', 'pessoa');
+
         // Carrega os models.
         $usuarioModel = new UsuarioModel();
         $lojaModel = new LojaModel();
