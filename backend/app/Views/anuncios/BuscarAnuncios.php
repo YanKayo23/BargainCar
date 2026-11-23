@@ -3,7 +3,9 @@ $termo = $termo ?? '';
 $cidade = $cidade ?? null;
 $erro = $erro ?? null;
 $anuncios = $anuncios ?? [];
-$raioKm = $raioKm ?? 100;
+$raioKm = (int) ($raioKm ?? 100);
+$cidadeIdFiltro = (string) ($cidadeIdFiltro ?? '');
+$proximaDistancia = $proximaDistancia ?? null;
 ?>
 
 <!DOCTYPE html>
@@ -69,17 +71,23 @@ $raioKm = $raioKm ?? 100;
 
         <?php elseif (empty($anuncios)): ?>
 
-            <div class="busca-mensagem">
-                <h2>Nenhum veículo encontrado</h2>
-                <p>
-                    Não encontramos anúncios que correspondam
-                    à sua pesquisa dentro do raio de
-                    <?= esc((string) $raioKm) ?> km.
-                </p>
-                <p>
-                    Experimente pesquisar outro veículo
-                    ou escolher outra cidade.
-                </p>
+            <div class="busca-mensagem" role="status">
+                <h2>Nenhum anúncio encontrado</h2>
+
+                <?php if ($proximaDistancia !== null): ?>
+                    <p>Nenhum anúncio encontrado nesse raio. Deseja ampliar a distância?</p>
+                    <form class="busca-ampliar-form" method="get" action="<?= site_url('buscar') ?>">
+                        <input type="hidden" name="termo" value="<?= esc((string) $termo, 'attr') ?>">
+                        <input type="hidden" name="cidade_id" value="<?= esc($cidadeIdFiltro, 'attr') ?>">
+                        <input type="hidden" name="distancia" value="<?= (int) $proximaDistancia ?>">
+                        <button class="busca-ampliar-botao" type="submit">
+                            Ampliar para <?= (int) $proximaDistancia ?> km
+                        </button>
+                    </form>
+                    <p class="busca-mensagem-apoio">A cidade e o título da pesquisa serão mantidos.</p>
+                <?php else: ?>
+                    <p>Nenhum anúncio encontrado em até 100 km. Tente outra cidade ou outro termo de pesquisa.</p>
+                <?php endif; ?>
             </div>
 
         <?php else: ?>
