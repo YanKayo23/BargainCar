@@ -1,14 +1,27 @@
 <?php
-// Valores padrão para evitar erro caso o Controller não envie os totais.
+/**
+ * Dados enviados por PerfilLojaController::index().
+ * As anotações permitem que o Intelephense reconheça as variáveis da View.
+ * @var array<string, mixed> $loja
+ * @var array<string, mixed>|null $cidade
+ * @var array<int, array<string, mixed>> $anuncios
+ * @var array<string, int> $totais
+ */
+$loja = isset($loja) && is_array($loja) ? $loja : [];
+$cidade = isset($cidade) && is_array($cidade) ? $cidade : null;
+$anuncios = isset($anuncios) && is_array($anuncios) ? $anuncios : [];
 $totais = array_merge(
     ['ativos' => 0, 'pendentes' => 0, 'expirados' => 0, 'arquivados' => 0],
     isset($totais) && is_array($totais) ? $totais : []
 );
-$nome = (string) $loja['nome_empresa'];
-$cidadeTexto = $cidade ? $cidade['nome'] . ' - ' . $cidade['uf'] : 'Cidade não informada';
+$nome = (string) ($loja['nome_empresa'] ?? 'Loja');
+$cidadeTexto = $cidade ? ($cidade['nome'] ?? '') . ' - ' . ($cidade['uf'] ?? '') : 'Cidade não informada';
 $inicial = mb_strtoupper(mb_substr($nome, 0, 1));
-$cadastro = !empty($loja['data_cadastro']) ? new DateTimeImmutable($loja['data_cadastro']) : null;
+$cadastro = !empty($loja['data_cadastro']) ? new DateTimeImmutable((string) $loja['data_cadastro']) : null;
 $tempo = $cadastro ? $cadastro->diff(new DateTimeImmutable())->days . ' dias' : 'tempo não informado';
+$mensagemSucesso = session()->getFlashdata('sucesso');
+$mensagemErro = session()->getFlashdata('erro');
+$erros = session()->getFlashdata('erros') ?? [];
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -23,9 +36,8 @@ $tempo = $cadastro ? $cadastro->diff(new DateTimeImmutable())->days . ' dias' : 
 <?= view('layouts/Navbar') ?>
 <main class="pl-container">
   <a href="<?= site_url('/') ?>" class="pl-voltar">← Voltar à Home</a>
-  <?php if (session()->getFlashdata('sucesso')): ?><div class="pl-aviso pl-ok" role="status"><?= esc(session()->getFlashdata('sucesso')) ?></div><?php endif; ?>
-  <?php if (session()->getFlashdata('erro')): ?><div class="pl-aviso pl-erro" role="alert"><?= esc(session()->getFlashdata('erro')) ?></div><?php endif; ?>
-  <?php $erros = session()->getFlashdata('erros') ?? []; ?>
+  <?php if ($mensagemSucesso): ?><div class="pl-aviso pl-ok" role="status"><?= esc($mensagemSucesso) ?></div><?php endif; ?>
+  <?php if ($mensagemErro): ?><div class="pl-aviso pl-erro" role="alert"><?= esc($mensagemErro) ?></div><?php endif; ?>
   <?php if ($erros): ?><div class="pl-aviso pl-erro" role="alert"><?= esc(implode(' ', array_values($erros))) ?></div><?php endif; ?>
 
   <section class="pl-identidade" aria-label="Identidade da loja">
@@ -42,7 +54,7 @@ $tempo = $cadastro ? $cadastro->diff(new DateTimeImmutable())->days . ' dias' : 
       </div>
       <div class="pl-dados"><h1><?= esc($nome) ?></h1><p><?= esc($cidadeTexto) ?> · Na plataforma há <?= esc($tempo) ?></p>
       </div>
-      <span class="pl-btn pl-contorno pl-editar-futuro" title="A edição será criada em uma página separada">Editar loja (em breve)</span>
+      <a href="<?= site_url('perfil-loja/editar') ?>" class="pl-btn pl-contorno">Editar dados da loja</a>
     </div>
   </section>
 
@@ -52,7 +64,7 @@ $tempo = $cadastro ? $cadastro->diff(new DateTimeImmutable())->days . ' dias' : 
       <div><span>Nome da empresa</span><strong><?= esc($nome) ?></strong></div>
       <div><span>Cidade</span><strong><?= esc($cidadeTexto) ?></strong></div>
       <div><span>CNPJ</span><strong><?= !empty($loja['cnpj']) ? esc(preg_replace('/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/', '$1.$2.$3/$4-$5', (string) $loja['cnpj'])) : 'Não informado' ?></strong></div>
-      <div><span>Contato</span><strong><?= esc($loja['contato'] ?: 'Não informado') ?></strong></div>
+      <div><span>Contato</span><strong><?= esc($loja['contato'] ?? 'Não informado') ?></strong></div>
       <div><span>Data de cadastro</span><strong><?= $cadastro ? esc($cadastro->format('d/m/Y')) : 'Não informada' ?></strong></div>
       <div><span>Identificador da loja</span><strong>#<?= (int) $loja['id'] ?></strong></div>
     </div>
