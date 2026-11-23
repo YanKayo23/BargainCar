@@ -106,40 +106,9 @@ $situacao = $situacoes[$situacaoOriginal]
 
 <body>
 
-    <header class="topo">
+    <?= view('layouts/Navbar') ?>
 
-        <div class="topo-conteudo">
-
-            <a href="<?= site_url('/') ?>" class="marca">
-                <span class="marca-icone">B</span>
-                <span>BargainCar</span>
-            </a>
-
-            <nav
-                class="navegacao"
-                aria-label="Navegação principal">
-
-                <a href="<?= site_url('/') ?>">Buscar</a>
-
-                <span class="nav-futuro">Favoritos</span>
-
-                <span class="nav-futuro">Meu perfil</span>
-
-                <span class="tipo-conta">Pessoa</span>
-
-                <a
-                    href="<?= site_url('criar-anuncio') ?>"
-                    class="botao-anunciar">
-                    + Anunciar
-                </a>
-
-            </nav>
-
-        </div>
-
-    </header>
-
-    <main class="container">
+    <main class="container pagina-anuncio">
 
         <a href="<?= site_url('/') ?>" class="voltar">
             ← Voltar
