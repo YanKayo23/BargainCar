@@ -11,7 +11,7 @@ use App\Models\MidiaModel;
 
 class BuscaController extends BaseController
 {
-    private const RAIO_KM = 100;
+    private const DISTANCIAS_PERMITIDAS = [10, 25, 50, 75, 100];
 
     public function index(): string|RedirectResponse
     {
@@ -23,6 +23,16 @@ class BuscaController extends BaseController
         $cidadeId = trim(
             (string) $this->request->getGet('cidade_id')
         );
+
+        // O valor deve ser um dos cinco raios oficiais.
+        // Ausência do parâmetro significa 100 km.
+        $distanciaRecebida = $this->request->getGet('distancia');
+        $distanciaTexto = $distanciaRecebida === null ? '100' : $distanciaRecebida;
+        $distanciaValida = is_string($distanciaTexto)
+            && ctype_digit($distanciaTexto)
+            && in_array((int) $distanciaTexto, self::DISTANCIAS_PERMITIDAS, true);
+        $raioKm = $distanciaValida ? (int) $distanciaTexto : 100;
+
 
         // Evita pesquisas excessivamente longas.
         if (mb_strlen($termo) > 100) {
@@ -104,14 +114,14 @@ class BuscaController extends BaseController
 
             $codigosCidades = [];
 
-            // 4. Mantém apenas cidades até 100 km.
+            // 4. Mantém apenas cidades dentro do raio escolhido.
             foreach ($resultadoCidades as $cidade) {
 
                 $distancia = (float) $cidade['distancia_km'];
 
                 if ($distanciaService->dentroDoRaio(
                     $distancia,
-                    self::RAIO_KM
+                    $raioKm
                 )) {
 
                     $codigo = (int) $cidade['codigo_ibge'];
@@ -239,7 +249,21 @@ class BuscaController extends BaseController
             'cidade' => $cidadeReferencia,
             'erro' => $erro,
             'anuncios' => $anuncios,
-            'raioKm' => self::RAIO_KM,
+            'raioKm' => $raioKm,
+            'cidadeIdFiltro' => $cidadeId,
+            'proximaDistancia' => $this->proximaDistancia($raioKm),
         ]);
     }
+
+    private function proximaDistancia(int $raioAtual): ?int
+    {
+        foreach (self::DISTANCIAS_PERMITIDAS as $distancia) {
+            if ($distancia > $raioAtual) {
+                return $distancia;
+            }
+        }
+
+        return null;
+    }
+
 }
