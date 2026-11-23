@@ -50,7 +50,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 - RF08: O sistema deve notificar o vendedor por e-mail quando o anúncio estiver a 3 dias de expirar, perguntando se o veículo ainda está à venda.
 - RF09: O sistema deve renovar o anúncio por mais 30 dias caso o vendedor confirme que o veículo ainda está à venda, ou expirá-lo automaticamente caso não haja resposta.
 - RF10: O sistema deve exibir automaticamente anúncios de cidades próximas à cidade padrão do usuário.
-- RF11: O sistema deve permitir que o usuário busque manualmente por anúncios em regiões que deseja.
+- RF11: O sistema deve permitir que o usuário busque anúncios por título, cidade e distância máxima em relação à cidade padrão ou à cidade pesquisada.
 - RF12: O sistema deve permitir que o usuário edite e exclua seus próprios anúncios.
 - RF13: O sistema deve permitir que o usuário crie um perfil de Loja (empresa), com contato, localização padrão, nome da empresa e CNPJ opcional.
 - RF14: O sistema deve permitir que o dono do anúncio exclua perguntas feitas no seu anúncio (ex: perguntas ofensivas), e que o autor exclua as próprias perguntas.
@@ -163,29 +163,33 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 
 ### Caso de Uso: Buscar Anúncios
 **Ator:** Usuário autenticado ou visitante
-**Pré-condição:** Nenhuma; a busca é pública. Para visitantes sem cidade de referência definida, solicitar a seleção de uma cidade.
+**Pré-condição:** Nenhuma; a busca é pública. Visitantes sem cidade de referência definida deverão selecionar uma cidade.
 
 **Interface da barra de pesquisa:**
 - Campo de texto "O que você procura?", para pesquisar pelo nome/título do anúncio.
-- Campo "Cidade", com sugestões de municípios identificados por nome e UF e seleção pelo código IBGE (`cidade_id`).
-- Botão azul destacado "Buscar", com ícone de lupa, para confirmar a pesquisa. A pesquisa não é executada apenas por preencher um dos campos.
-- Os campos são independentes: o usuário pode preencher apenas o termo, apenas a cidade ou ambos.
+- Campo "Cidade", com sugestões de municípios por nome e UF, selecionados pelo código IBGE (`cidade_id`). Opcional quando já existe cidade padrão disponível.
+- **Novo campo "Distância"**, para selecionar o raio máximo de busca a partir da cidade de referência. Valor inicial: **100 km**. Opções predefinidas e únicas: **10, 25, 50, 75 e 100 km**; não é permitido digitar valores personalizados.
+- Botão azul destacado "Buscar", com ícone de lupa. A busca somente é executada ao confirmar pelo botão.
+- Os filtros de título e cidade são opcionais e independentes; a distância sempre possui um valor selecionado.
 
 **Fluxo principal:**
-1. O usuário informa opcionalmente um termo de pesquisa e/ou seleciona uma cidade.
-2. O usuário confirma a operação pelo botão "Buscar".
-3. O sistema determina a cidade de referência: cidade selecionada, quando houver; caso contrário, cidade padrão do usuário autenticado. Se um visitante não tiver cidade de referência, o sistema solicita que selecione uma.
-4. O sistema pesquisa anúncios na cidade de referência e nas cidades a até 100 km dela, com distância euclidiana local aproximada entre os centros geográficos das cidades.
-5. Se houver termo informado, o sistema também filtra os anúncios por correspondência com o título pesquisado.
-6. O sistema apresenta os anúncios disponíveis que atendem aos filtros.
+1. O usuário informa opcionalmente o título e/ou seleciona uma cidade, podendo alterar a distância máxima.
+2. O usuário clica em "Buscar".
+3. O sistema determina a cidade de referência: cidade selecionada, se houver; caso contrário, cidade padrão do usuário autenticado. Visitantes sem referência devem selecionar uma cidade.
+4. O sistema calcula a distância euclidiana local aproximada entre os centros geográficos dos municípios e inclui somente anúncios localizados dentro do raio escolhido.
+5. Se houver título informado, filtra também pelo título.
+6. Exibe os anúncios disponíveis que atendem a todos os filtros.
+
+**Fluxo alternativo — nenhum anúncio encontrado:** Se a busca não retornar anúncios, o sistema exibirá a mensagem **"Nenhum anúncio encontrado nesse raio. Deseja ampliar a distância?"** e oferecerá um botão para selecionar a próxima distância predefinida maior (10 → 25 → 50 → 75 → 100 km). Ao confirmar, o sistema repetirá a busca mantendo a cidade e o termo informados. Se o raio já for de 100 km, não oferecerá ampliação e exibirá **"Nenhum anúncio encontrado em até 100 km. Tente outra cidade ou outro termo de pesquisa."** O sistema nunca ampliará o raio automaticamente sem a ação do usuário.
 
 **Combinações de filtros:**
-- **Somente termo:** busca anúncios com título correspondente, na cidade padrão do usuário e em municípios a até 100 km. Para visitante sem cidade definida, solicita uma cidade de referência.
-- **Somente cidade:** mostra anúncios disponíveis na cidade selecionada e em municípios a até 100 km, sem restringir o título.
-- **Termo e cidade:** combina o filtro de título com a cidade selecionada e os municípios a até 100 km.
-- **Nenhum campo:** mostra anúncios disponíveis na região padrão do usuário, com raio de 100 km; para visitante sem cidade definida, solicita uma cidade.
+- **Somente título:** busca pelo título na região da cidade padrão, respeitando a distância selecionada.
+- **Somente cidade:** busca anúncios próximos à cidade escolhida, respeitando a distância selecionada.
+- **Título e cidade:** combina os dois filtros e a distância selecionada.
+- **Somente distância alterada:** utiliza a cidade padrão como centro da busca, se disponível.
+- **Nenhum filtro alterado:** utiliza a cidade padrão e a distância inicial de 100 km; visitantes sem cidade de referência devem selecioná-la.
 
-**Regras complementares:** O raio é fixo em 100 km, não configurável pelo usuário. O cálculo representa uma aproximação em linha reta, não distância por estrada. A busca é pública, mas não exibe anúncios expirados ou excluídos logicamente; anúncios `ativo` e `pendente` podem aparecer.
+**Regras complementares:** O raio padrão é 100 km e pode ser reduzido pelo usuário somente às opções predefinidas, sem ultrapassar 100 km. A distância é uma aproximação em linha reta, não rodoviária. A busca pública exibe somente anúncios `ativo` e `pendente`, excluindo os expirados e os removidos logicamente. As opções definitivas são 10, 25, 50, 75 e 100 km, sendo 100 km o limite máximo.
 
 ### Caso de Uso: Selecionar Cidade
 **Ator:** Usuário
@@ -422,7 +426,7 @@ As rotas são declaradas em `app/Config/Routes.php` e direcionadas a Controllers
 | Autenticação | RNF01 | Login com CPF e senha, em tela separada do cadastro; o servidor estabelece uma sessão autenticada, verificada por Filters nas requisições seguintes. Senhas armazenadas com hash (RNF07). |
 | Proteção contra tentativas de login | RF21, RNF10 | Contabilizar no servidor as tentativas incorretas consecutivas por conta/CPF normalizado, aplicando bloqueio de 60 segundos na quinta falha. Recusar tentativas durante o bloqueio antes de verificar a senha; após o prazo, permitir novas tentativas com contador zerado. Sucesso anterior ao limite zera o contador. Adotar também proteção complementar contra abuso por origem/IP, sem revelar se o CPF existe. |
 | Recuperação de senha | RF16 | Reaproveita o SMTP já usado para a expiração de anúncios (RF08): envia um link de redefinição com token temporário. |
-| Proximidade entre cidades | RF10, RF11 | Tabela `Cidade` com latitude e longitude. A distância é estimada no MySQL pela distância euclidiana em um plano local, convertendo diferenças angulares em quilômetros e corrigindo a longitude pelo cosseno da latitude média. O raio é fixo em 100 km, sem API externa. Trata-se de distância aproximada em linha reta, não rodoviária. |
+| Proximidade entre cidades | RF10, RF11 | Tabela `Cidade` com latitude e longitude. A distância é estimada no MySQL pela distância euclidiana em um plano local, convertendo diferenças angulares em quilômetros e corrigindo a longitude pelo cosseno da latitude média. O raio padrão é 100 km e pode ser ajustado pelo usuário, sem API externa. Trata-se de distância aproximada em linha reta, não rodoviária. |
 | Padronização das cidades | RF01, RF05 | O usuário escolhe a cidade em uma lista (base de municípios importada para `Cidade`, conforme a nota na Modelagem de Dados), em vez de digitar texto livre. |
 | Fotos e vídeos | RF04, RNF03, RNF06 | Arquivos guardados no servidor, com o caminho na tabela `Mídia`. Mínimo de 3 e máximo de 5 fotos por anúncio; vídeo opcional (até 1). Imagens comprimidas no upload; limite de tamanho por arquivo. O back-end precisa aceitar uploads multipart e impor o limite de tamanho por arquivo. |
 | Expiração e renovação | RF08, RF09 | Tarefa agendada (cron) que roda todo dia e executa um comando CLI do CodeIgniter 4: marca como pendente os anúncios a 3 dias de expirar, notifica o vendedor e expira os vencidos. |
@@ -440,7 +444,7 @@ Sejam `lat1`, `lon1` as coordenadas da cidade de referência e `lat2`, `lon2` as
 - `delta_x = 111.32 * COS(lat_media) * (lon2 - lon1)` km;
 - `distancia_km = SQRT(POW(delta_x, 2) + POW(delta_y, 2))`.
 
-A cidade será considerada próxima quando `distancia_km <= 100`. O cálculo será executado no MySQL com parâmetros vinculados pelo CodeIgniter 4. A distância é aproximada e **não representa o percurso por estradas**; municípios próximos do limite podem apresentar pequena divergência em relação à distância geodésica.
+A cidade será considerada próxima quando `distancia_km <= raio_km`, sendo `raio_km` a distância escolhida pelo usuário (100 km por padrão). O cálculo será executado no MySQL com parâmetros vinculados pelo CodeIgniter 4. A distância é aproximada e **não representa o percurso por estradas**; municípios próximos do limite podem apresentar pequena divergência em relação à distância geodésica.
 
 Exemplo de expressão SQL (os valores de referência devem ser vinculados como parâmetros, não concatenados):
 
@@ -452,11 +456,11 @@ SELECT codigo_ibge, nome, uf,
                * (longitude - ?), 2)
        ) AS distancia_km
 FROM cidades
-HAVING distancia_km <= 100
+HAVING distancia_km <= ?
 ORDER BY distancia_km ASC;
 ```
 
-Na execução, os parâmetros são, nesta ordem: latitude de referência, latitude de referência e longitude de referência. O nome real da tabela deve corresponder à Migration implementada.
+Na execução, os parâmetros são, nesta ordem: latitude de referência, latitude de referência, longitude de referência e raio em quilômetros (validado no servidor). O nome real da tabela deve corresponder à Migration implementada.
 
 ### Dependências e recursos do PHP
 
@@ -491,7 +495,7 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 | DELETE | `/lojas/{id}` 🔒 | Exclui logicamente a loja e oculta seus anúncios |
 | POST | `/lojas/{id}/reativar` 🔒 | Reativa loja antiga, desde que o usuário não tenha outra loja ativa |
 | POST | `/anuncios` 🔒 | Cria um anúncio |
-| GET | `/anuncios?titulo=gol&cidade_id=7` | Busca anúncios ativos e pendentes por título e cidade (e cidades num raio de 100 km). Sem `cidade_id`, usa a cidade padrão do usuário autenticado; para visitantes, solicitar uma cidade de referência |
+| GET | `/anuncios?titulo=gol&cidade_id=7&distancia=50` | Busca anúncios ativos e pendentes por título, cidade e raio máximo escolhido (100 km por padrão). Sem `cidade_id`, usa a cidade padrão do usuário autenticado; para visitantes, solicitar uma cidade de referência |
 | GET | `/anuncios/{id}` | Mostra um anúncio |
 | PUT | `/anuncios/{id}` 🔒 | Edita o anúncio (só o dono) |
 | DELETE | `/anuncios/{id}` 🔒 | Exclui o anúncio (só o dono) |
@@ -539,15 +543,18 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 - RN12: Anúncio expirado ou excluído logicamente (`deleted_at` preenchido) não aparece nas buscas. Quem tentar abri-lo vê a mensagem "Este anúncio não está mais disponível" e é levado à página de anúncios. Essa mesma mensagem aparece ao clicar em um anúncio expirado/excluído a partir da lista de Favoritos.
 
 **Busca e localização**
-- RN13: A busca pública exibe apenas anúncios com status `ativo` ou `pendente`. Anúncios `expirados` não aparecem. Esse filtro é aplicado pelo back-end, não escolhido pelo usuário.
-- RN14: A busca sem cidade informada usa a cidade padrão do usuário autenticado e mostra também municípios cuja distância euclidiana local aproximada seja de até 100 km, calculada pelas coordenadas geográficas convertidas para quilômetros. Visitantes devem escolher uma cidade de referência antes de uma busca regional, sem depender de geolocalização automática.
-- RN15: Na busca, o usuário pode escolher outra cidade para ver anúncios de locais mais distantes. O raio é fixo em 100 km e não pode ser ajustado; o que muda é a cidade de referência.
-- RN15.1: A cidade é sempre escolhida em uma lista de sugestões, e o sistema guarda o `cidade_id`, nunca um texto digitado livremente.
-- RN15.2: A barra de pesquisa possui dois campos independentes (`termo` e `cidade_id`) e um botão destacado "Buscar" para confirmar a pesquisa. É permitido preencher um, ambos ou nenhum dos campos.
-- RN15.3: Quando `termo` estiver preenchido, a busca filtra os anúncios pelo título. Quando estiver vazio, não aplica filtro de título.
-- RN15.4: Quando `cidade_id` for informado, a cidade selecionada substitui a cidade padrão como centro do raio de 100 km. Quando não for informado, usa a cidade padrão do usuário autenticado; visitantes sem cidade de referência devem selecionar uma cidade.
-- RN15.5: O filtro geográfico e o filtro por título são combinados quando ambos estiverem preenchidos. A confirmação ocorre pelo botão "Buscar".
+- RN13: A busca pública exibe apenas anúncios com status `ativo` ou `pendente`; anúncios `expirado` e excluídos logicamente não aparecem.
+- RN14: A busca sem cidade informada usa a cidade padrão do usuário autenticado. O cálculo utiliza distância euclidiana local aproximada, com latitude e longitude convertidas para quilômetros. Visitantes sem cidade de referência deverão escolher uma.
+- RN15: A barra de pesquisa possui três campos: título (`termo`), cidade (`cidade_id`) e distância máxima (`distancia`). O valor inicial da distância é 100 km, podendo ser alterado pelo usuário.
+- RN15.1: A cidade é selecionada a partir de sugestões de municípios; o sistema utiliza o `cidade_id` (código IBGE), não texto livre.
+- RN15.2: A busca somente é confirmada ao clicar no botão "Buscar".
+- RN15.3: Se `termo` estiver preenchido, os resultados também serão filtrados pelo título.
+- RN15.4: Se `cidade_id` for informado, a cidade escolhida será o centro do raio. Caso contrário, utiliza-se a cidade padrão do usuário autenticado.
+- RN15.5: A distância selecionada é aplicada a partir da cidade de referência, independentemente de o usuário pesquisar por título, cidade ou ambos.
+- RN15.6: O back-end deve validar o valor da distância e aceitar apenas valores definidos para a interface. Os únicos valores permitidos são **10, 25, 50, 75 e 100 km**; o padrão e limite máximo são **100 km**.
 
+- RN15.7: Quando não houver anúncios, o sistema exibirá uma mensagem informativa e, se a distância for inferior a 100 km, oferecerá ampliar para a próxima opção predefinida. A nova pesquisa preservará título e cidade, e somente será executada após confirmação do usuário.
+- RN15.8: Se não houver resultados com raio de 100 km, o sistema não oferecerá distâncias maiores e orientará o usuário a pesquisar outro termo ou outra cidade.
 
 **Perfil, loja e privacidade**
 - RN16: O perfil público do usuário mostra apenas nome, fotos, anúncios ativos e tempo de criação da conta. CPF, CNPJ, contato padrão e localização padrão nunca são exibidos publicamente.
@@ -592,7 +599,8 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 
 ## Pendências e decisões atualizadas
 
-- [x] Raio de "cidades próximas": 100 km, fixo.
+- [x] Raio de "cidades próximas": 100 km por padrão, ajustável pelo novo campo de distância da busca.
+- [ ] Confirmar as opções disponíveis no seletor de distância (sugestão: 10, 25, 50, 75 e 100 km).
 - [x] Estado pendente: nos últimos 3 dias, até o vendedor responder; sem resposta, o anúncio expira.
 - [x] Anúncio expirado não é reativado; o vendedor cria outro.
 - [x] RF01 usa apenas CPF (o CNPJ fica na Loja).
