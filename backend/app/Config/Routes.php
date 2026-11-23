@@ -96,3 +96,11 @@ $routes->get(
     'AnunciosController::exibirMidiaEdicao/$1/$2',
     ['filter' => 'auth']
 );
+
+// Perfil privado e gerenciamento da loja ativa
+$routes->get('perfil-loja', 'PerfilLojaController::index', ['filter' => 'auth']);
+$routes->post('perfil-loja/atualizar', 'PerfilLojaController::atualizar', ['filter' => 'auth']);
+$routes->post('perfil-loja/imagem/(:segment)', 'PerfilLojaController::imagem/$1', ['filter' => 'auth']);
+
+// Voltar ao modo pessoa sem desativar a loja
+$routes->post('perfil-loja/sair', 'PerfilLojaController::sair', ['filter' => 'auth']);
