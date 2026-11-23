@@ -239,11 +239,7 @@ $mensagemErro = session()->getFlashdata('erro');
 
                     </div>
 
-                    <span
-                        class="perfil-botao-contorno perfil-desabilitado"
-                    >
-                        Gerenciar
-                    </span>
+                    <a href="<?= site_url('perfil-loja') ?>" class="perfil-botao-contorno">Gerenciar</a>
 
                 </div>
 
