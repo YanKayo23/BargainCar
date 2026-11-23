@@ -92,7 +92,7 @@ body {
    CONTEÚDO PRINCIPAL
 ========================================= */
 
-.container {
+.pagina-anuncio {
     max-width: 1200px;
     margin: 30px auto;
     padding: 0 20px;
@@ -539,14 +539,7 @@ body {
         height: 370px;
     }
 
-    .navegacao {
-        gap: 12px;
-    }
 
-    .nav-futuro,
-    .tipo-conta {
-        display: none;
-    }
 }
 
 /* =========================================
@@ -555,19 +548,10 @@ body {
 
 @media (max-width: 600px) {
 
-    .topo-conteudo {
-        padding: 12px;
-    }
 
-    .marca {
-        font-size: 19px;
-    }
 
-    .navegacao {
-        gap: 10px;
-    }
 
-    .container {
+    .pagina-anuncio {
         margin: 20px auto;
         padding: 0 12px;
     }
@@ -622,3 +606,9 @@ body {
         width: 100%;
     }
 }
+
+/* Espaço para a navbar fixa, ajustado pelo Navbar.js quando disponível. */
+#bc-navbar-espacador { min-height: 72px; }
+
+/* Mantém o conteúdo centralizado sem conflito com o .container do Bootstrap. */
+main.pagina-anuncio { width: 100%; max-width: 1200px; }
