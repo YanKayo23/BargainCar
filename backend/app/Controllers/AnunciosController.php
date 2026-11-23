@@ -41,7 +41,7 @@ class AnunciosController extends BaseController
         return view('anuncios/CriarAnuncio', [
             'usuario' => $usuario,
             'loja' => $loja,
-            'tipoInicial' => $loja ? 'loja' : 'pessoa',
+            'tipoInicial' => ($loja && session()->get('modo_perfil') === 'loja') ? 'loja' : 'pessoa',
         ]);
     }
 
@@ -58,6 +58,11 @@ class AnunciosController extends BaseController
         }
 
         $dados = $this->request->getPost();
+        // O anunciante deve corresponder ao perfil ativo na sessão.
+        // Nunca confiar somente no campo enviado pelo navegador.
+        $lojaAtiva = (new LojaModel())->where('usuario_id', $usuarioId)->first();
+        $dados['tipo_anunciante'] = ($lojaAtiva && session()->get('modo_perfil') === 'loja')
+            ? 'loja' : 'pessoa';
         $regras = [
             'tipo_anunciante' => 'required|in_list[pessoa,loja]',
             'titulo' => 'required|max_length[150]',
