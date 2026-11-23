@@ -1,7 +1,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // =========================================
-    // 1. NAVBAR FIXA NO TOPO
+    // 1. NAVBAR FIXA
     // =========================================
 
     const navbar = document.getElementById('bc-navbar');
@@ -28,34 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuBotao = document.getElementById('bc-menu-botao');
     const menuPerfis = document.getElementById('bc-menu-perfis');
 
-    const fecharPerfis = () => {
-        if (!menuBotao || !menuPerfis) return;
-
-        menuPerfis.hidden = true;
-        menuBotao.setAttribute('aria-expanded', 'false');
-    };
-
-    menuBotao?.addEventListener('click', () => {
-        if (!menuPerfis) return;
-
-        const abrir = menuPerfis.hidden;
-        menuPerfis.hidden = !abrir;
-
-        menuBotao.setAttribute('aria-expanded', String(abrir));
-
-        if (abrir) fecharDistancia();
-    });
-
-    // =========================================
-    // 3. ELEMENTOS DA PESQUISA
-    // =========================================
-
-    const form = document.querySelector('.bc-navbar-pesquisa');
-
-    const cidade = document.getElementById('bc-cidade-busca');
-    const cidadeId = document.getElementById('bc-cidade-id');
-    const sugestoes = document.getElementById('bc-cidades-sugestoes');
-
     const distanciaContainer =
         document.getElementById('bc-distancia-container');
 
@@ -73,12 +45,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const valores = ['10', '25', '50', '75', '100'];
 
-    // =========================================
-    // 4. DROPDOWN DE DISTÂNCIA
-    // =========================================
+    function fecharPerfis() {
+        if (!menuBotao || !menuPerfis) return;
+
+        menuPerfis.hidden = true;
+        menuBotao.setAttribute('aria-expanded', 'false');
+    }
 
     function fecharDistancia(foco = false) {
-        if (!distanciaOpcoes || !distanciaBotao) return;
+        if (!distanciaBotao || !distanciaOpcoes) return;
 
         distanciaOpcoes.hidden = true;
         distanciaBotao.setAttribute('aria-expanded', 'false');
@@ -86,46 +61,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (foco) distanciaBotao.focus();
     }
 
-    function selecionarDistancia(valor) {
-        if (
-            !valores.includes(valor) ||
-            !distanciaInput ||
-            !distanciaTexto ||
-            !distanciaOpcoes
-        ) return;
+    menuBotao?.addEventListener('click', () => {
+        if (!menuPerfis) return;
 
-        distanciaInput.value = valor;
-        distanciaTexto.textContent = `${valor} km`;
+        const abrir = menuPerfis.hidden;
 
-        distanciaOpcoes
-            .querySelectorAll('.bc-distancia-opcao')
-            .forEach(opcao => {
-                const ativa = opcao.dataset.km === valor;
+        menuPerfis.hidden = !abrir;
+        menuBotao.setAttribute('aria-expanded', String(abrir));
 
-                opcao.classList.toggle('is-selected', ativa);
-                opcao.setAttribute('aria-selected', String(ativa));
-            });
+        if (abrir) fecharDistancia();
+    });
 
-        fecharDistancia(true);
-    }
-
-    function abrirDistancia() {
-        if (!distanciaOpcoes || !distanciaBotao) return;
-
-        distanciaOpcoes.hidden = false;
-        distanciaBotao.setAttribute('aria-expanded', 'true');
-
-        fecharPerfis();
-
-        const atual = distanciaOpcoes.querySelector(
-            '.bc-distancia-opcao.is-selected'
-        );
-
-        (
-            atual ||
-            distanciaOpcoes.querySelector('.bc-distancia-opcao')
-        )?.focus();
-    }
+    // =========================================
+    // 3. DISTÂNCIA PERSONALIZADA
+    // =========================================
 
     if (
         distanciaBotao &&
@@ -133,66 +82,88 @@ document.addEventListener('DOMContentLoaded', () => {
         distanciaInput &&
         distanciaTexto
     ) {
-        if (!valores.includes(distanciaInput.value)) {
-            distanciaInput.value = '100';
-        }
+        const opcoes = [
+            ...distanciaOpcoes.querySelectorAll('.bc-distancia-opcao')
+        ];
 
-        distanciaTexto.textContent =
-            `${distanciaInput.value} km`;
+        const selecionar = valor => {
+            if (!valores.includes(valor)) return;
+
+            distanciaInput.value = valor;
+            distanciaTexto.textContent = `${valor} km`;
+
+            opcoes.forEach(opcao => {
+                const ativa = opcao.dataset.km === valor;
+
+                opcao.classList.toggle('is-selected', ativa);
+                opcao.setAttribute('aria-selected', String(ativa));
+            });
+
+            fecharDistancia(true);
+        };
+
+        const abrir = () => {
+            distanciaOpcoes.hidden = false;
+            distanciaBotao.setAttribute('aria-expanded', 'true');
+
+            fecharPerfis();
+
+            const selecionada = opcoes.find(
+                opcao => opcao.dataset.km === distanciaInput.value
+            );
+
+            (selecionada || opcoes[0])?.focus();
+        };
+
+        const inicial = valores.includes(distanciaInput.value)
+            ? distanciaInput.value
+            : '100';
+
+        distanciaInput.value = inicial;
+        distanciaTexto.textContent = `${inicial} km`;
+
+        opcoes.forEach(opcao => {
+            const ativa = opcao.dataset.km === inicial;
+
+            opcao.classList.toggle('is-selected', ativa);
+            opcao.setAttribute('aria-selected', String(ativa));
+        });
 
         distanciaBotao.addEventListener('click', () => {
-            distanciaOpcoes.hidden
-                ? abrirDistancia()
-                : fecharDistancia();
+            distanciaOpcoes.hidden ? abrir() : fecharDistancia();
         });
 
         distanciaBotao.addEventListener('keydown', evento => {
-            if (
-                evento.key === 'ArrowDown' ||
-                evento.key === 'ArrowUp'
-            ) {
+            if (['ArrowDown', 'ArrowUp'].includes(evento.key)) {
                 evento.preventDefault();
-                abrirDistancia();
+                abrir();
             }
         });
 
-        const opcoes = [
-            ...distanciaOpcoes.querySelectorAll(
-                '.bc-distancia-opcao'
-            )
-        ];
-
         opcoes.forEach((opcao, indice) => {
             opcao.addEventListener('click', () => {
-                selecionarDistancia(opcao.dataset.km);
+                selecionar(opcao.dataset.km);
             });
 
             opcao.addEventListener('keydown', evento => {
-                if (
-                    evento.key === 'ArrowDown' ||
-                    evento.key === 'ArrowUp'
-                ) {
+                if (['ArrowDown', 'ArrowUp'].includes(evento.key)) {
                     evento.preventDefault();
 
-                    const proximo = (
-                        indice +
-                        (evento.key === 'ArrowDown' ? 1 : -1) +
-                        opcoes.length
-                    ) % opcoes.length;
+                    const passo = evento.key === 'ArrowDown' ? 1 : -1;
+
+                    const proximo =
+                        (indice + passo + opcoes.length) % opcoes.length;
 
                     opcoes[proximo].focus();
 
-                } else if (
-                    evento.key === 'Home' ||
-                    evento.key === 'End'
-                ) {
+                } else if (['Home', 'End'].includes(evento.key)) {
                     evento.preventDefault();
 
-                    opcoes[
-                        evento.key === 'Home'
-                            ? 0
-                            : opcoes.length - 1
-                    ].focus();
+                    const posicao = evento.key === 'Home'
+                        ? 0
+                        : opcoes.length - 1;
+
+                    opcoes[posicao].focus();
 
                 } else if (evento.key === 'Escape') {
                     evento.preventDefault();
@@ -206,21 +177,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =========================================
-    // 5. AUTOCOMPLETE DE CIDADES
+    // 4. PESQUISA DE CIDADES
     // =========================================
+
+    const form = document.querySelector('.bc-navbar-pesquisa');
+    const cidade = document.getElementById('bc-cidade-busca');
+    const cidadeId = document.getElementById('bc-cidade-id');
+    const sugestoes = document.getElementById('bc-cidades-sugestoes');
 
     if (!form || !cidade || !cidadeId || !sugestoes) return;
 
     let temporizador;
     let buscaAtual;
 
-    const limparSugestoes = () => {
+    function limparSugestoes() {
         sugestoes.replaceChildren();
         sugestoes.hidden = true;
         cidade.setAttribute('aria-expanded', 'false');
-    };
+    }
 
-    const aviso = mensagem => {
+    function aviso(mensagem) {
         limparSugestoes();
 
         const item = document.createElement('div');
@@ -231,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sugestoes.hidden = false;
 
         cidade.setAttribute('aria-expanded', 'true');
-    };
+    }
 
     cidade.addEventListener('input', () => {
         cidadeId.value = '';
@@ -322,12 +298,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error('Erro ao buscar cidades:', erro);
                 }
             }
-
         }, 300);
     });
 
     // =========================================
-    // 6. VALIDAÇÃO DO FORMULÁRIO
+    // 5. VALIDAÇÃO DO FORMULÁRIO
     // =========================================
 
     form.addEventListener('submit', evento => {
@@ -337,10 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
             evento.preventDefault();
             cidade.focus();
 
-            aviso(
-                'Selecione uma cidade da lista de sugestões.'
-            );
-
+            aviso('Selecione uma cidade da lista de sugestões.');
             return;
         }
 
@@ -352,15 +324,10 @@ document.addEventListener('DOMContentLoaded', () => {
             evento.preventDefault();
             cidade.focus();
 
-            aviso(
-                'Selecione uma cidade para realizar a busca.'
-            );
-
+            aviso('Selecione uma cidade para realizar a busca.');
             return;
         }
 
-        // Garante que apenas os cinco raios
-        // predefinidos sejam enviados.
         if (
             distanciaInput &&
             !valores.includes(distanciaInput.value)
@@ -370,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =========================================
-    // 7. FECHAR MENUS
+    // 6. FECHAR MENUS
     // =========================================
 
     document.addEventListener('click', evento => {
