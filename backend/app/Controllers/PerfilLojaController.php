@@ -59,14 +59,33 @@ class PerfilLojaController extends BaseController
         return redirect()->to(site_url('meu-perfil'));
     }
 
+    public function editar(): string|RedirectResponse
+    {
+        if (! session()->get('usuario_id')) {
+            return redirect()->to(site_url('login'));
+        }
+        $loja = $this->lojaAtiva();
+        if (! $loja) {
+            return redirect()->to(site_url('meu-perfil'))->with('erro', 'Você não possui loja ativa.');
+        }
+        session()->set('modo_perfil', 'loja');
+        $cidade = (new CidadeModel())->where('codigo_ibge', $loja['cidade_id'])->first();
+        return view('lojas/EditarLoja', compact('loja', 'cidade'));
+    }
+
     public function atualizar(): RedirectResponse
     {
-        if (! session()->get('usuario_id')) return redirect()->to(site_url('login'));
+        if (! session()->get('usuario_id')) {
+            return redirect()->to(site_url('login'));
+        }
         $loja = $this->lojaAtiva();
-        if (! $loja) return redirect()->to(site_url('meu-perfil'));
+        if (! $loja) {
+            return redirect()->to(site_url('meu-perfil'))->with('erro', 'Você não possui loja ativa.');
+        }
+
         $dados = [
             'nome_empresa' => trim((string) $this->request->getPost('nome_empresa')),
-            'cidade_id' => $this->request->getPost('cidade_id'),
+            'cidade_id' => trim((string) $this->request->getPost('cidade_id')),
             'contato' => trim((string) $this->request->getPost('contato')),
         ];
         $regras = [
@@ -74,13 +93,28 @@ class PerfilLojaController extends BaseController
             'cidade_id' => 'required|is_not_unique[cidades.codigo_ibge]',
             'contato' => 'required|max_length[30]',
         ];
-        if (! $this->validateData($dados, $regras)) {
-            return redirect()->to(site_url('perfil-loja'))->withInput()->with('erros', $this->validator->getErrors());
+        $mensagens = [
+            'nome_empresa' => ['required' => 'Informe o nome da empresa.', 'max_length' => 'O nome deve ter até 150 caracteres.'],
+            'cidade_id' => ['required' => 'Selecione uma cidade na lista.', 'is_not_unique' => 'Selecione uma cidade válida.'],
+            'contato' => ['required' => 'Informe o contato da loja.', 'max_length' => 'O contato deve ter até 30 caracteres.'],
+        ];
+        if (! $this->validateData($dados, $regras, $mensagens)) {
+            return redirect()->to(site_url('perfil-loja/editar'))->withInput()
+                ->with('erros', $this->validator->getErrors());
         }
-        if ((new LojaModel())->update($loja['id'], $dados) === false) {
-            return redirect()->to(site_url('perfil-loja'))->with('erro', 'Não foi possível atualizar os dados.');
+        try {
+            $modelo = new LojaModel();
+            if ($modelo->update((int) $loja['id'], $this->validator->getValidated()) === false) {
+                return redirect()->to(site_url('perfil-loja/editar'))->withInput()
+                    ->with('erros', $modelo->errors() ?: ['geral' => 'Não foi possível atualizar a loja.']);
+            }
+        } catch (Throwable $e) {
+            log_message('error', 'Falha ao atualizar dados da loja: ' . $e->getMessage());
+            return redirect()->to(site_url('perfil-loja/editar'))->withInput()
+                ->with('erro', 'Não foi possível atualizar os dados da loja.');
         }
-        return redirect()->to(site_url('perfil-loja'))->with('sucesso', 'Dados da loja atualizados!');
+        return redirect()->to(site_url('perfil-loja'))
+            ->with('sucesso', 'Dados da loja atualizados com sucesso!');
     }
 
     public function imagem(string $tipo): RedirectResponse
@@ -89,19 +123,19 @@ class PerfilLojaController extends BaseController
         $loja = $this->lojaAtiva();
         if (! $loja) return redirect()->to(site_url('meu-perfil'));
         if (! in_array($tipo, ['perfil', 'capa'], true)) {
-            return redirect()->to(site_url('perfil-loja'))->with('erro', 'Tipo de imagem inválido.');
+            return redirect()->to(site_url('perfil-loja/editar'))->with('erro', 'Tipo de imagem inválido.');
         }
         $arquivo = $this->request->getFile('imagem');
         $mimes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
         if (! $arquivo || ! $arquivo->isValid() || $arquivo->getSize() > 5 * 1024 * 1024
             || ! isset($mimes[$arquivo->getMimeType()])
             || @getimagesize($arquivo->getTempName()) === false) {
-            return redirect()->to(site_url('perfil-loja'))
+            return redirect()->to(site_url('perfil-loja/editar'))
                 ->with('erro', 'Envie uma imagem JPG, PNG ou WebP válida de até 5 MB.');
         }
         $pasta = FCPATH . 'uploads/lojas/' . (int) $loja['id'] . '/';
         if (! is_dir($pasta) && ! mkdir($pasta, 0755, true) && ! is_dir($pasta)) {
-            return redirect()->to(site_url('perfil-loja'))->with('erro', 'Não foi possível preparar a pasta de imagens.');
+            return redirect()->to(site_url('perfil-loja/editar'))->with('erro', 'Não foi possível preparar a pasta de imagens.');
         }
         $nome = bin2hex(random_bytes(16)) . '.' . $mimes[$arquivo->getMimeType()];
         $campo = $tipo === 'perfil' ? 'foto_perfil' : 'foto_capa';
@@ -120,8 +154,8 @@ class PerfilLojaController extends BaseController
         } catch (Throwable $e) {
             @unlink($pasta . $nome);
             log_message('error', 'Erro no upload da loja: ' . $e->getMessage());
-            return redirect()->to(site_url('perfil-loja'))->with('erro', 'Não foi possível salvar a imagem.');
+            return redirect()->to(site_url('perfil-loja/editar'))->with('erro', 'Não foi possível salvar a imagem.');
         }
-        return redirect()->to(site_url('perfil-loja'))->with('sucesso', 'Imagem atualizada com sucesso!');
+        return redirect()->to(site_url('perfil-loja/editar'))->with('sucesso', 'Imagem atualizada com sucesso!');
     }
 }
