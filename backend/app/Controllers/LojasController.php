@@ -184,36 +184,50 @@ class LojasController extends BaseController
     }
 
 
-    // Desativa uma loja sem apagar seus dados
+    // Desativa a loja e arquiva SOMENTE seus anúncios empresariais.
     public function desativar(int $id): RedirectResponse
     {
-        $usuarioId = session()->get('usuario_id');
-
-        if (! $usuarioId) {
-            return redirect()->to('/login');
+        $usuarioId = (int) session()->get('usuario_id');
+        if ($usuarioId <= 0) {
+            return redirect()->to(site_url('login'));
         }
 
-        $lojaModel = new LojaModel();
-
-        // Busca apenas uma loja ativa do usuário autenticado
-        $loja = $lojaModel
-            ->where('id', $id)
-            ->where('usuario_id', $usuarioId)
-            ->first();
-
+        $loja = (new LojaModel())->where('id', $id)
+            ->where('usuario_id', $usuarioId)->first();
         if (! $loja) {
-            return redirect()->to('/')
-                ->with('erro', 'Loja ativa não encontrada ou você não tem permissão para desativá-la.');
+            return redirect()->to(site_url('meu-perfil'))
+                ->with('erro', 'Loja ativa não encontrada ou acesso não permitido.');
         }
 
-        // Soft delete: preenche deleted_at
-        if ($lojaModel->delete($id) === false) {
-            return redirect()->to('/')
+        $db = db_connect();
+        $db->transBegin();
+        try {
+            $agora = date('Y-m-d H:i:s');
+            // Não modifica anúncios pessoais nem anúncios de outras lojas.
+            $db->table('anuncios')
+                ->where('loja_id', $id)
+                ->where('tipo_anunciante', 'loja')
+                ->where('deleted_at', null)
+                ->update(['deleted_at' => $agora]);
+
+            $db->table('lojas')->where('id', $id)
+                ->where('usuario_id', $usuarioId)
+                ->where('deleted_at', null)
+                ->update(['deleted_at' => $agora]);
+
+            if ($db->transStatus() === false || $db->transCommit() === false) {
+                throw new \RuntimeException('Falha ao confirmar desativação.');
+            }
+        } catch (\Throwable $e) {
+            $db->transRollback();
+            log_message('error', 'Erro ao desativar loja: ' . $e->getMessage());
+            return redirect()->to(site_url('perfil-loja'))
                 ->with('erro', 'Não foi possível desativar a loja.');
         }
 
-        return redirect()->to('/')
-            ->with('sucesso', 'Loja desativada com sucesso!');
+        session()->set('modo_perfil', 'pessoa');
+        return redirect()->to(site_url('meu-perfil'))
+            ->with('sucesso', 'Loja desativada. Os anúncios da loja foram arquivados; seus anúncios pessoais não foram alterados.');
     }
 
     // Reativa uma loja anteriormente desativada
