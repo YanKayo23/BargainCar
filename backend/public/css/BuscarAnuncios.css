@@ -448,3 +448,12 @@ body {
         transform: none;
     }
 }
+
+
+/* Ampliar a pesquisa quando não houver anúncios */
+.busca-ampliar-form { display: flex; justify-content: center; margin: 22px 0 10px; }
+.busca-ampliar-botao { border: 1px solid #0866c9; border-radius: 9px; background: #0866c9; color: #fff; padding: 12px 22px; font: 700 14px Arial, Helvetica, sans-serif; cursor: pointer; transition: background .2s ease, border-color .2s ease; }
+.busca-ampliar-botao:hover { background: #0755a8; border-color: #0755a8; }
+.busca-ampliar-botao:focus-visible { outline: 3px solid #93bff5; outline-offset: 3px; }
+.busca-mensagem .busca-mensagem-apoio { font-size: 12px; }
+@media (max-width: 600px) { .busca-ampliar-botao { width: 100%; } }
