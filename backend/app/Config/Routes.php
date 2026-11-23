@@ -99,6 +99,7 @@ $routes->get(
 
 // Perfil privado e gerenciamento da loja ativa
 $routes->get('perfil-loja', 'PerfilLojaController::index', ['filter' => 'auth']);
+$routes->get('perfil-loja/editar', 'PerfilLojaController::editar', ['filter' => 'auth']);
 $routes->post('perfil-loja/atualizar', 'PerfilLojaController::atualizar', ['filter' => 'auth']);
 $routes->post('perfil-loja/imagem/(:segment)', 'PerfilLojaController::imagem/$1', ['filter' => 'auth']);
 
