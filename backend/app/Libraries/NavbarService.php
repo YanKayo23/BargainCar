@@ -18,6 +18,7 @@ class NavbarService
             'usuario' => null,
             'lojaAtiva' => null,
             'lojasDesativadas' => [],
+            'modoPerfil' => 'pessoa',
         ];
 
         // Se não houver usuário autenticado,
@@ -51,9 +52,14 @@ class NavbarService
             ->orderBy('id', 'DESC')
             ->findAll();
 
+        // Somente uma loja ativa permite navegar em modo loja.
+        $modoPerfil = ($lojaAtiva && session()->get('modo_perfil') === 'loja')
+            ? 'loja' : 'pessoa';
+
         // 4. Retorna os dados para a navbar.
         return [
             'logado' => true,
+            'modoPerfil' => $modoPerfil,
 
             // Enviamos somente as informações
             // necessárias para a navegação.
