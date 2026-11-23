@@ -1,470 +1,309 @@
-/* ========================================
-   BARGAINCAR - NAVBAR
-======================================== */
-
-.bc-navbar,
-.bc-navbar * {
-    box-sizing: border-box;
+/* BargainCar — Bootstrap 5 + identidade visual própria */
+.bc-navbar, .bc-navbar * { box-sizing: border-box; }
+.bc-navbar { background: #fff; border-bottom: 1px solid #e2e6ee; font-family: Arial, sans-serif; z-index: 1050; padding: 12px 0; }
+.bc-navbar-conteudo { max-width: 1500px; padding: 0 20px; gap: 14px; }
+.bc-navbar-marca { font-size: 23px; font-weight: 700; color: #202a3b; white-space: nowrap; margin-right: 12px; }
+.bc-navbar-marca span { color: #0866c9; }
+.bc-navbar-collapse { align-items: center; gap: 15px; min-width: 0; }
+.bc-navbar-pesquisa { display: flex; align-items: center; flex: 1 1 530px; min-width: 0; max-width: 660px; height: 46px; border: 1px solid #b9c4d3; border-radius: 25px; padding: 4px; background: #fff; margin: 0; }
+.bc-navbar-campo { display: flex; align-items: center; gap: 6px; padding: 0 9px; height: 32px; min-width: 0; position: relative; }
+.bc-navbar-campo > span { color: #687587; font-size: 19px; }
+.bc-navbar-termo { flex: 1.5 1 0; border-right: 1px solid #e1e5ec; }
+.bc-navbar-cidade { flex: 1 1 0; border-right: 1px solid #e1e5ec; }
+.bc-navbar-distancia { flex: 0 0 94px; padding: 0 6px; }
+.bc-navbar-campo input, .bc-navbar-campo select { display: block; width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; font: 13px Arial, sans-serif; color: #202a3b; box-shadow: none; }
+.bc-navbar-campo input::placeholder { color: #858c97; }
+.bc-navbar-distancia select { cursor: pointer; }
+.bc-navbar-buscar { border-radius: 22px; background: #0866c9; border-color: #0866c9; font-weight: 700; font-size: 13px; height: 36px; padding: 0 14px; white-space: nowrap; }
+.bc-navbar-buscar:hover, .bc-navbar-anunciar:hover { background: #0755a8; border-color: #0755a8; }
+.bc-navbar-acoes { display: flex; align-items: center; gap: 13px; margin-left: auto; }
+.bc-navbar-meu-perfil, .bc-navbar-favoritos { color: #0866c9; font-size: 13px; font-weight: 700; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+.bc-navbar-meu-perfil { border: 1px solid #d5e1f0; border-radius: 9px; padding: 10px; }
+.bc-navbar-meu-perfil:hover { background: #eaf2ff; }
+.bc-navbar-favoritos > span { font-size: 24px; line-height: 1; }
+.bc-navbar-perfis { position: relative; }
+.bc-navbar-perfil-botao { background: #eaf2ff; color: #0866c9; border: 1px solid transparent; border-radius: 9px; padding: 11px 18px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.bc-navbar-perfil-botao:hover, .bc-navbar-perfil-botao[aria-expanded="true"] { border-color: #0866c9; }
+.bc-navbar-anunciar { display: inline-flex; align-items: center; gap: 6px; justify-content: center; background: #0866c9; border-color: #0866c9; font-size: 13px; font-weight: 700; border-radius: 9px; white-space: nowrap; min-height: 42px; }
+.bc-navbar-anunciar > span { font-size: 22px; line-height: 1; }
+.bc-navbar-menu { position: absolute; right: 0; top: calc(100% + 10px); width: min(320px, calc(100vw - 28px)); max-height: min(70vh, 540px); overflow-y: auto; padding: 14px; border: 1px solid #0866c9; border-radius: 16px; background: white; box-shadow: 0 10px 28px rgba(20,40,70,.12); z-index: 1070; }
+.bc-navbar-menu[hidden], .bc-navbar-sugestoes[hidden] { display: none !important; }
+.bc-navbar-menu h3 { font-size: 15px; margin: 0 0 12px; font-weight: 700; }
+.bc-navbar-opcao { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; margin-bottom: 9px; border: 1px solid #d5e1f0; border-radius: 9px; background: #f7f9fd; text-decoration: none; color: #202a3b; }
+.bc-navbar-opcao > span:first-child { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.bc-navbar-opcao strong { font-size: 13px; overflow-wrap: anywhere; }
+.bc-navbar-opcao small { color: #6b7a90; font-size: 12px; }
+.bc-navbar-atual { background: #e8f2ff; border-color: #0866c9; }
+.bc-navbar-atual > strong, .bc-navbar-acao { color: #0866c9; font-size: 12px; }
+.bc-navbar-aviso { color: #6b7a90; font-size: 12px; line-height: 1.6; margin: 12px 2px; }
+.bc-navbar-botao-azul { display: block; width: 100%; padding: 11px; text-align: center; text-decoration: none; background: #0866c9; border-radius: 9px; color: #fff; font-size: 13px; font-weight: 700; }
+.bc-navbar-link-cadastro { display: block; text-align: center; margin-top: 10px; font-size: 13px; }
+.bc-navbar-desativadas { border-top: 1px solid #dce4ef; padding-top: 12px; margin: 12px 0; }
+.bc-navbar-desativadas summary { font-size: 13px; font-weight: 700; cursor: pointer; }
+.bc-navbar-loja-desativada { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 3px; }
+.bc-navbar-loja-desativada strong { font-size: 12px; }
+.bc-navbar-loja-desativada form { margin: 0; }
+.bc-navbar-loja-desativada button { background: none; border: 0; color: #0866c9; font-size: 12px; font-weight: 700; }
+.bc-navbar-sugestoes { position: absolute; left: 0; top: calc(100% + 12px); width: max(240px, 100%); max-height: 250px; overflow-y: auto; background: #fff; border: 1px solid #d7e0ed; border-radius: 12px; box-shadow: 0 8px 24px rgba(20,40,70,.12); z-index: 1080; }
+.bc-navbar-sugestao { display: block; width: 100%; border: 0; background: #fff; color: #202a3b; padding: 10px 13px; text-align: left; font-size: 13px; cursor: pointer; }
+.bc-navbar-sugestao:hover, .bc-navbar-sugestao:focus { background: #eaf2ff; color: #0866c9; }
+.bc-navbar-sugestao-vazia { font-size: 12px; color: #6b7a90; padding: 12px; }
+@media (max-width: 1199.98px) {
+  .bc-navbar-collapse { padding-top: 14px; }
+  .bc-navbar-pesquisa { max-width: none; width: 100%; margin-bottom: 14px; }
+  .bc-navbar-acoes { flex-wrap: wrap; justify-content: flex-start; margin-left: 0; }
+  .bc-navbar-menu { right: auto; left: 0; }
+}
+@media (max-width: 575.98px) {
+  .bc-navbar-conteudo { padding: 0 12px; }
+  .bc-navbar-pesquisa { height: auto; flex-wrap: wrap; border-radius: 15px; gap: 5px; padding: 7px; }
+  .bc-navbar-termo { flex: 1 1 100%; border-right: 0; border-bottom: 1px solid #e1e5ec; }
+  .bc-navbar-cidade { flex: 1 1 55%; }
+  .bc-navbar-distancia { flex: 0 0 95px; }
+  .bc-navbar-buscar { width: 100%; }
+  .bc-navbar-acoes { gap: 10px; }
 }
 
-.bc-navbar {
-    width: 100%;
-    background: #ffffff;
-    border-bottom: 1px solid #e2e6ee;
-    font-family: Arial, sans-serif;
+
+/* Refinamento dos campos Cidade e Distância */
+.bc-navbar .bc-navbar-pesquisa { border: 1px solid #cbd7e6; border-radius: 28px; background: #fff; }
+.bc-navbar .bc-navbar-cidade input { width: 100%; min-width: 0; height: 34px; border: 0; outline: 0; background: transparent; color: #202a3b; font-size: 13px; box-shadow: none; }
+.bc-navbar .bc-navbar-cidade input:focus { outline: none; box-shadow: none; }
+.bc-navbar .bc-navbar-distancia { min-width: 92px; border-left: 0; padding: 0 8px; }
+.bc-navbar .bc-navbar-distancia select { appearance: none; -webkit-appearance: none; -moz-appearance: none; width: 100%; min-width: 0; height: 34px; padding: 0 20px 0 4px; border: 0; border-radius: 6px; outline: 0; box-shadow: none; background-color: #fff; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%230866c9' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 4px center; background-size: 12px; color: #202a3b; font: 600 13px Arial, sans-serif; cursor: pointer; }
+.bc-navbar .bc-navbar-distancia select:focus { background-color: #f2f7ff; outline: 2px solid #c8ddfa; outline-offset: -2px; }
+.bc-navbar .bc-navbar-distancia select option { color: #202a3b; background: #fff; font-size: 14px; }
+.bc-navbar .bc-navbar-sugestoes { width: max(260px, 100%); max-width: min(340px, 90vw); max-height: 250px; padding: 5px; border-radius: 12px; box-shadow: 0 10px 28px rgba(20,40,70,.16); }
+.bc-navbar .bc-navbar-sugestao { border-radius: 7px; padding: 11px 12px; }
+.bc-navbar .bc-navbar-sugestao:focus { outline: none; }
+@media (max-width: 575.98px) { .bc-navbar .bc-navbar-pesquisa { border-radius: 15px; } .bc-navbar .bc-navbar-distancia { min-width: 78px; padding: 0 5px; } .bc-navbar .bc-navbar-distancia select { font-size: 12px; padding-right: 16px; } .bc-navbar .bc-navbar-sugestoes { width: min(280px, 85vw); } }
+
+
+/* ================================================
+   DISTÂNCIA - DROPDOWN PERSONALIZADO BARGAINCAR
+   (substitui o select nativo do navegador)
+   ================================================ */
+.bc-navbar .bc-navbar-distancia {
     position: relative;
-    z-index: 1000;
+    flex: 0 0 102px;
+    min-width: 102px;
+    padding: 0 5px;
+    border-left: 0;
 }
-
-.bc-navbar-conteudo {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 18px;
-}
-
-/* LOGOTIPO */
-
-.bc-navbar-marca {
-    color: #202a3b;
-    font-size: 23px;
-    font-weight: bold;
-    text-decoration: none;
-    white-space: nowrap;
-}
-
-.bc-navbar-marca span {
-    color: #0866c9;
-}
-
-/* BARRA DE PESQUISA */
-
-.bc-navbar-pesquisa {
-    display: flex;
-    align-items: center;
-    flex: 1;
-    max-width: 510px;
-    min-width: 260px;
-    height: 44px;
-    padding: 4px;
-    border: 1px solid #b9c4d3;
-    border-radius: 25px;
-    background: #fff;
-    gap: 0;
-}
-
-.bc-navbar-campo {
-    display: flex;
-    align-items: center;
-    min-width: 0;
-    height: 30px;
-    gap: 8px;
-    padding: 0 10px;
-    position: relative;
-}
-
-.bc-navbar-campo>span {
-    font-size: 20px;
-    color: #687587;
-    flex-shrink: 0;
-}
-
-.bc-navbar-termo {
-    flex: 1.4;
-    border-right: 1px solid #e1e5ec;
-}
-
-.bc-navbar-cidade {
-    flex: 0.8;
-}
-
-.bc-navbar-campo input {
+.bc-navbar .bc-distancia-botao {
     width: 100%;
-    min-width: 0;
-    border: none;
-    outline: none;
-    background: transparent;
-    color: #202a3b;
-    font-size: 14px;
-    font-family: inherit;
-}
-
-.bc-navbar-campo input::placeholder {
-    color: #858c97;
-}
-
-.bc-navbar-buscar {
     height: 34px;
-    padding: 0 20px;
-    border: none;
-    border-radius: 20px;
-    background: #0866c9;
-    color: white;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
+    padding: 0 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: #0866c9;
+    font: 700 13px Arial, sans-serif;
     white-space: nowrap;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
 }
-
-.bc-navbar-buscar:hover {
-    background: #0755a8;
+.bc-navbar .bc-distancia-botao:hover,
+.bc-navbar .bc-distancia-botao[aria-expanded="true"] {
+    background: #eaf2ff;
+    border-color: #c7dcf7;
 }
-
-/* SUGESTÕES DE CIDADES */
-
-.bc-navbar-sugestoes {
+.bc-navbar .bc-distancia-botao:focus-visible {
+    outline: 2px solid #0866c9;
+    outline-offset: 2px;
+}
+.bc-navbar .bc-distancia-botao svg { flex-shrink: 0; transition: transform .15s; }
+.bc-navbar .bc-distancia-botao[aria-expanded="true"] svg { transform: rotate(180deg); }
+.bc-navbar .bc-distancia-opcoes {
     position: absolute;
     top: calc(100% + 12px);
     left: 0;
-    width: 280px;
-    max-height: 240px;
-    overflow-y: auto;
-    background: white;
+    width: 145px;
+    padding: 6px;
+    background: #fff;
     border: 1px solid #d7e0ed;
     border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(20, 40, 70, 0.12);
-    z-index: 1100;
+    box-shadow: 0 10px 28px rgba(20, 40, 70, .16);
+    z-index: 1090;
+}
+.bc-navbar .bc-distancia-opcoes[hidden] { display: none !important; }
+.bc-navbar .bc-distancia-opcao {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: #fff;
+    color: #202a3b;
+    text-align: left;
+    font: 13px Arial, sans-serif;
+    cursor: pointer;
+}
+.bc-navbar .bc-distancia-opcao:hover,
+.bc-navbar .bc-distancia-opcao:focus-visible { background: #eaf2ff; color: #0866c9; outline: none; }
+.bc-navbar .bc-distancia-opcao.is-selected {
+    background: #0866c9;
+    color: #fff;
+    font-weight: 700;
+}
+.bc-navbar .bc-distancia-opcao.is-selected:hover,
+.bc-navbar .bc-distancia-opcao.is-selected:focus-visible { background: #0755a8; color: #fff; }
+@media (max-width: 575.98px) {
+    .bc-navbar .bc-navbar-distancia { flex: 0 0 102px; min-width: 102px; }
+    .bc-navbar .bc-distancia-opcoes { left: auto; right: 0; }
 }
 
-.bc-navbar-sugestoes[hidden],
-.bc-navbar-menu[hidden] {
-    display: none !important;
-}
-
-/* FAVORITOS */
-
-.bc-navbar-favoritos {
+/* ==============================================
+   REFINAMENTO FINAL - BOTOES DA NAVBAR
+   Altura, alinhamento e peso visual uniformes
+   ============================================== */
+.bc-navbar .bc-navbar-acoes {
     display: flex;
     align-items: center;
-    gap: 7px;
-    color: #0866c9;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: bold;
-    white-space: nowrap;
+    justify-content: flex-end;
+    gap: 10px;
 }
 
-.bc-navbar-favoritos span {
-    font-size: 25px;
+.bc-navbar .bc-navbar-meu-perfil,
+.bc-navbar .bc-navbar-favoritos,
+.bc-navbar .bc-navbar-perfil-botao,
+.bc-navbar .bc-navbar-anunciar {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 38px;
+    min-height: 38px;
+    margin: 0;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    vertical-align: middle;
+    text-decoration: none;
+    box-shadow: none;
+}
+
+.bc-navbar .bc-navbar-meu-perfil {
+    padding: 0 11px;
+    border: 1px solid #dbe5f2;
+    border-radius: 8px;
+    background: #fff;
+    color: #0866c9;
+}
+.bc-navbar .bc-navbar-meu-perfil:hover {
+    background: #f4f8ff;
+    border-color: #bfd4f0;
+}
+.bc-navbar .bc-navbar-meu-perfil > span {
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.bc-navbar .bc-navbar-favoritos {
+    padding: 0 3px;
+    border: 0;
+    background: transparent;
+    color: #0866c9;
+}
+.bc-navbar .bc-navbar-favoritos > span {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1;
+}
+.bc-navbar .bc-navbar-favoritos:hover { color: #0755a8; }
+
+.bc-navbar .bc-navbar-perfis {
+    display: flex;
+    align-items: center;
+    position: relative;
+    flex: 0 0 auto;
+    min-width: 0;
+}
+.bc-navbar .bc-navbar-perfil-botao {
+    width: auto;
+    padding: 0 13px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: #eaf2ff;
+    color: #0866c9;
+    cursor: pointer;
+}
+.bc-navbar .bc-navbar-perfil-botao:hover,
+.bc-navbar .bc-navbar-perfil-botao[aria-expanded="true"] {
+    border-color: #c6daf5;
+    background: #e2eeff;
+}
+.bc-navbar .bc-navbar-perfil-botao > span {
+    margin-left: 2px;
+    font-size: 13px;
     line-height: 1;
 }
 
-.bc-navbar-favoritos:hover {
-    color: #0755a8;
-}
-
-/* SELETOR PESSOA / LOJA */
-
-.bc-navbar-perfis {
-    position: relative;
-    flex: 0 1 220px;
-    min-width: 130px;
-}
-
-.bc-navbar-perfil-botao {
-    width: 100%;
-    height: 42px;
-    border: 1px solid transparent;
-    border-radius: 9px;
-    background: #eaf2ff;
-    color: #0866c9;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.bc-navbar-perfil-botao:hover,
-.bc-navbar-perfil-botao[aria-expanded="true"] {
-    border-color: #0866c9;
-}
-
-.bc-navbar-perfil-botao span {
-    margin-left: 6px;
-}
-
-/* MENU FLUTUANTE */
-
-.bc-navbar-menu {
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 0;
-    width: 310px;
-    padding: 14px;
-    background: #ffffff;
-    border: 1px solid #0866c9;
-    border-radius: 16px;
-    box-shadow: 0 10px 28px rgba(20, 40, 70, 0.12);
-    z-index: 1200;
-}
-
-.bc-navbar-menu h3 {
-    margin: 0 0 12px;
-    color: #202a3b;
-    font-size: 15px;
-}
-
-.bc-navbar-opcao {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    min-height: 55px;
-    padding: 10px 12px;
-    margin-bottom: 9px;
-    border: 1px solid #d5e1f0;
-    border-radius: 9px;
-    background: #f7f9fd;
-    color: #202a3b;
-    text-decoration: none;
-}
-
-.bc-navbar-opcao>span:first-child {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.bc-navbar .bc-navbar-anunciar {
     min-width: 0;
-}
-
-.bc-navbar-opcao strong {
-    font-size: 13px;
-}
-
-.bc-navbar-opcao small {
-    color: #6b7a90;
-    font-size: 12px;
-}
-
-.bc-navbar-atual {
-    background: #e8f2ff;
-    border-color: #0866c9;
-}
-
-.bc-navbar-atual>strong,
-.bc-navbar-acao {
-    color: #0866c9;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.bc-navbar-aviso {
-    color: #6b7a90;
-    font-size: 12px;
-    line-height: 1.6;
-    margin: 12px 2px;
-}
-
-/* BOTÕES DO MENU */
-
-.bc-navbar-botao-azul {
-    display: block;
-    width: 100%;
-    padding: 12px;
+    padding: 0 13px;
+    border: 1px solid #0866c9;
+    border-radius: 8px;
     background: #0866c9;
-    border-radius: 9px;
-    color: white;
-    text-align: center;
-    font-size: 13px;
-    font-weight: bold;
-    text-decoration: none;
+    color: #fff;
 }
-
-.bc-navbar-botao-azul:hover {
+.bc-navbar .bc-navbar-anunciar > span {
+    font-size: 19px;
+    font-weight: 400;
+    line-height: 1;
+}
+.bc-navbar .bc-navbar-anunciar:hover {
     background: #0755a8;
+    border-color: #0755a8;
+    color: #fff;
 }
 
-/* LOJAS DESATIVADAS */
-
-.bc-navbar-desativadas {
-    border-top: 1px solid #dce4ef;
-    padding-top: 12px;
-    margin-top: 12px;
-    margin-bottom: 12px;
+@media (max-width: 575.98px) {
+    .bc-navbar .bc-navbar-acoes { gap: 7px; }
+    .bc-navbar .bc-navbar-meu-perfil,
+    .bc-navbar .bc-navbar-favoritos,
+    .bc-navbar .bc-navbar-perfil-botao,
+    .bc-navbar .bc-navbar-anunciar {
+        height: 36px;
+        min-height: 36px;
+        font-size: 11px;
+    }
+    .bc-navbar .bc-navbar-meu-perfil,
+    .bc-navbar .bc-navbar-anunciar { padding: 0 9px; }
+    .bc-navbar .bc-navbar-perfil-botao { padding: 0 10px; }
 }
 
-.bc-navbar-desativadas summary {
-    cursor: pointer;
-    color: #202a3b;
-    font-size: 13px;
-    font-weight: bold;
-    padding: 3px 0;
-}
-
-.bc-navbar-loja-desativada {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    padding: 11px 5px;
-}
-
-.bc-navbar-loja-desativada strong {
-    font-size: 12px;
-    color: #202a3b;
-}
-
-.bc-navbar-loja-desativada form {
-    margin: 0;
-}
-
-.bc-navbar-loja-desativada button {
-    background: transparent;
-    border: none;
-    color: #0866c9;
-    font-size: 12px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.bc-navbar-loja-desativada button:hover {
-    text-decoration: underline;
-}
-
-/* BOTÃO ANUNCIAR */
-
-.bc-navbar-anunciar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    min-width: 125px;
-    height: 42px;
-    padding: 0 15px;
-    background: #0866c9;
-    color: #ffffff;
-    border-radius: 9px;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: bold;
-    white-space: nowrap;
-}
-
-.bc-navbar-anunciar span {
-    font-size: 23px;
-    font-weight: normal;
-}
-
-.bc-navbar-anunciar:hover {
-    background: #0755a8;
-}
-
-/* RESPONSIVIDADE */
-
-@media (max-width: 1050px) {
-    .bc-navbar-conteudo {
-        flex-wrap: wrap;
-        justify-content: space-between;
-    }
-
-    .bc-navbar-pesquisa {
-        order: 5;
-        flex-basis: 100%;
-        max-width: none;
-    }
-
-    .bc-navbar-perfis {
-        flex: 0 1 180px;
-    }
-}
-
-@media (max-width: 600px) {
-    .bc-navbar-conteudo {
-        gap: 12px;
-        padding: 12px;
-    }
-
-    .bc-navbar-marca {
-        font-size: 21px;
-    }
-
-    .bc-navbar-favoritos {
-        font-size: 0;
-    }
-
-    .bc-navbar-favoritos span {
-        font-size: 25px;
-    }
-
-    .bc-navbar-perfis {
-        flex: 0 1 110px;
-        min-width: 110px;
-    }
-
-    .bc-navbar-anunciar {
-        min-width: 105px;
-        padding: 0 10px;
-        font-size: 12px;
-    }
-
-    .bc-navbar-menu {
-        width: min(310px, calc(100vw - 24px));
-    }
-
-    .bc-navbar-pesquisa {
-        min-width: 0;
-    }
-
-    .bc-navbar-campo {
-        padding: 0 6px;
-        gap: 4px;
-    }
-
-    .bc-navbar-campo input {
-        font-size: 12px;
-    }
-
-    .bc-navbar-buscar {
-        padding: 0 12px;
-        font-size: 12px;
-    }
-
-
-    /* ITENS DO AUTOCOMPLETE DE CIDADES */
-
-    .bc-navbar-sugestao {
-        display: block;
-        width: 100%;
-        padding: 11px 13px;
-        border: none;
-        background: #ffffff;
-        color: #202a3b;
-        text-align: left;
-        font-family: inherit;
-        font-size: 13px;
-        cursor: pointer;
-    }
-
-    .bc-navbar-sugestao:hover,
-    .bc-navbar-sugestao:focus {
-        background: #eaf2ff;
-        color: #0866c9;
-        outline: none;
-    }
-
-}
-
-/* ACESSO AO PERFIL OU LOGIN */
-.bc-navbar-meu-perfil {
+/* ==========================================
+   ALINHAMENTO DA SETA PESSOA / LOJA
+   ========================================== */
+.bc-navbar .bc-navbar-perfil-botao {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 7px;
-    padding: 9px 12px;
-    min-height: 42px;
-    border: 1px solid #d5e1f0;
-    border-radius: 9px;
-    background: #ffffff;
-    color: #0866c9;
-    font-size: 13px;
-    font-weight: bold;
-    text-decoration: none;
-    white-space: nowrap;
-    transition: background 0.2s, border-color 0.2s;
+    line-height: 1;
 }
-.bc-navbar-meu-perfil span { font-size: 19px; line-height: 1; }
-.bc-navbar-meu-perfil:hover { background: #eaf2ff; border-color: #0866c9; }
-@media (max-width: 600px) {
-    .bc-navbar-meu-perfil { padding: 8px; font-size: 12px; }
+
+.bc-navbar .bc-navbar-perfil-botao > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    height: 12px;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1;
+    transform: translateY(-2px);
 }
+
+/* Troca de perfil por POST, com o mesmo visual das opções existentes. */
+.bc-navbar .bc-navbar-troca-form { margin: 0; }
+.bc-navbar .bc-navbar-troca-botao { width: 100%; font-family: inherit; cursor: pointer; text-align: left; }
+.bc-navbar .bc-navbar-troca-botao:hover { background: #eaf2ff; border-color: #c6daf5; }
