@@ -43,8 +43,28 @@ $codigoCidade = old('cidade_id', $usuario['cidade_id'] ?? '');
         <?php endif; ?>
 
         <form id="formEditarPerfil" action="<?= site_url('editar-perfil') ?>"
-              method="post" data-url-cidades="<?= esc(site_url('cidades'), 'attr') ?>">
+              method="post" enctype="multipart/form-data" data-url-cidades="<?= esc(site_url('cidades'), 'attr') ?>">
             <?= csrf_field() ?>
+            <?php $fotoAtual = $usuario['foto_perfil'] ?? ''; ?>
+            <section class="editar-perfil-card">
+                <h2>Foto de perfil</h2>
+                <div class="ep-foto-area">
+                    <div class="ep-avatar">
+                        <img id="fotoPrevia" alt="Foto de perfil" <?php if ($fotoAtual): ?>src="<?= esc(base_url($fotoAtual), 'attr') ?>"<?php else: ?>hidden<?php endif; ?>>
+                        <span id="fotoInicial" <?= $fotoAtual ? 'hidden' : '' ?>><?= esc(mb_strtoupper(mb_substr($usuario['nome'] ?? 'U', 0, 1))) ?></span>
+                    </div>
+                    <div class="editar-perfil-campo">
+                        <label for="foto_perfil">Escolher nova foto</label>
+                        <input type="file" id="foto_perfil" name="foto_perfil" accept="image/jpeg,image/png,image/webp">
+                        <input type="hidden" id="remover_foto" name="remover_foto" value="0">
+                        <div class="ep-foto-acoes">
+                            <button type="button" id="removerFoto" <?= $fotoAtual ? '' : 'hidden' ?>>Remover foto</button>
+                            <button type="button" id="desfazerFoto" hidden>Desfazer remoção</button>
+                        </div>
+                        <small>JPG, PNG ou WebP, até 2 MB. A foto só será alterada ao salvar.</small>
+                    </div>
+                </div>
+            </section>
             <section class="editar-perfil-card">
                 <h2>Informações pessoais</h2>
                 <div class="editar-perfil-grid">
@@ -87,7 +107,7 @@ $codigoCidade = old('cidade_id', $usuario['cidade_id'] ?? '');
 
             <section class="editar-perfil-card">
                 <h2>Confirmação de segurança</h2>
-                <p class="editar-perfil-explicacao">Se você alterar o CPF ou o e-mail, informe sua senha atual para confirmar a mudança. Não é necessário digitar a senha para alterar apenas nome, contato ou cidade.</p>
+                <p class="editar-perfil-explicacao">Se você alterar o CPF ou o e-mail, informe sua senha atual para confirmar a mudança. Não é necessário digitar a senha para alterar apenas nome, contato, cidade ou foto de perfil.</p>
                 <div class="editar-perfil-campo editar-perfil-senha">
                     <label for="senha_atual">Senha atual</label>
                     <div class="editar-perfil-senha-linha">
