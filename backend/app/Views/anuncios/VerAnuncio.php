@@ -102,6 +102,8 @@ $situacao = $situacoes[$situacaoOriginal]
     <link
         rel="stylesheet"
         href="<?= base_url('css/VerAnuncio.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('css/Favoritos.css') ?>">
+    <script defer src="<?= base_url('js/Favoritos.js') ?>"></script>
 </head>
 
 <body>
@@ -204,7 +206,7 @@ $situacao = $situacoes[$situacaoOriginal]
 
                 </div>
 
-                <h1><?= esc($titulo) ?></h1>
+                <div class="bc-fav-titulo"><h1><?= esc($titulo) ?></h1><?= view('layouts/CoracaoFavorito',['anuncioId'=>$anuncioId]) ?></div>
 
                 <div class="preco">
                     R$ <?= number_format($preco, 2, ',', '.') ?>
@@ -233,7 +235,7 @@ $situacao = $situacoes[$situacaoOriginal]
                         Anunciado por
                     </p>
 
-                    <div class="perfil-anunciante">
+                    <a class="perfil-anunciante" style="text-decoration:none;color:inherit" href="<?= site_url(($ehLoja ? 'lojas/' : 'usuarios/') . (int)$perfilId) ?>">
 
                         <div class="foto-anunciante">
 
@@ -261,10 +263,10 @@ $situacao = $situacoes[$situacaoOriginal]
                             ›
                         </span>
 
-                    </div>
+                    </a>
 
                     <p class="aviso-perfil">
-                        Visualização do perfil em breve.
+                        Acesse o perfil do anunciante.
                     </p>
 
                 </div>
@@ -311,13 +313,7 @@ $situacao = $situacoes[$situacaoOriginal]
 
                 </div>
 
-                <button
-                    type="button"
-                    class="botao botao-favorito"
-                    disabled
-                    title="Funcionalidade em desenvolvimento">
-                    ♡ Favoritar (em breve)
-                </button>
+                
 
             </aside>
 
