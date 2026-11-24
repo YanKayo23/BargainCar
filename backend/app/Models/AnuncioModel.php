@@ -28,6 +28,8 @@ class AnuncioModel extends Model
         'situacao_documentacao',
         'status',
         'deleted_at',
+        'motivo_indisponibilidade',
+        'anuncio_origem_id',
     ];
 
     // Exclusão lógica
