@@ -100,7 +100,11 @@ $mensagemErro = session()->getFlashdata('erro');
             <div class="perfil-identidade">
 
                 <div class="perfil-avatar">
-                    <?= esc($inicial) ?>
+                    <?php if (! empty($usuario['foto_perfil'])): ?>
+                        <img src="<?= esc(base_url($usuario['foto_perfil']), 'attr') ?>" alt="Foto de perfil" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                    <?php else: ?>
+                        <?= esc($inicial) ?>
+                    <?php endif; ?>
                 </div>
 
                 <div class="perfil-identidade-texto">
@@ -505,7 +509,7 @@ $mensagemErro = session()->getFlashdata('erro');
                                         href="<?= site_url(
                                             'anuncios/'
                                             . $anuncio['id']
-                                            . '/editar'
+                                            . '/editar?origem=perfil'
                                         ) ?>"
                                     >
                                         Editar
@@ -555,6 +559,21 @@ $mensagemErro = session()->getFlashdata('erro');
 
         </section>
 
+<section class="perfil-secao"><h2>Histórico de anúncios</h2><p>Somente você pode visualizar este histórico.</p>
+<?php if (empty($historico)): ?><p>Nenhum anúncio no histórico.</p><?php endif; ?>
+<div class="pl-historico-lista"><?php foreach ($historico ?? [] as $item): ?>
+<?php $situacao = $item['situacao_historico']; $acao = \App\Services\AnuncioCicloVidaService::acao($item); $data = $situacao === 'expirado' ? $item['data_expiracao'] : $item['deleted_at']; ?>
+<article class="pl-historico-item" data-situacao="<?= esc($situacao,'attr') ?>">
+<div class="pl-historico-foto"><?php if ($item['foto_id']): ?><img loading="lazy" src="<?= site_url('anuncios/'.$item['id'].'/midias-historico/'.$item['foto_id']) ?>" alt="Foto do veículo"><?php else: ?>Sem foto<?php endif; ?></div>
+<div class="pl-historico-dados"><h3><?= esc($item['titulo']) ?></h3><strong>R$ <?= number_format((float)$item['preco'],2,',','.') ?></strong>
+<p><?= esc(['excluido'=>'Excluído','expirado'=>'Expirado','moderacao'=>'Removido por moderação'][$situacao]) ?> · <?= $data ? esc(date('d/m/Y',strtotime($data))) : 'Data não informada' ?></p>
+<?php if ($acao === 'restaurar' && !($somenteConsulta ?? false)): ?>
+<form method="post" action="<?= site_url('anuncios/'.$item['id'].'/restaurar') ?>" class="form-restaurar-anuncio"><?= csrf_field() ?><input type="hidden" name="confirmar" value="1"> <button class="pl-btn pl-contorno" type="submit">Restaurar</button></form>
+<?php elseif ($acao === 'republicar' && !($somenteConsulta ?? false)): ?>
+<a class="pl-btn pl-contorno" href="<?= site_url('anuncios/'.$item['id'].'/republicar') ?>">Republicar</a>
+<?php else: ?><span>Operação indisponível</span><?php endif; ?>
+</div></article>
+<?php endforeach; ?></div></section>
     </main>
 
     <!-- MODAL DE CONFIRMAÇÃO DA EXCLUSÃO -->
@@ -600,6 +619,16 @@ $mensagemErro = session()->getFlashdata('erro');
 
     </dialog>
 
+<dialog id="modal-restaurar-anuncio" class="perfil-modal-restaurar" aria-labelledby="titulo-restaurar">
+    <div class="restaurar-icone" aria-hidden="true">↶</div>
+    <h2 id="titulo-restaurar">Restaurar anúncio</h2>
+    <p>Tem certeza de que deseja restaurar este anúncio?</p>
+    <p class="restaurar-aviso">O anúncio voltará a ficar disponível, mantendo a validade original, as mídias, os favoritos e as perguntas.</p>
+    <div class="restaurar-acoes">
+        <button type="button" id="restaurar-cancelar" autofocus>Cancelar</button>
+        <button type="button" id="restaurar-confirmar">Sim, restaurar</button>
+    </div>
+</dialog>
 </body>
 
 </html>
