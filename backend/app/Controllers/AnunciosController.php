@@ -241,7 +241,8 @@ class AnunciosController extends BaseController
     {
         $anuncio = (new AnuncioModel())->find($id);
         if (
-            ! $anuncio || $anuncio['status'] !== 'ativo'
+            ! $anuncio || !in_array($anuncio['status'], ['ativo','pendente'], true)
+            || !empty($anuncio['motivo_indisponibilidade'])
             || empty($anuncio['data_expiracao'])
             || strtotime($anuncio['data_expiracao']) <= time()
         ) {
@@ -299,7 +300,8 @@ class AnunciosController extends BaseController
     {
         $anuncio = (new AnuncioModel())->find($anuncioId);
         if (
-            ! $anuncio || $anuncio['status'] !== 'ativo'
+            ! $anuncio || !in_array($anuncio['status'], ['ativo','pendente'], true)
+            || !empty($anuncio['motivo_indisponibilidade'])
             || empty($anuncio['data_expiracao'])
             || strtotime($anuncio['data_expiracao']) <= time()
         ) {
