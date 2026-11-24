@@ -365,36 +365,8 @@ $situacao = $situacoes[$situacaoOriginal]
 
         </section>
 
-        <!-- PERGUNTAS -->
-
-        <section class="cartao perguntas">
-
-            <h2>Perguntas ao vendedor</h2>
-
-            <div class="formulario-pergunta">
-
-                <input
-                    type="text"
-                    placeholder="Escreva sua pergunta"
-                    aria-label="Escreva sua pergunta"
-                    disabled>
-
-                <button
-                    type="button"
-                    class="botao botao-principal"
-                    disabled>
-                    Perguntar
-                </button>
-
-            </div>
-
-            <p class="mensagem-perguntas">
-                Em breve você poderá enviar perguntas públicas
-                ao vendedor e acompanhar as respostas aqui.
-            </p>
-
-        </section>
-
+        <!-- PERGUNTAS E RESPOSTAS -->
+        <?= view('layouts/Perguntas', ['anuncioId' => $anuncioId]) ?>
     </main>
 
     <footer class="rodape">
