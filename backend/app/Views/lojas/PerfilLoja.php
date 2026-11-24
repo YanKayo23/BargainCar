@@ -55,7 +55,7 @@ $erros = session()->getFlashdata('erros') ?? [];
       </div>
       <div class="pl-dados"><h1><?= esc($nome) ?></h1><p><?= esc($cidadeTexto) ?> · Na plataforma há <?= esc($tempo) ?></p>
       </div>
-      <span class="pl-btn pl-contorno pl-editar-futuro" title="A edição será criada em uma página separada">Editar loja (em breve)</span>
+      <a class="pl-btn pl-contorno" href="<?= site_url('perfil-loja/editar') ?>">Editar loja</a>
     </div>
   </section>
 
