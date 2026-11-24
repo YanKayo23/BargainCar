@@ -102,16 +102,67 @@ class PerfilLojaController extends BaseController
             return redirect()->to(site_url('perfil-loja/editar'))->withInput()
                 ->with('erros', $this->validator->getErrors());
         }
+        $dados = $this->validator->getValidated();
+        $mimes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+        $arquivos = [];
+        $erros = [];
+        foreach (['foto_perfil' => 'Foto de perfil', 'foto_capa' => 'Foto de fundo'] as $campo => $label) {
+            $remover = $this->request->getPost('remover_' . $campo) === '1';
+            $arquivo = $this->request->getFile($campo);
+            if ($remover && (!$arquivo || $arquivo->getError() === UPLOAD_ERR_NO_FILE)) {
+                $dados[$campo] = null;
+                continue;
+            }
+            if (!$arquivo || $arquivo->getError() === UPLOAD_ERR_NO_FILE) continue;
+            if (!$arquivo->isValid() || $arquivo->getSize() > 5 * 1024 * 1024
+                || !isset($mimes[$arquivo->getMimeType()])
+                || @getimagesize($arquivo->getTempName()) === false) {
+                $erros[$campo] = $label . ': envie uma imagem JPG, PNG ou WebP de até 5 MB.';
+                continue;
+            }
+            $arquivos[$campo] = $arquivo;
+        }
+        if ($erros) {
+            return redirect()->to(site_url('perfil-loja/editar'))->withInput()->with('erros', $erros);
+        }
+        $prefixo = 'uploads/lojas/' . (int) $loja['id'] . '/';
+        $pasta = FCPATH . $prefixo;
+        $novos = [];
         try {
+            if ($arquivos && !is_dir($pasta) && !mkdir($pasta, 0755, true) && !is_dir($pasta)) {
+                throw new \RuntimeException('Não foi possível criar a pasta de imagens.');
+            }
+            foreach ($arquivos as $campo => $arquivo) {
+                $nome = bin2hex(random_bytes(16)) . '.' . $mimes[$arquivo->getMimeType()];
+                $novos[$campo] = $prefixo . $nome;
+                if (!$arquivo->move($pasta, $nome)) {
+                    throw new \RuntimeException('Falha ao mover imagem.');
+                }
+                $dados[$campo] = $novos[$campo];
+            }
+            // Uma única atualização grava os dados e os caminhos das imagens.
             $modelo = new LojaModel();
-            if ($modelo->update((int) $loja['id'], $this->validator->getValidated()) === false) {
-                return redirect()->to(site_url('perfil-loja/editar'))->withInput()
-                    ->with('erros', $modelo->errors() ?: ['geral' => 'Não foi possível atualizar a loja.']);
+            if ($modelo->update((int) $loja['id'], $dados) === false) {
+                throw new \RuntimeException('Falha ao atualizar a loja.');
             }
         } catch (Throwable $e) {
-            log_message('error', 'Falha ao atualizar dados da loja: ' . $e->getMessage());
+            foreach ($novos as $caminho) {
+                if (is_file(FCPATH . $caminho)) @unlink(FCPATH . $caminho);
+            }
+            log_message('error', 'Falha ao atualizar loja: ' . $e->getMessage());
             return redirect()->to(site_url('perfil-loja/editar'))->withInput()
-                ->with('erro', 'Não foi possível atualizar os dados da loja.');
+                ->with('erro', 'Não foi possível salvar as alterações. Selecione novamente as imagens.');
+        }
+        // Remove as imagens antigas somente após a atualização bem-sucedida.
+        foreach (['foto_perfil', 'foto_capa'] as $campo) {
+            if (!array_key_exists($campo, $dados)) continue;
+            $caminho = $dados[$campo];
+            $anterior = (string) ($loja[$campo] ?? '');
+            if ($anterior !== '' && $anterior === $prefixo . basename($anterior) && $anterior !== $caminho
+                && !in_array($anterior, [$dados['foto_perfil'] ?? (array_key_exists('foto_perfil', $dados) ? null : ($loja['foto_perfil'] ?? null)), $dados['foto_capa'] ?? (array_key_exists('foto_capa', $dados) ? null : ($loja['foto_capa'] ?? null))], true)
+                && is_file(FCPATH . $anterior)) {
+                @unlink(FCPATH . $anterior);
+            }
         }
         return redirect()->to(site_url('perfil-loja'))
             ->with('sucesso', 'Dados da loja atualizados com sucesso!');
