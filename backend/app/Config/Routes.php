@@ -125,3 +125,9 @@ $routes->post('anuncios/(:num)/restaurar', 'AnunciosController::restaurar/$1', [
 $routes->get('anuncios/(:num)/republicar', 'AnunciosController::prepararRepublicacao/$1', ['filter'=>'auth']);
 $routes->post('anuncios/(:num)/republicar/preparar', 'AnunciosController::prepararRepublicacao/$1', ['filter'=>'auth']);
 $routes->post('anuncios/(:num)/republicar', 'AnunciosController::republicar/$1', ['filter'=>'auth']);
+
+$routes->get('lojas/(:num)', 'VerPerfilLojaController::index/$1');
+$routes->get('usuarios/(:num)', 'VerPerfilUsuarioController::index/$1');
+$routes->get('favoritos', 'FavoritosController::index', ['filter'=>'auth']);
+$routes->get('favoritos/estado', 'FavoritosController::estado');
+$routes->post('anuncios/(:num)/favoritar', 'FavoritosController::alternar/$1', ['filter'=>'csrf']);
