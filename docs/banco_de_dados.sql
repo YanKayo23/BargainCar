@@ -112,10 +112,19 @@ CREATE TABLE anuncios (
     status ENUM('ativo', 'pendente', 'expirado')
         NOT NULL DEFAULT 'ativo',
     deleted_at DATETIME NULL,
+    motivo_indisponibilidade ENUM('exclusao_vendedor', 'exclusao_loja', 'moderacao')
+        NULL DEFAULT NULL,
+    anuncio_origem_id INT UNSIGNED NULL DEFAULT NULL,
 
+    INDEX idx_anuncios_historico (usuario_id, tipo_anunciante, loja_id, deleted_at, data_expiracao),
     INDEX idx_anuncios_busca (status, deleted_at, cidade_id),
     INDEX idx_anuncios_expiracao (status, data_expiracao),
     INDEX idx_anuncios_usuario (usuario_id),
+
+    CONSTRAINT fk_anuncio_origem
+        FOREIGN KEY (anuncio_origem_id)
+        REFERENCES anuncios(id)
+        ON DELETE SET NULL,
 
     CONSTRAINT fk_anuncios_usuarios
         FOREIGN KEY (usuario_id)
