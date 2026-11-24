@@ -20,6 +20,8 @@ $proximaDistancia = $proximaDistancia ?? null;
     <link
         rel="stylesheet"
         href="<?= base_url('css/BuscarAnuncios.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('css/Favoritos.css') ?>">
+    <script defer src="<?= base_url('js/Favoritos.js') ?>"></script>
 </head>
 
 <body>
@@ -101,7 +103,7 @@ $proximaDistancia = $proximaDistancia ?? null;
 
                 <?php foreach ($anuncios as $anuncio): ?>
 
-                    <a
+                    <div class="bc-fav-wrap"><a
                         class="busca-cartao"
                         href="<?= site_url(
                                     'anuncios/' . $anuncio['id']
@@ -183,6 +185,8 @@ $proximaDistancia = $proximaDistancia ?? null;
                         </div>
 
                     </a>
+<?= view('layouts/CoracaoFavorito',['anuncioId'=>$anuncio['id']]) ?>
+</div>
 
                 <?php endforeach; ?>
 
