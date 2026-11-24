@@ -3,6 +3,7 @@ $termo = $termo ?? '';
 $cidade = $cidade ?? null;
 $erro = $erro ?? null;
 $anuncios = $anuncios ?? [];
+$lojas = $lojas ?? [];
 $raioKm = (int) ($raioKm ?? 100);
 $cidadeIdFiltro = (string) ($cidadeIdFiltro ?? '');
 $proximaDistancia = $proximaDistancia ?? null;
@@ -41,7 +42,7 @@ $proximaDistancia = $proximaDistancia ?? null;
 
             <?php if ($cidade): ?>
                 <p>
-                    Anúncios em até
+                    Anúncios e lojas em até
                     <strong><?= esc((string) $raioKm) ?> km</strong>
                     de
                     <strong>
@@ -53,12 +54,43 @@ $proximaDistancia = $proximaDistancia ?? null;
 
             <?php if ($termo !== ''): ?>
                 <p>
-                    Resultados para:
+                    Veículos pesquisados:
                     <strong><?= esc($termo) ?></strong>
                 </p>
             <?php endif; ?>
 
         </section>
+
+        <?php if (!$erro && $cidade): ?>
+            <section class="busca-lojas" aria-labelledby="busca-lojas-titulo">
+                <h2 id="busca-lojas-titulo">Lojas próximas</h2>
+                <?php if (empty($lojas)): ?>
+                    <p class="busca-lojas-vazio">Nenhuma loja encontrada nesse raio.</p>
+                <?php else: ?>
+                    <div class="busca-lojas-grade">
+                        <?php foreach ($lojas as $loja): ?>
+                            <a class="busca-loja-cartao" href="<?= site_url('lojas/' . (int) $loja['id']) ?>">
+                                <div class="busca-loja-foto">
+                                    <?php if (!empty($loja['foto_perfil']) && is_file(FCPATH . $loja['foto_perfil'])): ?>
+                                        <img src="<?= esc(base_url($loja['foto_perfil']), 'attr') ?>" alt="" loading="lazy">
+                                    <?php else: ?>
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M3 9l2-6h14l2 6v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/>
+                                            <path d="M5 14v7h14v-7M10 21v-6h4v6"/>
+                                        </svg>
+                                    <?php endif; ?>
+                                </div>
+                                <h3><?= esc($loja['nome_empresa']) ?></h3>
+                                <p><?= esc($loja['cidade_nome']) ?> - <?= esc($loja['cidade_uf']) ?></p>
+                                <p class="busca-loja-distancia"><?= number_format((float) $loja['distancia_km'], 1, ',', '.') ?> km de distância aproximada</p>
+                                <span class="busca-loja-botao">Ver loja</span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </section>
+            <h2 class="busca-anuncios-titulo">Anúncios encontrados</h2>
+        <?php endif; ?>
 
         <?php if ($erro): ?>
 
