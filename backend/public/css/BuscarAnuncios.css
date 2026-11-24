@@ -457,3 +457,23 @@ body {
 .busca-ampliar-botao:focus-visible { outline: 3px solid #93bff5; outline-offset: 3px; }
 .busca-mensagem .busca-mensagem-apoio { font-size: 12px; }
 @media (max-width: 600px) { .busca-ampliar-botao { width: 100%; } }
+
+
+/* Lojas próximas */
+.busca-lojas { margin-bottom: 32px; }
+.busca-lojas h2, .busca-anuncios-titulo { font-size: 21px; font-weight: 700; color: #202a3b; margin: 0 0 16px; }
+.busca-lojas-grade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.busca-loja-cartao { display: flex; flex-direction: column; align-items: center; min-width: 0; padding: 20px; background: #fff; border: 1px solid #e2e6ee; border-radius: 15px; text-decoration: none; color: #202a3b; text-align: center; box-shadow: 0 2px 8px rgba(20,40,70,.035); transition: border-color .2s, box-shadow .2s; }
+.busca-loja-cartao:hover { border-color: #b6d2f5; box-shadow: 0 6px 18px rgba(20,40,70,.09); color: #202a3b; }
+.busca-loja-cartao:focus-visible { outline: 3px solid #1769d2; outline-offset: 3px; }
+.busca-loja-foto { width: 76px; height: 76px; flex: 0 0 76px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: #eaf2ff; color: #1769d2; margin-bottom: 12px; }
+.busca-loja-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.busca-loja-cartao h3 { font-size: 17px; font-weight: 700; margin: 0 0 6px; overflow-wrap: anywhere; max-width: 100%; }
+.busca-loja-cartao p { font-size: 13px; color: #64748b; margin: 4px 0; overflow-wrap: anywhere; }
+.busca-loja-cartao .busca-loja-distancia { color: #1769d2; font-weight: 600; margin-bottom: 16px; }
+.busca-loja-botao { display: block; width: 100%; margin-top: auto; padding: 10px; border-radius: 9px; background: #1769d2; color: #fff; font-size: 13px; font-weight: 700; }
+.busca-loja-cartao:hover .busca-loja-botao { background: #0d4fa8; }
+.busca-lojas-vazio { color: #64748b; font-size: 14px; margin: 0; }
+@media (max-width: 850px) { .busca-lojas-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .busca-lojas-grade { grid-template-columns: 1fr; gap: 12px; } }
+@media (prefers-reduced-motion: reduce) { .busca-loja-cartao { transition: none; } }
