@@ -628,3 +628,19 @@ body {
     .perfil-form-logout,
     .perfil-botao-logout { width: 100%; }
 }
+
+/* Histórico de anúncios */
+.pl-historico-lista{display:grid;gap:16px}.pl-historico-item{display:flex;gap:18px;background:#fff;border:1px solid #e1e6ef;border-radius:12px;padding:16px;flex-wrap:wrap}.pl-historico-foto{width:160px;height:120px;background:#eaf0f8;display:grid;place-items:center;overflow:hidden;border-radius:8px}.pl-historico-foto img{width:100%;height:100%;object-fit:cover}.pl-historico-dados{flex:1;min-width:180px}.pl-historico-dados h3{margin:0 0 8px}.pl-historico-dados strong{color:#1769d2}.pl-historico-dados form label{display:block;margin-bottom:10px}.pl-btn.pl-contorno{display:inline-block;padding:10px 15px;border:1px solid #1769d2;border-radius:8px;color:#1769d2;background:white;text-decoration:none;cursor:pointer}
+
+/* Modal de restauração */
+.perfil-modal-restaurar { width: min(440px, calc(100% - 32px)); padding: 28px; border: 1px solid #e1e6ef; border-radius: 14px; background: #fff; color: #202a3b; box-shadow: 0 15px 45px #0f172a33; }
+.perfil-modal-restaurar::backdrop { background: #0f172a88; }
+.restaurar-icone { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #eaf2ff; color: #1769d2; font-size: 30px; }
+.perfil-modal-restaurar h2 { margin: 16px 0; font-size: 22px; }
+.perfil-modal-restaurar p { font-size: 14px; line-height: 1.6; }
+.restaurar-aviso { color: #64748b; }
+.restaurar-acoes { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; border-top: 1px solid #e1e6ef; padding-top: 18px; margin-top: 22px; }
+.restaurar-acoes button { padding: 11px 16px; border: 1px solid #cfd6e1; border-radius: 8px; background: #fff; color: #64748b; font-weight: bold; cursor: pointer; }
+#restaurar-confirmar { background: #1769d2; color: #fff; border-color: #1769d2; }
+#restaurar-confirmar:hover { background: #0755a8; }
+#restaurar-confirmar:disabled { opacity: .6; cursor: wait; }
