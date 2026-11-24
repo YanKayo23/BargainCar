@@ -3,6 +3,7 @@
 /** @var array|null $cidade */
 /** @var array $fotos */
 /** @var array|null $video */
+$republicar = $republicar ?? false;
 $erros = session('erros') ?? [];
 $erroGeral = session('erro');
 $sucesso = session('sucesso');
@@ -25,7 +26,7 @@ $removidas = is_array($removidas) ? array_map('strval', $removidas) : [];
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Editar anúncio | BargainCar</title>
+    <title><?= $republicar ? 'Republicar' : 'Editar' ?> anúncio | BargainCar</title>
 
     <link rel="stylesheet" href="<?= base_url('css/CriarAnuncio.css') ?>">
     <link rel="stylesheet" href="<?= base_url('css/EditarAnuncio.css') ?>">
@@ -36,12 +37,12 @@ $removidas = is_array($removidas) ? array_map('strval', $removidas) : [];
 <?= view('layouts/Navbar') ?>
 <main class="pagina-criar-anuncio">
 
-    <a class="voltar" href="<?= site_url('meu-perfil') ?>">← Voltar ao meu perfil</a>
+    <a class="voltar" href="<?= esc($urlRetorno, 'attr') ?>">← Voltar</a>
     <div class="cabecalho-pagina">
-        <h1>Editar anúncio</h1>
+        <h1><?= $republicar ? 'Republicar anúncio' : 'Editar anúncio' ?></h1>
 
         <p>
-            Atualize os dados e as mídias do anúncio. O prazo de validade não será reiniciado.
+            <?= $republicar ? 'Revise os dados e mídias. Uma nova publicação terá validade de 30 dias.' : 'Atualize os dados e as mídias do anúncio. O prazo de validade não será reiniciado.' ?>
         </p>
     </div>
 
@@ -71,7 +72,7 @@ $removidas = is_array($removidas) ? array_map('strval', $removidas) : [];
 
     <form
         id="formEditarAnuncio"
-        action="<?= site_url('anuncios/' . $anuncio['id'] . '/atualizar') ?>"
+        action="<?= site_url('anuncios/' . $anuncio['id'] . ($republicar ? '/republicar' : '/atualizar')) ?>"
         method="post"
         enctype="multipart/form-data"
 
@@ -80,6 +81,7 @@ $removidas = is_array($removidas) ? array_map('strval', $removidas) : [];
     >
 
         <?= csrf_field() ?>
+        <input type="hidden" name="origem" value="<?= esc($origem, 'attr') ?>">
 
         <div class="conteudo-anuncio">
 
@@ -234,7 +236,7 @@ $removidas = is_array($removidas) ? array_map('strval', $removidas) : [];
                         <div class="fotos-atuais" id="fotosAtuais">
                             <?php foreach ($fotos as $foto): ?>
                                 <label class="foto-atual">
-                                    <img src="<?= esc(site_url('anuncios/' . $anuncio['id'] . '/midias-edicao/' . $foto['id']), 'attr') ?>"
+                                    <img src="<?= esc(site_url('anuncios/' . $anuncio['id'] . ($republicar ? '/midias-historico/' : '/midias-edicao/') . $foto['id']), 'attr') ?>"
                                          alt="Foto atual do veículo">
                                     <span>
                                         <input type="checkbox" name="remover_fotos[]"
@@ -267,7 +269,7 @@ $removidas = is_array($removidas) ? array_map('strval', $removidas) : [];
 
                         <?php if ($video): ?>
                             <p>Vídeo atual: <a target="_blank" rel="noopener"
-                                href="<?= esc(site_url('anuncios/' . $anuncio['id'] . '/midias-edicao/' . $video['id']), 'attr') ?>">Visualizar vídeo</a></p>
+                                href="<?= esc(site_url('anuncios/' . $anuncio['id'] . ($republicar ? '/midias-historico/' : '/midias-edicao/') . $video['id']), 'attr') ?>">Visualizar vídeo</a></p>
                             <label class="opcao-video"><input type="checkbox" name="remover_video" value="1"
                                 <?= old('remover_video') === '1' ? 'checked' : '' ?>> Remover vídeo atual</label>
                         <?php endif; ?>
@@ -357,16 +359,18 @@ $removidas = is_array($removidas) ? array_map('strval', $removidas) : [];
                     </p>
 
                     <p>
-                        A edição não altera a data de expiração do anúncio.
+                        <?= $republicar ? 'O original permanecerá no histórico.' : 'A edição não altera a data de expiração do anúncio.' ?>
                     </p>
 
+                    <?php if ($republicar): ?><label class="opcao-video"><input type="checkbox" name="confirmar" value="1" required> Confirmo a criação de um novo anúncio.</label><?php endif; ?>
                     <button
                         type="submit"
                         id="botaoSalvar"
                         class="botao-publicar"
                     >
-                        Salvar alterações
+                        <?= $republicar ? 'Republicar anúncio' : 'Salvar alterações' ?>
                     </button>
+                    <a class="voltar" href="<?= esc($urlRetorno, 'attr') ?>">Cancelar</a>
 
                 </section>
 
