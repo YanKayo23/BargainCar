@@ -118,3 +118,10 @@ $routes->post(
     'PerfilController::atualizar',
     ['filter' => 'auth']
 );
+
+$routes->get('anuncios/(:num)/midias-historico/(:num)', 'AnunciosController::exibirMidiaHistorico/$1/$2', ['filter' => 'auth']);
+
+$routes->post('anuncios/(:num)/restaurar', 'AnunciosController::restaurar/$1', ['filter'=>'auth']);
+$routes->get('anuncios/(:num)/republicar', 'AnunciosController::prepararRepublicacao/$1', ['filter'=>'auth']);
+$routes->post('anuncios/(:num)/republicar/preparar', 'AnunciosController::prepararRepublicacao/$1', ['filter'=>'auth']);
+$routes->post('anuncios/(:num)/republicar', 'AnunciosController::republicar/$1', ['filter'=>'auth']);
