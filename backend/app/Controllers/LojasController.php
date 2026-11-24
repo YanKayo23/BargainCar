@@ -202,13 +202,18 @@ class LojasController extends BaseController
         $db = db_connect();
         $db->transBegin();
         try {
+            if (!$db->query('SELECT id FROM lojas WHERE id = ? AND usuario_id = ? AND deleted_at IS NULL FOR UPDATE', [$id, $usuarioId])->getRowArray()) throw new \RuntimeException('Loja indisponível.');
             $agora = date('Y-m-d H:i:s');
             // Não modifica anúncios pessoais nem anúncios de outras lojas.
             $db->table('anuncios')
                 ->where('loja_id', $id)
                 ->where('tipo_anunciante', 'loja')
                 ->where('deleted_at', null)
-                ->update(['deleted_at' => $agora]);
+                ->where('usuario_id', $usuarioId)
+                ->where('motivo_indisponibilidade', null)
+                ->whereIn('status', ['ativo', 'pendente'])
+                ->where('data_expiracao >', $agora)
+                ->update(['deleted_at' => $agora, 'motivo_indisponibilidade' => 'exclusao_loja']);
 
             $db->table('lojas')->where('id', $id)
                 ->where('usuario_id', $usuarioId)
@@ -227,7 +232,7 @@ class LojasController extends BaseController
 
         session()->set('modo_perfil', 'pessoa');
         return redirect()->to(site_url('meu-perfil'))
-            ->with('sucesso', 'Loja desativada. Os anúncios da loja foram arquivados; seus anúncios pessoais não foram alterados.');
+            ->with('sucesso', 'Loja desativada. Os anúncios da loja foram excluídos logicamente; seus anúncios pessoais não foram alterados.');
     }
 
     // Reativa uma loja anteriormente desativada
