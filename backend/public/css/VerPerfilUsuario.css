@@ -1,0 +1,29 @@
+body { margin: 0; background: #f3f5f9; color: #202a3b; font-family: Arial, sans-serif; }
+.vu-container { max-width: 1200px; margin: auto; padding: 28px 20px 70px; box-sizing: border-box; }
+.vu-voltar { display: inline-block; margin-bottom: 22px; color: #0866c9; text-decoration: none; font-weight: 600; }
+.vu-painel { background: #fff; border: 1px solid #e0e5ee; border-radius: 15px; margin-bottom: 24px; box-shadow: 0 3px 14px #172e4a0a; }
+.vu-identidade { display: flex; align-items: center; gap: 20px; padding: 28px; flex-wrap: wrap; }
+.vu-avatar { width: 94px; height: 94px; flex: 0 0 94px; border-radius: 50%; overflow: hidden; background: #e6f0ff; color: #0866c9; display: grid; place-items: center; font-size: 40px; font-weight: 800; }
+.vu-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.vu-dados { flex: 1; min-width: 150px; overflow-wrap: anywhere; }
+.vu-dados h1 { font-size: 27px; margin: 0 0 7px; }
+.vu-dados p, .vu-anuncios > p { color: #66768a; font-size: 14px; margin: 0 0 8px; }
+.vu-total { display: flex; flex-direction: column; padding: 12px 20px; background: #f3f7fc; border-radius: 10px; color: #66768a; font-size: 13px; }
+.vu-total strong { color: #0866c9; font-size: 25px; }
+.vu-anuncios { padding: 28px; }
+.vu-anuncios h2 { font-size: 22px; margin: 0 0 8px; }
+.vu-topo { display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-wrap: wrap; margin: 22px 0; color: #66768a; font-size: 14px; }
+.vu-topo select { padding: 9px; border: 1px solid #cbd5e2; border-radius: 8px; background: #fff; color: #202a3b; }
+.vu-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; }
+.vu-card { display: flex; flex-direction: column; min-width: 0; border: 1px solid #e1e6ef; border-radius: 12px; overflow: hidden; }
+.vu-foto { position: relative; height: 180px; background: #eaf0f8; display: grid; place-items: center; color: #718097; overflow: hidden; }
+.vu-foto img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.vu-card-info { display: flex; flex-direction: column; flex: 1; padding: 16px; overflow-wrap: anywhere; }
+.vu-card-info h3 { font-size: 17px; margin: 0 0 9px; }
+.vu-card-info strong { font-size: 20px; color: #0866c9; }
+.vu-card-info p { color: #66768a; font-size: 13px; margin: 8px 0 16px; }
+.vu-ver { margin-top: auto; text-align: center; padding: 10px; border: 1px solid #0866c9; border-radius: 8px; color: #0866c9; text-decoration: none; font-weight: 700; }
+.vu-ver:hover, .vu-ver:focus-visible { background: #0866c9; color: #fff; }
+.vu-vazio { padding: 35px; text-align: center; background: #f7f9fc; border-radius: 12px; }
+@media(max-width:850px) { .vu-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:580px) { .vu-grid { grid-template-columns: 1fr; } .vu-identidade,.vu-anuncios { padding: 18px; } .vu-dados h1 { font-size: 22px; } .vu-total { width: 100%; } }
