@@ -8,6 +8,7 @@ use App\Models\UsuarioModel;
 use App\Models\AnuncioModel;
 use CodeIgniter\HTTP\RedirectResponse;
 use App\Models\MidiaModel;
+use App\Models\LojaModel;
 
 class BuscaController extends BaseController
 {
@@ -80,6 +81,7 @@ class BuscaController extends BaseController
         }
 
         $anuncios = [];
+        $lojas = [];
         $distancias = [];
 
         // 3. Executa a busca somente com cidade válida.
@@ -133,6 +135,27 @@ class BuscaController extends BaseController
 
             // 5. Busca anúncios dessas cidades.
             if (! empty($codigosCidades)) {
+
+                // Lojas próximas: mesmo raio e cidade dos anúncios,
+                // independentemente do título pesquisado.
+                $lojas = (new LojaModel())
+                    ->select('lojas.id, lojas.nome_empresa, lojas.foto_perfil,
+                        lojas.cidade_id, cidades.nome AS cidade_nome,
+                        cidades.uf AS cidade_uf')
+                    ->join('cidades', 'cidades.codigo_ibge = lojas.cidade_id')
+                    ->whereIn('lojas.cidade_id', $codigosCidades)
+                    ->findAll();
+
+                foreach ($lojas as &$loja) {
+                    $loja['distancia_km'] = $distancias[(int) $loja['cidade_id']];
+                }
+                unset($loja);
+
+                usort($lojas, static function ($a, $b) {
+                    return ($a['distancia_km'] <=> $b['distancia_km'])
+                        ?: ($a['id'] <=> $b['id']);
+                });
+                $lojas = array_slice($lojas, 0, 3);
 
                 $anuncioModel = new AnuncioModel();
 
@@ -249,6 +272,7 @@ class BuscaController extends BaseController
             'cidade' => $cidadeReferencia,
             'erro' => $erro,
             'anuncios' => $anuncios,
+            'lojas' => $lojas,
             'raioKm' => $raioKm,
             'cidadeIdFiltro' => $cidadeId,
             'proximaDistancia' => $this->proximaDistancia($raioKm),
