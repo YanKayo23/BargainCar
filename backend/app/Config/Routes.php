@@ -105,3 +105,16 @@ $routes->post('perfil-loja/imagem/(:segment)', 'PerfilLojaController::imagem/$1'
 
 // Voltar ao modo pessoa sem desativar a loja
 $routes->post('perfil-loja/sair', 'PerfilLojaController::sair', ['filter' => 'auth']);
+
+// Edição dos dados pessoais do usuário
+$routes->get(
+    'editar-perfil',
+    'PerfilController::editar',
+    ['filter' => 'auth']
+);
+
+$routes->post(
+    'editar-perfil',
+    'PerfilController::atualizar',
+    ['filter' => 'auth']
+);
