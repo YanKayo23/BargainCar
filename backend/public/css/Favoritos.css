@@ -1,0 +1,49 @@
+.bc-fav-coracao{position:absolute;top:10px;right:10px;z-index:2;width:42px;height:42px;display:grid;place-items:center;background:#fff;border:1px solid #dce3ec;border-radius:50%;cursor:pointer;color:#64748b;box-shadow:0 2px 8px #182b4a20;padding:9px}
+.bc-fav-coracao svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.bc-fav-coracao[aria-pressed=true]{color:#dc3545}.bc-fav-coracao[aria-pressed=true] svg{fill:currentColor}.bc-fav-coracao:disabled{opacity:.6;cursor:wait}.bc-fav-coracao:focus-visible{outline:3px solid #1769d2;outline-offset:2px}
+.bc-fav-wrap{position:relative;min-width:0}.bc-fav-wrap>a{height:100%}.bc-fav-titulo{display:flex;align-items:center;gap:12px}.bc-fav-titulo .bc-fav-coracao{position:static;flex-shrink:0}.bc-fav-titulo h1{flex:1}
+.bc-fav-toast{position:fixed;bottom:24px;right:24px;max-width:calc(100vw - 48px);z-index:99999;background:#1769d2;color:white;padding:15px 20px;border-radius:10px;box-shadow:0 5px 20px #182b4a33;font:600 14px Arial}.bc-fav-toast.erro{background:#b42318}
+body:has(.bc-fav-pagina){margin:0;background:#f3f5f9;color:#202a3b;font-family:Arial,sans-serif}.bc-fav-pagina{max-width:1200px;margin:32px auto;padding:0 20px 60px}.bc-fav-pagina a{color:#1769d2;text-decoration:none;font-weight:600}.bc-fav-pagina>p{color:#64748b}.bc-fav-grade{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.bc-fav-card{background:white;border:1px solid #e1e6ef;border-radius:14px;overflow:hidden}.bc-fav-foto{position:relative;height:190px;background:#e7edf5;display:grid;place-items:center;color:#64748b}.bc-fav-foto img{width:100%;height:100%;object-fit:cover}.bc-fav-info{padding:18px}.bc-fav-info h2{font-size:18px;margin:0 0 10px}.bc-fav-info strong{color:#1769d2;font-size:22px}.bc-fav-info p{font-size:14px;color:#64748b}.bc-fav-vazio{padding:45px;text-align:center;background:white;border-radius:14px}.bc-fav-vazio[hidden]{display:none}@media(max-width:850px){.bc-fav-grade{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:550px){.bc-fav-grade{grid-template-columns:1fr}}
+
+/* Informações dos cards: proteção contra estilos globais da Navbar. */
+.bc-fav-pagina .bc-fav-info{display:flex;flex-direction:column;gap:8px;padding:18px;color:#202a3b;background:#fff;visibility:visible;opacity:1}
+.bc-fav-pagina .bc-fav-info h2{display:block;visibility:visible;color:#202a3b;font:700 18px/1.4 Arial,sans-serif;margin:0;overflow-wrap:anywhere}
+.bc-fav-pagina .bc-fav-info strong{display:block;visibility:visible;color:#1769d2;font:700 22px/1.4 Arial,sans-serif}
+.bc-fav-pagina .bc-fav-info p{display:block;visibility:visible;color:#64748b;font:400 14px/1.5 Arial,sans-serif;margin:0}
+.bc-fav-pagina .bc-fav-tipo{align-self:flex-start;background:#eaf2ff;color:#1769d2;padding:5px 9px;border-radius:7px;font:700 12px Arial,sans-serif}
+.bc-fav-pagina .bc-fav-info a{border-top:1px solid #edf0f5;padding-top:12px;margin-top:5px}
+
+/* A foto fica confinada à sua própria área, sem sobrepor os dados. */
+.bc-fav-pagina .bc-fav-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.bc-fav-pagina .bc-fav-foto {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    flex: 0 0 auto;
+    overflow: hidden;
+    isolation: isolate;
+}
+.bc-fav-pagina .bc-fav-foto > img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    margin: 0;
+}
+.bc-fav-pagina .bc-fav-info {
+    position: relative;
+    flex: 1 0 auto;
+    min-width: 0;
+}
