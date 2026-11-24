@@ -59,7 +59,7 @@ class PerfilController extends BaseController
 
         // Busca somente anúncios da pessoa física.
         // Os anúncios das lojas ficam separados.
-        $anunciosPessoais = $anuncioModel
+        $anunciosPessoais = $anuncioModel->withDeleted()
             ->where('usuario_id', $usuarioId)
             ->where('tipo_anunciante', 'pessoa')
             ->orderBy('id', 'DESC')
@@ -84,6 +84,14 @@ class PerfilController extends BaseController
         unset($anuncio);
 
 
+        $historico = [];
+        $atuais = [];
+        foreach ($anunciosPessoais as $a) {
+            $situacao = \App\Services\AnuncioCicloVidaService::situacao($a);
+            if ($situacao === null) $atuais[] = $a;
+            else { $a['situacao_historico'] = $situacao; $a['foto_id'] = $a['primeira_foto']['id'] ?? null; $historico[] = $a; }
+        }
+        $anunciosPessoais = $atuais;
         // Conta anúncios pessoais ativos.
         $totalAnunciosAtivos = 0;
 
@@ -139,6 +147,7 @@ class PerfilController extends BaseController
             'lojaAtiva' => $lojaAtiva,
             'lojasDesativadas' => $lojasDesativadas,
             'anunciosPessoais' => $anunciosPessoais,
+            'historico' => $historico,
         ];
 
         return view('usuarios/MeuPerfil', $dados);
@@ -239,23 +248,57 @@ class PerfilController extends BaseController
             }
         }
 
+        // A foto é alterada somente após validar os dados pessoais.
+        $foto = $this->request->getFile('foto_perfil');
+        $remover = $this->request->getPost('remover_foto') === '1';
+        $novaFoto = null;
+        $fotoAntiga = $usuario['foto_perfil'] ?? null;
+        $dados['contato_padrao'] = $dados['contato_padrao'] ?: null;
+
+        if ($foto !== null && $foto->getError() !== UPLOAD_ERR_NO_FILE) {
+            $extensoes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+            if (! $foto->isValid() || $foto->hasMoved() || $foto->getSize() > 2097152
+                || ! isset($extensoes[$foto->getMimeType()])
+                || ! @getimagesize($foto->getTempName())) {
+                return redirect()->back()->withInput()->with('erros', [
+                    'foto_perfil' => 'Selecione uma imagem JPG, PNG ou WebP válida de até 2 MB.',
+                ]);
+            }
+            try {
+                $pasta = FCPATH . 'uploads/usuarios';
+                if (! is_dir($pasta) && ! mkdir($pasta, 0755, true) && ! is_dir($pasta)) {
+                    throw new \RuntimeException('Pasta de imagens indisponível.');
+                }
+                $nomeArquivo = bin2hex(random_bytes(16)) . '.' . $extensoes[$foto->getMimeType()];
+                $foto->move($pasta, $nomeArquivo);
+                $novaFoto = 'uploads/usuarios/' . $nomeArquivo;
+                $dados['foto_perfil'] = $novaFoto;
+            } catch (\Throwable $e) {
+                log_message('error', 'Falha no upload: {erro}', ['erro' => $e->getMessage()]);
+                return redirect()->back()->withInput()->with('erros', [
+                    'foto_perfil' => 'Não foi possível enviar a foto.',
+                ]);
+            }
+        } elseif ($remover) {
+            $dados['foto_perfil'] = null;
+        }
+
         try {
-            $salvou = $usuarioModel->update($usuarioId, [
-                'nome' => $dados['nome'],
-                'email' => $dados['email'],
-                'cpf' => $dados['cpf'],
-                'cidade_id' => $dados['cidade_id'],
-                'contato_padrao' => $dados['contato_padrao'] !== '' ? $dados['contato_padrao'] : null,
-            ]);
+            $salvou = $usuarioModel->update($usuarioId, $dados);
         } catch (\Throwable $e) {
             log_message('error', 'Erro ao editar perfil: {erro}', ['erro' => $e->getMessage()]);
             $salvou = false;
         }
 
         if (! $salvou) {
+            $this->excluirFotoPerfil($novaFoto);
             return redirect()->back()->withInput()->with('erros', [
                 'geral' => 'Não foi possível salvar as alterações. Tente novamente.',
             ]);
+        }
+
+        if (array_key_exists('foto_perfil', $dados) && $fotoAntiga !== $dados['foto_perfil']) {
+            $this->excluirFotoPerfil($fotoAntiga);
         }
 
         session()->set('usuario_nome', $dados['nome']);
@@ -264,4 +307,14 @@ class PerfilController extends BaseController
             ->with('sucesso', 'Dados do perfil atualizados com sucesso!');
     }
 
+    private function excluirFotoPerfil(?string $caminho): void
+    {
+        if (! $caminho || ! preg_match('~^uploads/usuarios/[a-f0-9]{32}\.(jpg|png|webp)$~D', $caminho)) {
+            return;
+        }
+        $arquivo = FCPATH . $caminho;
+        if (is_file($arquivo) && ! @unlink($arquivo)) {
+            log_message('error', 'Não foi possível excluir a foto antiga.');
+        }
+    }
 }
