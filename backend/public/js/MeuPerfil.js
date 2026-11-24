@@ -1,4 +1,3 @@
-
 /* ==========================================
    BARGAINCAR - MEU PERFIL
 ========================================== */
@@ -13,21 +12,23 @@ document.addEventListener('DOMContentLoaded', () => {
         '.perfil-form-reativar'
     );
 
-    formulariosReativacao.forEach((formulario) => {
+    formulariosReativacao.forEach(formulario => {
 
-        formulario.addEventListener('submit', (evento) => {
+        formulario.addEventListener('submit', evento => {
 
             const nomeLoja = formulario.dataset.nomeLoja || 'esta loja';
 
             const confirmado = confirm(
                 `Deseja reativar ${nomeLoja}?\n\n` +
-                'Os anúncios antigos permanecerão arquivados.'
+                'Os anúncios antigos permanecerão no histórico.'
             );
 
             if (!confirmado) {
                 evento.preventDefault();
             }
+
         });
+
     });
 
 
@@ -61,9 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
     ) {
 
         document.querySelectorAll('.perfil-form-excluir')
-            .forEach((formulario) => {
+            .forEach(formulario => {
 
-                formulario.addEventListener('submit', (evento) => {
+                formulario.addEventListener('submit', evento => {
 
                     evento.preventDefault();
 
@@ -76,14 +77,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         `Tem certeza de que deseja excluir o anúncio "${titulo}"?`;
 
                     modalExcluir.showModal();
-                });
-            });
 
+                });
+
+            });
 
         botaoCancelar.addEventListener('click', () => {
             modalExcluir.close();
         });
-
 
         botaoConfirmar.addEventListener('click', () => {
 
@@ -92,16 +93,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 botaoConfirmar.disabled = true;
 
                 formularioSelecionado.submit();
-            }
-        });
 
+            }
+
+        });
 
         modalExcluir.addEventListener('close', () => {
 
             formularioSelecionado = null;
 
             botaoConfirmar.disabled = false;
+
         });
+
     }
 
 
@@ -113,9 +117,9 @@ document.addEventListener('DOMContentLoaded', () => {
         '.perfil-form-renovar'
     );
 
-    formulariosRenovacao.forEach((formulario) => {
+    formulariosRenovacao.forEach(formulario => {
 
-        formulario.addEventListener('submit', (evento) => {
+        formulario.addEventListener('submit', evento => {
 
             const confirmado = confirm(
                 'Deseja solicitar a renovação deste anúncio?'
@@ -124,7 +128,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!confirmado) {
                 evento.preventDefault();
             }
+
         });
+
     });
 
 
@@ -136,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         '.perfil-mensagem'
     );
 
-    mensagens.forEach((mensagem) => {
+    mensagens.forEach(mensagem => {
 
         const botaoFechar = mensagem.querySelector(
             '.perfil-mensagem-fechar'
@@ -147,7 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
             botaoFechar.addEventListener('click', () => {
                 mensagem.remove();
             });
+
         }
+
     });
 
 
@@ -171,8 +179,143 @@ document.addEventListener('DOMContentLoaded', () => {
                     'aria-expanded',
                     String(historico.open)
                 );
+
             }
+
         });
+
+    }
+
+
+    // ======================================
+    // 6. MODAL DE RESTAURAÇÃO DE ANÚNCIOS
+    // ======================================
+
+    const modalRestaurar = document.getElementById(
+        'modal-restaurar-anuncio'
+    );
+
+    const cancelarRestauracao = document.getElementById(
+        'restaurar-cancelar'
+    );
+
+    const confirmarRestauracao = document.getElementById(
+        'restaurar-confirmar'
+    );
+
+    let formularioRestauracao = null;
+    let restaurando = false;
+
+    if (
+        modalRestaurar &&
+        cancelarRestauracao &&
+        confirmarRestauracao
+    ) {
+
+        document.querySelectorAll('.form-restaurar-anuncio')
+            .forEach(formulario => {
+
+                formulario.addEventListener('submit', evento => {
+
+                    evento.preventDefault();
+
+                    if (restaurando || modalRestaurar.open) {
+                        return;
+                    }
+
+                    formularioRestauracao = formulario;
+
+                    confirmarRestauracao.disabled = false;
+                    confirmarRestauracao.textContent = 'Sim, restaurar';
+
+                    cancelarRestauracao.disabled = false;
+
+                    modalRestaurar.showModal();
+
+                });
+
+            });
+
+
+        // Cancelar restauração
+
+        cancelarRestauracao.addEventListener('click', () => {
+
+            if (!restaurando) {
+                modalRestaurar.close();
+            }
+
+        });
+
+
+        // Confirmar restauração
+
+        confirmarRestauracao.addEventListener('click', () => {
+
+            if (!formularioRestauracao || restaurando) {
+                return;
+            }
+
+            restaurando = true;
+
+            confirmarRestauracao.disabled = true;
+            confirmarRestauracao.textContent = 'Restaurando...';
+
+            cancelarRestauracao.disabled = true;
+
+            formularioRestauracao.submit();
+
+        });
+
+
+        // Fechar ao clicar fora do modal
+
+        modalRestaurar.addEventListener('click', evento => {
+
+            if (restaurando || evento.target !== modalRestaurar) {
+                return;
+            }
+
+            const limites = modalRestaurar.getBoundingClientRect();
+
+            const fora =
+                evento.clientX < limites.left ||
+                evento.clientX > limites.right ||
+                evento.clientY < limites.top ||
+                evento.clientY > limites.bottom;
+
+            if (fora) {
+                modalRestaurar.close();
+            }
+
+        });
+
+
+        // Impedir fechamento durante o envio
+
+        modalRestaurar.addEventListener('cancel', evento => {
+
+            if (restaurando) {
+                evento.preventDefault();
+            }
+
+        });
+
+
+        // Limpar seleção ao fechar
+
+        modalRestaurar.addEventListener('close', () => {
+
+            formularioRestauracao = null;
+            restaurando = false;
+
+            confirmarRestauracao.disabled = false;
+            confirmarRestauracao.textContent = 'Sim, restaurar';
+
+            cancelarRestauracao.disabled = false;
+
+        });
+
     }
 
 });
