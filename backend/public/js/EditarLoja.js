@@ -1,7 +1,9 @@
 
-/* BargainCar - Editar dados e imagens da loja */
+/* BargainCar - Edição dos dados e imagens da loja */
+
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('formEditarLoja');
+
     if (!form) return;
 
     const busca = document.getElementById('cidade_busca');
@@ -15,34 +17,37 @@ document.addEventListener('DOMContentLoaded', () => {
     let sequencia = 0;
 
     // ==========================================
-    // AUTOCOMPLETE DE CIDADES
+    // 1. AUTOCOMPLETE DE CIDADES
     // ==========================================
 
-    function fechar() {
+    function fecharSugestoes() {
         lista.hidden = true;
         lista.replaceChildren();
+
         busca.setAttribute('aria-expanded', 'false');
     }
 
-    function cancelar() {
+    function cancelarBusca() {
         clearTimeout(timer);
         controlador?.abort();
         sequencia++;
     }
 
-    function aviso(texto) {
+    function avisoCidade(texto) {
         lista.replaceChildren();
 
-        const p = document.createElement('p');
-        p.textContent = texto;
-        lista.appendChild(p);
+        const aviso = document.createElement('p');
+        aviso.textContent = texto;
 
+        lista.appendChild(aviso);
         lista.hidden = false;
+
         busca.setAttribute('aria-expanded', 'true');
     }
 
-    async function procurar(termo) {
+    async function buscarCidades(termo) {
         controlador?.abort();
+
         controlador = new AbortController();
 
         const atual = ++sequencia;
@@ -73,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
             lista.replaceChildren();
 
             if (!Array.isArray(cidades) || cidades.length === 0) {
-                aviso('Nenhuma cidade encontrada.');
+                avisoCidade('Nenhuma cidade encontrada.');
                 return;
             }
 
@@ -82,11 +87,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 botao.type = 'button';
                 botao.setAttribute('role', 'option');
+
                 botao.textContent =
                     `${cidade.nome} - ${cidade.uf}`;
 
                 botao.addEventListener('click', () => {
-                    cancelar();
+                    cancelarBusca();
 
                     busca.value =
                         `${cidade.nome} - ${cidade.uf}`;
@@ -94,13 +100,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     cidadeId.value =
                         String(cidade.codigo_ibge);
 
-                    fechar();
+                    fecharSugestoes();
                 });
 
                 lista.appendChild(botao);
             }
 
             lista.hidden = false;
+
             busca.setAttribute('aria-expanded', 'true');
 
         } catch (erro) {
@@ -109,11 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 atual === sequencia
             ) {
                 console.error(
-                    'Falha ao buscar cidades:',
+                    'Erro ao buscar cidades:',
                     erro
                 );
 
-                aviso(
+                avisoCidade(
                     'Não foi possível buscar cidades. Tente novamente.'
                 );
             }
@@ -121,29 +128,230 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     busca.addEventListener('input', () => {
-        cancelar();
+        cancelarBusca();
 
         cidadeId.value = '';
-        fechar();
+
+        fecharSugestoes();
 
         const termo = busca.value.trim();
 
         if (termo.length >= 2) {
-            timer = setTimeout(() => procurar(termo), 300);
+            timer = setTimeout(() => {
+                buscarCidades(termo);
+            }, 300);
         }
     });
 
     busca.addEventListener('keydown', evento => {
-        if (evento.key === 'Escape') fechar();
+        if (evento.key === 'Escape') {
+            cancelarBusca();
+            fecharSugestoes();
+        }
     });
 
     document.addEventListener('click', evento => {
         if (!campoCidade.contains(evento.target)) {
-            fechar();
+            cancelarBusca();
+            fecharSugestoes();
         }
     });
 
+    // ==========================================
+    // 2. VALIDAÇÃO DAS IMAGENS
+    // ==========================================
+
+    const formatosPermitidos = [
+        'image/jpeg',
+        'image/png',
+        'image/webp'
+    ];
+
+    const tamanhoMaximo = 5 * 1024 * 1024;
+
+    function imagemValida(arquivo) {
+        return formatosPermitidos.includes(arquivo.type)
+            && arquivo.size > 0
+            && arquivo.size <= tamanhoMaximo;
+    }
+
+    // ==========================================
+    // 3. GERENCIAMENTO DAS IMAGENS
+    // ==========================================
+
+    function configurarImagem(tipo) {
+        const input = document.getElementById(
+            `el-imagem-${tipo}`
+        );
+
+        const previa = document.getElementById(
+            `el-previa-img-${tipo}`
+        );
+
+        const vazio = document.getElementById(
+            `el-sem-foto-${tipo}`
+        );
+
+        const campoRemover = document.getElementById(
+            `el-remover-${tipo}`
+        );
+
+        const botaoRemover = document.querySelector(
+            `[data-remover="${tipo}"]`
+        );
+
+        const botaoDesfazer = document.querySelector(
+            `[data-desfazer="${tipo}"]`
+        );
+
+        if (
+            !input ||
+            !previa ||
+            !vazio ||
+            !campoRemover ||
+            !botaoRemover ||
+            !botaoDesfazer
+        ) {
+            return;
+        }
+
+        const imagemOriginal = previa.getAttribute('src');
+
+        const possuiImagemOriginal =
+            Boolean(imagemOriginal) && !previa.hidden;
+
+        let urlTemporaria = null;
+
+        // Libera a prévia temporária da memória.
+
+        function limparPreviaTemporaria() {
+            if (urlTemporaria) {
+                URL.revokeObjectURL(urlTemporaria);
+                urlTemporaria = null;
+            }
+        }
+
+        // Exibe a imagem.
+
+        function mostrarImagem(url) {
+            previa.src = url;
+            previa.hidden = false;
+            vazio.hidden = true;
+        }
+
+        // Exibe o espaço sem imagem.
+
+        function ocultarImagem() {
+            previa.hidden = true;
+            previa.removeAttribute('src');
+            vazio.hidden = false;
+        }
+
+        // Restaura a imagem original.
+
+        function restaurarOriginal() {
+            limparPreviaTemporaria();
+
+            input.value = '';
+            campoRemover.value = '0';
+
+            if (possuiImagemOriginal) {
+                mostrarImagem(imagemOriginal);
+            } else {
+                ocultarImagem();
+            }
+
+            botaoRemover.disabled = !possuiImagemOriginal;
+            botaoRemover.hidden = false;
+            botaoDesfazer.hidden = true;
+        }
+
+        // ======================================
+        // SELECIONAR UMA NOVA IMAGEM
+        // ======================================
+
+        input.addEventListener('change', () => {
+            limparPreviaTemporaria();
+
+            const arquivo = input.files?.[0];
+
+            if (!arquivo) {
+                if (campoRemover.value === '1') {
+                    ocultarImagem();
+                } else {
+                    restaurarOriginal();
+                }
+
+                return;
+            }
+
+            if (!imagemValida(arquivo)) {
+                alert(
+                    'Escolha uma imagem JPG, PNG ou WebP de até 5 MB.'
+                );
+
+                restaurarOriginal();
+
+                return;
+            }
+
+            // Uma nova imagem cancela a remoção anterior.
+
+            campoRemover.value = '0';
+
+            urlTemporaria = URL.createObjectURL(arquivo);
+
+            mostrarImagem(urlTemporaria);
+
+            botaoRemover.disabled = false;
+            botaoRemover.hidden = false;
+            botaoDesfazer.hidden = true;
+        });
+
+        // ======================================
+        // REMOVER IMAGEM
+        // ======================================
+
+        botaoRemover.addEventListener('click', () => {
+            limparPreviaTemporaria();
+
+            // Descarta qualquer nova imagem selecionada.
+
+            input.value = '';
+
+            // Marca a imagem para remoção no salvamento.
+
+            campoRemover.value = '1';
+
+            ocultarImagem();
+
+            botaoRemover.hidden = true;
+            botaoDesfazer.hidden = false;
+        });
+
+        // ======================================
+        // DESFAZER REMOÇÃO
+        // ======================================
+
+        botaoDesfazer.addEventListener('click', () => {
+            restaurarOriginal();
+        });
+    }
+
+    // Configura as duas imagens separadamente.
+
+    configurarImagem('perfil');
+    configurarImagem('capa');
+
+    // ==========================================
+    // 4. SALVAR TODAS AS ALTERAÇÕES
+    // ==========================================
+
     form.addEventListener('submit', evento => {
+        cancelarBusca();
+
+        fecharSugestoes();
+
         if (!cidadeId.value) {
             evento.preventDefault();
 
@@ -152,85 +360,41 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
             busca.focus();
+
             return;
         }
 
+        const camposImagem = form.querySelectorAll(
+            'input[type="file"]'
+        );
+
+        for (const input of camposImagem) {
+            const arquivo = input.files?.[0];
+
+            if (arquivo && !imagemValida(arquivo)) {
+                evento.preventDefault();
+
+                alert(
+                    'As imagens devem ser JPG, PNG ou WebP de até 5 MB.'
+                );
+
+                input.focus();
+
+                return;
+            }
+        }
+
+        // Impede o envio duplicado.
+
         if (form.dataset.enviando === '1') {
             evento.preventDefault();
+
             return;
         }
 
         form.dataset.enviando = '1';
 
         salvar.disabled = true;
-        salvar.textContent = 'Salvando...';
-    });
-
-    // ==========================================
-    // FOTOS DE PERFIL E FUNDO
-    // ==========================================
-
-    document.querySelectorAll('.el-form-imagem').forEach(formImagem => {
-        const input = formImagem.querySelector('input[type="file"]');
-        const botao = formImagem.querySelector('button[type="submit"]');
-
-        const previa = document.getElementById(input.dataset.previa);
-        const vazio = document.getElementById(input.dataset.vazio);
-
-        let urlTemporaria = null;
-        let arquivoValido = false;
-
-        input.addEventListener('change', () => {
-            if (urlTemporaria) {
-                URL.revokeObjectURL(urlTemporaria);
-            }
-
-            urlTemporaria = null;
-            arquivoValido = false;
-
-            const arquivo = input.files?.[0];
-
-            if (!arquivo) return;
-
-            const formatos = [
-                'image/jpeg',
-                'image/png',
-                'image/webp'
-            ];
-
-            if (
-                !formatos.includes(arquivo.type) ||
-                arquivo.size > 5 * 1024 * 1024
-            ) {
-                alert(
-                    'Escolha uma imagem JPG, PNG ou WebP de até 5 MB.'
-                );
-
-                input.value = '';
-                return;
-            }
-
-            arquivoValido = true;
-            urlTemporaria = URL.createObjectURL(arquivo);
-
-            previa.src = urlTemporaria;
-            previa.hidden = false;
-            vazio.hidden = true;
-        });
-
-        formImagem.addEventListener('submit', evento => {
-            if (
-                !arquivoValido ||
-                formImagem.dataset.enviando === '1'
-            ) {
-                evento.preventDefault();
-                return;
-            }
-
-            formImagem.dataset.enviando = '1';
-
-            botao.disabled = true;
-            botao.textContent = 'Enviando imagem...';
-        });
+        salvar.textContent = 'Salvando alterações...';
     });
 });
