@@ -24,6 +24,8 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 - Caso o vendedor confirme, o anúncio é renovado por mais 30 dias. Caso não responda até o fim do prazo, o anúncio expira automaticamente.
 - Perfil de Loja (empresa), vinculado a um Usuário, com dados próprios separados do perfil pessoal.
 
+- Histórico privado de anúncios pessoais e de cada loja, com restauração de anúncios ainda válidos e republicação de anúncios vencidos.
+
 *Observação: embora a v1 seja restrita à categoria de veículos, o sistema deve ser modelado pensando em uma futura expansão para outras categorias de produtos.*
 
 **Fora do escopo da v1**
@@ -62,6 +64,12 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 - RF20: O sistema deve permitir que o usuário mostre ou oculte a senha digitada por meio de um ícone de olho nos campos de senha (cadastro, login e redefinição).
 - RF21: O sistema deve bloquear temporariamente o login após 5 tentativas incorretas consecutivas, recusando novas tentativas por 1 minuto.
 
+- RF22: Exibir histórico privado em Meu Perfil e Perfil da Loja, separado dos anúncios atuais e por identidade anunciante.
+- RF23: Permitir restauração confirmada de anúncios excluídos ainda válidos, preservando ID, mídias, favoritos, perguntas e prazo.
+- RF24: Permitir republicação de anúncios vencidos mediante revisão e nova validação, criando novo ID e validade de 30 dias, sem transferir interações.
+- RF25: Excluir logicamente anúncios disponíveis na desativação da loja e permitir operações manuais somente após reativação da mesma loja.
+- RF26: Impedir restauração e republicação pelo vendedor de anúncios removidos por moderação.
+
 **Requisitos Não Funcionais (RNF)**
 
 - RNF01: O sistema deve exigir autenticação para acessar áreas restritas (ex: editar perfil).
@@ -80,6 +88,12 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 - RNF12: O tratamento de dados pessoais deve respeitar princípios da LGPD, incluindo finalidade, minimização, transparência e política de retenção e exclusão.
 
 ---
+
+**Requisitos complementares de segurança**
+
+- RNF13: Autorizar no servidor cada consulta privada e operação pelo proprietário, tipo de anunciante e loja original; usar POST com CSRF para restauração e republicação, inclusive preparação de formulário por POST. Revalidar estado e validade na confirmação.
+- RNF14: Servir mídias por acesso controlado, sem URLs públicas diretas para arquivos indisponíveis; impedir acesso por cache público e por manipulação de IDs. Aplicar retenção e LGPD também às cópias e históricos.
+- RNF15: Usar transações, controle de concorrência e proteção contra submissão duplicada nas mudanças de estado e republicação; limpar arquivos temporários em caso de falha.
 
 ## 3. Casos de Uso
 
@@ -146,9 +160,39 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 1. Usuário clica em "Perfil"
 2. Usuário seleciona o anúncio que quer excluir
 3. Usuário clica em "Excluir"
-4. Sistema exibe um pedido de confirmação; se aceito, o anúncio é excluído
+4. Sistema exibe um pedido de confirmação; se aceito, registra a exclusão lógica e move o anúncio para o histórico privado, sem alterar sua validade.
 
 **Fluxo alternativo:** Se o pedido de confirmação não for aceito ou for ignorado, o anúncio não é apagado.
+
+### Caso de Uso: Consultar Histórico de Anúncios
+**Ator:** Proprietário autenticado.
+**Fluxo principal:** Acessa Meu Perfil ou Perfil da Loja e abre a seção Histórico de anúncios, separada dos anúncios atuais. Cada item mostra foto principal, título, preço, data de exclusão ou expiração, situação e ação elegível (Restaurar ou Republicar). Exibir uma única situação: Excluído, Expirado ou Removido por moderação. Para Expirado, mostrar a data de expiração; para Excluído ou Removido por moderação, mostrar a data da remoção. Anúncios pessoais e de cada loja são consultados separadamente. O proprietário pode consultar o histórico de uma loja desativada em área privada, sem executar ações de publicação.
+**Fluxo alternativo:** Histórico vazio exibe mensagem informativa; acesso de terceiros é recusado. Itens moderados não oferecem ações de publicação.
+
+### Caso de Uso: Restaurar Anúncio
+**Ator:** Proprietário autenticado.
+**Pré-condição:** Anúncio excluído pelo vendedor ou pela desativação da loja, ainda dentro da validade, sem bloqueio de moderação; se de loja, a mesma loja deve estar ativa.
+**Fluxo principal:**
+1. Proprietário seleciona Restaurar no histórico e confirma.
+2. Servidor recebe POST com CSRF e verifica propriedade, identidade anunciante, validade e condições de publicação.
+3. Em transação, limpa `deleted_at` e `motivo_indisponibilidade`, recalcula status ativo/pendente conforme prazo restante, preservando `data_expiracao`, ID e vínculos.
+4. Anúncio volta aos anúncios atuais e à consulta pública.
+**Fluxo alternativo:** Cancelamento não altera dados; se vencido, oferecer republicação quando elegível; se inválido, informar motivo e permitir correção autorizada antes de nova tentativa. Loja desativada ou moderação impede a ação.
+
+### Caso de Uso: Republicar Anúncio
+**Ator:** Proprietário autenticado.
+**Pré-condição:** Anúncio expirado, inclusive aquele que foi excluído antes de expirar, sem bloqueio de moderação; mesma loja ativa quando aplicável.
+**Fluxo principal:**
+1. Proprietário seleciona Republicar; POST protegido prepara formulário com dados e mídias anteriores.
+2. Proprietário revisa, altera dados e mídias se desejar e confirma a publicação.
+3. Servidor revalida origem, autorização, prazo vencido e todos os requisitos de criação (inclusive 3 a 5 fotos e vídeo opcional).
+4. Cria novo anúncio ativo, com novo ID, data de criação atual e validade de 30 dias, na mesma identidade anunciante. Cria vínculos de mídia próprios, sem copiar favoritos ou perguntas.
+5. Mantém o original no histórico e exibe a nova publicação nos anúncios atuais.
+**Fluxo alternativo:** Cancelamento ou falha de validação não cria publicação nem altera o original. Reenvio da mesma confirmação não cria duplicata.
+
+### Caso de Uso: Desativar e Reativar Loja
+**Ator:** Proprietário autenticado.
+**Fluxo:** Ao confirmar desativação, excluir logicamente a loja e excluir logicamente seus anúncios ainda publicáveis, preservando prazo e vínculos. Preencher `deleted_at` e `motivo_indisponibilidade = exclusao_loja` nos anúncios atingidos. Não sobrescrever motivos de anúncios já indisponíveis. Ao reativar a mesma loja, verificar limite de uma loja ativa por conta; nenhum anúncio retorna automaticamente. O proprietário pode consultar o histórico e restaurar os válidos ou republicar os vencidos, conforme as regras. A conta pessoal permanece independente.
 
 ### Caso de Uso: Editar Anúncio
 **Ator:** Usuário
@@ -189,7 +233,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 - **Somente distância alterada:** utiliza a cidade padrão como centro da busca, se disponível.
 - **Nenhum filtro alterado:** utiliza a cidade padrão e a distância inicial de 100 km; visitantes sem cidade de referência devem selecioná-la.
 
-**Regras complementares:** O raio padrão é 100 km e pode ser reduzido pelo usuário somente às opções predefinidas, sem ultrapassar 100 km. A distância é uma aproximação em linha reta, não rodoviária. A busca pública exibe somente anúncios `ativo` e `pendente`, excluindo os expirados e os removidos logicamente. As opções definitivas são 10, 25, 50, 75 e 100 km, sendo 100 km o limite máximo.
+**Regras complementares:** O raio padrão é 100 km e pode ser reduzido pelo usuário somente às opções predefinidas, sem ultrapassar 100 km. A distância é uma aproximação em linha reta, não rodoviária. A busca pública exibe somente anúncios publicáveis conforme RN13, com status `ativo` ou `pendente`. As opções definitivas são 10, 25, 50, 75 e 100 km, sendo 100 km o limite máximo.
 
 ### Caso de Uso: Selecionar Cidade
 **Ator:** Usuário
@@ -211,7 +255,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 3. Usuário clica nas fotos
 4. Sistema exibe as fotos disponíveis no anúncio
 
-**Fluxo alternativo:** Caso o anúncio tenha sido excluído ou expirado, o sistema exibe a mensagem "Este anúncio não está mais disponível" e redireciona o usuário para a página de anúncios.
+**Fluxo alternativo:** Caso o anúncio esteja indisponível (excluído, expirado, moderado ou vinculado a loja desativada), o sistema exibe a mensagem "Este anúncio não está mais disponível" e redireciona o usuário para a página de anúncios.
 
 ### Caso de Uso: Adicionar Anúncio aos Favoritos
 **Ator:** Usuário
@@ -251,7 +295,7 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 `id, usuario_id (FK), cidade_id (FK, cidade padrão da loja), contato, nome_empresa, data_cadastro, cnpj (opcional), deleted_at (opcional)`
 
 **Anúncio**
-`id, tipo_anunciante (pessoa ou loja), usuario_id (FK), loja_id (FK, opcional), deleted_at (opcional), cidade_id (FK, padrão ou variante), informacoes_contato (padrão ou variante), data_criacao, data_expiracao, titulo, ano, preco, cor, descricao, defeitos, debitos_pendentes, situacao_documentacao, status (ativo, pendente, expirado)`
+`id, tipo_anunciante (pessoa ou loja), usuario_id (FK), loja_id (FK, opcional), deleted_at (opcional), motivo_indisponibilidade (opcional), anuncio_origem_id (FK opcional), cidade_id (FK, padrão ou variante), informacoes_contato (padrão ou variante), data_criacao, data_expiracao, titulo, ano, preco, cor, descricao, defeitos, debitos_pendentes, situacao_documentacao, status (ativo, pendente, expirado)`
 
 **Mídia**
 `id, anuncio_id (FK), tipo (foto ou video), caminho_arquivo, ordem`
@@ -264,6 +308,18 @@ Sistemas de anúncios de venda frequentemente exibem produtos que despertam o in
 
 **TokenRecuperacaoSenha**
 `id, usuario_id (FK), token_hash, data_expiracao, usado`
+
+### Campos adicionais propostos para a Migration de anúncios
+
+| Campo | Tipo sugerido | Finalidade |
+|---|---|---|
+| `deleted_at` | DATETIME NULL (existente) | Data de exclusão ou remoção por moderação; nulo para publicação não removida. |
+| `motivo_indisponibilidade` | ENUM('exclusao_vendedor','exclusao_loja','moderacao') NULL | Distingue a causa da remoção lógica e determina elegibilidade. |
+| `anuncio_origem_id` | FK anulável para anúncios.id | Rastreabilidade opcional da republicação; ON DELETE SET NULL para permitir retenção/eliminação do original. |
+
+A expiração continua representada por `status` e `data_expiracao`, sem exigir outro campo de data. O prazo deve ser verificado diretamente, mesmo se a tarefa agendada estiver atrasada. Quando um anúncio excluído atingir a data de expiração, apresentar somente a situação Expirado, preservando internamente o motivo e a data de exclusão. Não haverá situação combinada de exclusão e vencimento. Moderação tem precedência sobre os demais motivos; nunca limpar esse bloqueio em operações do vendedor. Registros legados com `deleted_at` e motivo desconhecido devem ser classificados com evidência antes de permitir restauração ou republicação; na dúvida, bloquear as ações. Indexar consultas por proprietário, tipo, loja, `deleted_at`, status e validade conforme planos de execução. Não é necessária tabela separada para o histórico de anúncios indisponíveis; ele é uma consulta privada dos registros existentes. Não se trata de auditoria de todos os eventos passados de anúncios restaurados.
+
+As mídias republicadas devem possuir registros próprios e arquivos independentes (ou armazenamento imutável com controle de referências e autorização por anúncio). A exclusão definitiva de um anúncio não pode apagar arquivos ainda utilizados por outro.
 
 *Notas de modelagem:*
 - `Cidade` guarda latitude e longitude para calcular a distância entre cidades (ver seção Arquitetura). Os dados vêm do repositório público `kelvins/Municipios-Brasileiros` (https://github.com/kelvins/Municipios-Brasileiros), que traz código IBGE, nome, UF, latitude e longitude de 5.570 municípios, sob licença MIT (é preciso manter o aviso de licença do repositório de origem). Os dados são importados uma única vez para o MySQL por um script de carga, e o sistema não consulta nenhuma API externa durante o uso. A chave primária da `Cidade` é o código IBGE do município, e o campo `cidade_id` das outras entidades guarda esse código.
@@ -300,6 +356,7 @@ erDiagram
     USUARIO ||--o{ ANUNCIO : "cria"
     USUARIO ||--o{ PERGUNTA : "faz"
     USUARIO ||--o{ FAVORITO : "favorita"
+    ANUNCIO o|--o{ ANUNCIO : "origina_republicacao"
     ANUNCIO ||--o{ MIDIA : "tem"
     ANUNCIO ||--o{ PERGUNTA : "recebe"
     ANUNCIO ||--o{ FAVORITO : "e_favoritado_em"
@@ -341,7 +398,9 @@ erDiagram
         string tipo_anunciante
         int usuario_id FK
         int loja_id FK
-        date deleted_at
+        datetime deleted_at
+        string motivo_indisponibilidade
+        int anuncio_origem_id FK
         int cidade_id FK
         string informacoes_contato
         date data_criacao
@@ -462,6 +521,28 @@ ORDER BY distancia_km ASC;
 
 Na execução, os parâmetros são, nesta ordem: latitude de referência, latitude de referência, longitude de referência e raio em quilômetros (validado no servidor). O nome real da tabela deve corresponder à Migration implementada.
 
+### Implementação do histórico e ciclo de vida (MVC)
+
+Centralizar a elegibilidade e visibilidade em Service compartilhado pelos Controllers de anúncios, perfis, lojas, busca, home, favoritos, mídias e tarefa de expiração. Usar `withDeleted()` somente em consultas privadas autorizadas ou na recuperação mínima de referências indisponíveis; nunca expor registros completos em favoritos de terceiros. O Model mantém `useSoftDeletes = true` e `deletedField = 'deleted_at'`. A restauração usa atualização explícita autorizada do registro removido. A desativação da loja e a exclusão lógica de seus anúncios devem ser atômicas; preencher deleted_at e motivo_indisponibilidade = exclusao_loja nos anúncios ainda publicáveis. Armazenar mídias fora da raiz pública e entregá-las por Controller com autorização a cada requisição; migrar arquivos públicos existentes e invalidar caches/URLs antigas. Não é possível revogar cópias já baixadas por terceiros. Usar transações e bloqueios/revalidação de registros para impedir corrida com expiração, moderação ou desativação da loja.
+
+```mermaid
+flowchart TD
+ A[Publicação ativa] --> P[Pendente nos últimos 3 dias]
+ P -->|Renovação| A
+ A -->|Exclusão pelo vendedor ou desativação da loja| H[Histórico privado]
+ P -->|Exclusão pelo vendedor ou desativação da loja| H
+ P -->|Vencimento| E[Expirado no histórico]
+ H -->|Restauração elegível| V[Ativo ou pendente conforme prazo]
+ H -->|Vencimento| E
+ E -->|Republicação após revisão| N[Novo anúncio ativo]
+ A -->|Moderação| M[Histórico bloqueado]
+ P -->|Moderação| M
+ H -->|Moderação| M
+ E -->|Moderação| M
+```
+
+Ao vencer, um anúncio excluído passa a ser exibido apenas como Expirado, sem limpar deleted_at. A republicação não retira o registro original do histórico. A restauração não reinicia a validade.
+
 ### Dependências e recursos do PHP
 
 | Função | Tecnologia / recurso | Situação |
@@ -496,6 +577,13 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 | POST | `/lojas/{id}/reativar` 🔒 | Reativa loja antiga, desde que o usuário não tenha outra loja ativa |
 | POST | `/anuncios` 🔒 | Cria um anúncio |
 | GET | `/anuncios?titulo=gol&cidade_id=7&distancia=50` | Busca anúncios ativos e pendentes por título, cidade e raio máximo escolhido (100 km por padrão). Sem `cidade_id`, usa a cidade padrão do usuário autenticado; para visitantes, solicitar uma cidade de referência |
+| GET | `/usuarios/me/anuncios/historico` 🔒 | Histórico pessoal privado |
+| GET | `/lojas/{id}/anuncios/historico` 🔒 | Histórico privado da loja original, inclusive desativada |
+| POST | `/anuncios/{id}/restaurar` 🔒 | Restaura anúncio elegível após confirmação |
+| POST | `/anuncios/{id}/republicar/preparar` 🔒 | Prepara formulário privado de revisão |
+| POST | `/anuncios/{id}/republicar` 🔒 | Valida e cria nova publicação |
+| GET | `/midias/{id}/arquivo` | Entrega mídia somente se anúncio publicável ou solicitante proprietário autorizado |
+
 | GET | `/anuncios/{id}` | Mostra um anúncio |
 | PUT | `/anuncios/{id}` 🔒 | Edita o anúncio (só o dono) |
 | DELETE | `/anuncios/{id}` 🔒 | Exclui o anúncio (só o dono) |
@@ -518,7 +606,7 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 - RN01: Um anúncio só pode ser salvo com título, de 3 a 5 fotos (vídeo opcional).
 - RN02: Fotos devem ser JPG, PNG ou WebP, com até 5 MB cada (máximo de 5 por anúncio). Caso enviado, o vídeo deve ser MP4, com até 50 MB (máximo de 1 por anúncio).
 - RN03: Somente o dono do anúncio pode editá-lo ou excluí-lo.
-- RN04: A exclusão de um anúncio exige confirmação do usuário e é realizada por exclusão lógica (Soft Delete), preenchendo `deleted_at`. O anúncio deixa de aparecer em buscas e perfis públicos, mas seu registro e vínculos são preservados.
+- RN04: A exclusão de um anúncio exige confirmação do usuário e é realizada por exclusão lógica (Soft Delete), preenchendo `deleted_at` e `motivo_indisponibilidade = exclusao_vendedor`. O anúncio deixa de aparecer em buscas e perfis públicos, mas seu registro e vínculos são preservados.
 - RN05: Cada anúncio pertence a um único usuário. Quando criado em nome da loja, `tipo_anunciante` é `loja` e `loja_id` referencia obrigatoriamente uma loja pertencente a esse usuário; em anúncios pessoais, `tipo_anunciante` é `pessoa` e `loja_id` é nulo.
 - RN06: Contato e localização do anúncio usam, por padrão, os do perfil, mas o usuário pode escolher outros.
 
@@ -539,11 +627,29 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 - RN08: Nos últimos 3 dias antes da expiração, o anúncio passa a `pendente`, mas continua ativo e no ar (visível nas buscas e aberto a favoritos e perguntas), e o vendedor é notificado por e-mail. O anúncio permanece pendente até que o vendedor responda.
 - RN09: Se o vendedor confirmar que o veículo ainda está à venda, o anúncio volta a `ativo` e é renovado por mais 30 dias.
 - RN10: Se o vendedor não responder até o fim dos 30 dias, o anúncio sai do ar e passa a `expirado` automaticamente.
-- RN11: Um anúncio expirado não pode ser reativado. Para anunciar novamente, o vendedor precisa criar um novo anúncio.
-- RN12: Anúncio expirado ou excluído logicamente (`deleted_at` preenchido) não aparece nas buscas. Quem tentar abri-lo vê a mensagem "Este anúncio não está mais disponível" e é levado à página de anúncios. Essa mesma mensagem aparece ao clicar em um anúncio expirado/excluído a partir da lista de Favoritos.
+- RN11: Um anúncio expirado não pode ser restaurado nem renovado diretamente. Pode ser republicado com novo ID, reutilizando dados e mídias mediante revisão e validação, preservando o original no histórico.
+- RN12: Anúncio indisponível por expiração, exclusão lógica, moderação ou desativação da loja não aparece nas buscas. Quem tentar abri-lo vê a mensagem "Este anúncio não está mais disponível" e é levado à página de anúncios. Essa mesma mensagem aparece ao clicar em um anúncio expirado/excluído a partir da lista de Favoritos.
+
+**Histórico, restauração e republicação**
+- RN23: Histórico privado, separado por pessoa física e por ID de loja, com foto principal, título, preço, data, situação e ação elegível. Não incluir anúncios atualmente publicáveis.
+- RN24: Restaurar somente por confirmação do proprietário, antes de `data_expiracao`, quando o motivo for exclusão pelo vendedor ou desativação da loja e todos os requisitos de publicação forem satisfeitos. Limpar `deleted_at` e motivo, preservar ID, dados, mídias, favoritos, perguntas e prazo original vigente.
+- RN25: Republicar somente anúncios vencidos elegíveis, inclusive os que foram excluídos antes de expirar. Criar novo registro após revisão e validação integral, com 30 dias de validade, sem copiar favoritos ou perguntas; preservar original e identidade anunciante.
+- RN26: Loja desativada não pode restaurar nem republicar. Excluir logicamente apenas anúncios publicáveis na desativação, sem alterar prazos nem sobrescrever motivos anteriores. Reativar loja não restaura anúncios automaticamente.
+- RN27: Remoção por moderação impede restauração e republicação direta pelo vendedor, independentemente da validade. Eventual liberação depende de processo autorizado de moderação, não incluído nesta funcionalidade.
+- RN28: Operações privadas exigem autenticação, propriedade e escopo corretos no servidor; alterações via POST com CSRF e revalidação transacional. Histórico e mídias privadas sujeitos à retenção e LGPD.
+- RN29: Renovação aplica-se apenas a anúncio publicável pendente, antes do vencimento, conforme RN09. A tarefa agendada registra expiração mesmo para anúncios removidos, preservando seus motivos; não envia notificações de renovação para indisponíveis. Ao restaurar nos últimos três dias, definir pendente e disponibilizar o fluxo normal de renovação, com controle de notificações duplicadas.
+
+| Situação no histórico | Ação permitida |
+|---|---|
+| Excluído | Restaurar, se demais condições atendidas |
+| Expirado | Republicar, se demais condições atendidas |
+
+| Removido por moderação | Nenhuma pelo vendedor |
+
+A situação é única: moderação tem precedência, seguida de expiração e exclusão. Loja desativada e motivo legado desconhecido são impedimentos de operação, não categorias adicionais do histórico. Para motivo desconhecido, bloquear ações até classificação segura.
 
 **Busca e localização**
-- RN13: A busca pública exibe apenas anúncios com status `ativo` ou `pendente`; anúncios `expirado` e excluídos logicamente não aparecem.
+- RN13: Toda consulta pública exige status `ativo` ou `pendente`, validade futura, `deleted_at` nulo, ausência de motivo de indisponibilidade e, para anúncio de loja, loja original ativa. A regra vale também para home, perfis, detalhes, perguntas e mídias.
 - RN14: A busca sem cidade informada usa a cidade padrão do usuário autenticado. O cálculo utiliza distância euclidiana local aproximada, com latitude e longitude convertidas para quilômetros. Visitantes sem cidade de referência deverão escolher uma.
 - RN15: A barra de pesquisa possui três campos: título (`termo`), cidade (`cidade_id`) e distância máxima (`distancia`). O valor inicial da distância é 100 km, podendo ser alterado pelo usuário.
 - RN15.1: A cidade é selecionada a partir de sugestões de municípios; o sistema utiliza o `cidade_id` (código IBGE), não texto livre.
@@ -562,7 +668,7 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 - RN18: O CNPJ da loja é opcional.
 - RN18.1: A exclusão de lojas será lógica (`deleted_at`), ocultando a loja e seus anúncios públicos sem apagar seus registros.
 - RN18.2: Após excluir uma loja, o usuário poderá criar outra ou reativar uma antiga, desde que não tenha nenhuma loja ativa.
-- RN18.3: Ao reativar uma loja, será possível publicar novos anúncios; os anúncios antigos permanecerão arquivados e não voltarão automaticamente à exibição.
+- RN18.3: Ao reativar a mesma loja, será possível publicar novos anúncios; os antigos permanecerão no histórico até restauração manual dos válidos ou republicação dos vencidos. Não transferir anúncios para outra loja.
 - RN18.4: A conta pessoal continuará ativa e utilizável independentemente da exclusão ou reativação de lojas.
 
 **Interação**
@@ -600,9 +706,9 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 ## Pendências e decisões atualizadas
 
 - [x] Raio de "cidades próximas": 100 km por padrão, ajustável pelo novo campo de distância da busca.
-- [ ] Confirmar as opções disponíveis no seletor de distância (sugestão: 10, 25, 50, 75 e 100 km).
+- [x] Distâncias predefinidas confirmadas: 10, 25, 50, 75 e 100 km; padrão e máximo 100 km.
 - [x] Estado pendente: nos últimos 3 dias, até o vendedor responder; sem resposta, o anúncio expira.
-- [x] Anúncio expirado não é reativado; o vendedor cria outro.
+- [x] Anúncio expirado não é restaurado; republicação com novo ID e reaproveitamento de dados e mídias.
 - [x] RF01 usa apenas CPF (o CNPJ fica na Loja).
 - [x] Plataforma: exclusivamente web responsiva, sem aplicativos nativos.
 - [x] Front-end: HTML, CSS e JavaScript em Views do CodeIgniter 4.
@@ -614,7 +720,7 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 - [x] Anúncios: mínimo de 3 e máximo de 5 fotos; vídeo opcional.
 - [x] Busca e visualização públicas sem login; ações interativas exigem login.
 - [x] Anúncios de loja: `loja_id` explícito e validado.
-- [x] Exclusão de anúncios: Soft Delete com `deleted_at`, sem restauração pelo vendedor na interface.
+- [x] Exclusão de anúncios: Soft Delete com `deleted_at`, restauração elegível pelo proprietário e histórico privado.
 - [x] Notificações: somente e-mail na v1; push fora do escopo.
 - [x] Provedor SMTP: Brevo, para expiração e recuperação de senha.
 - [ ] (Adiado) Configurar Brevo SMTP e guardar credenciais em `.env` fora do repositório.
@@ -628,8 +734,42 @@ As rotas abaixo são caminhos web propostos para Controllers do CodeIgniter 4. A
 
 ### Decisão confirmada — exclusão lógica de anúncios (ponto C)
 
-A exclusão de anúncios será **lógica (Soft Delete)**. Após a confirmação do vendedor, o sistema preencherá `deleted_at` com a data e hora da exclusão. O anúncio deixará de aparecer nas buscas e perfis públicos, mas o registro será preservado para manter vínculos com favoritos, perguntas e mídias. Ao tentar abrir um anúncio excluído, o visitante verá **"Este anúncio não está mais disponível"**. O vendedor não poderá restaurá-lo pela interface.
+A exclusão de anúncios será **lógica (Soft Delete)**. Após a confirmação do vendedor, o sistema preencherá `deleted_at` com a data e hora da exclusão. O anúncio deixará de aparecer nas buscas e perfis públicos, mas o registro será preservado para manter vínculos com favoritos, perguntas e mídias. Ao tentar abrir um anúncio excluído, o visitante verá **"Este anúncio não está mais disponível"**. O proprietário poderá restaurá-lo pela interface enquanto estiver válido e elegível; após vencer, poderá republicá-lo com novo ID, conforme RN24–RN28.
 
-No Model do CodeIgniter 4, configurar `useSoftDeletes = true` e `deletedField = 'deleted_at'`, além de criar a coluna `deleted_at` anulável na migration. As consultas públicas devem excluir registros apagados logicamente; a consulta de favoritos poderá recuperar dados mínimos dos anúncios excluídos para exibir a mensagem de indisponibilidade.
+No Model do CodeIgniter 4, configurar `useSoftDeletes = true` e `deletedField = 'deleted_at'`, além de criar a coluna `deleted_at` anulável na migration. As consultas públicas devem aplicar integralmente RN13; a consulta de favoritos poderá recuperar dados mínimos dos anúncios excluídos para exibir a mensagem de indisponibilidade.
 
 A retenção dos dados não será indefinida: definir política de retenção, anonimização e eliminação definitiva quando cabível, conforme a LGPD.
+
+
+## 8. Critérios de aceitação — histórico e republicação
+
+| Cenário | Resultado esperado |
+|---|---|
+| Histórico pessoal e de loja | Apenas proprietário; itens separados por tipo e ID de loja; todos os campos solicitados visíveis. |
+| Exclusão confirmada | Registro preservado, motivo e data registrados; anúncio e mídias deixam de ser públicos. |
+| Restauração antes do vencimento | Mesmo ID, prazo, dados e vínculos; remoção lógica e motivo limpos; status coerente com prazo. |
+| Anúncio excluído atinge a validade | Exibir somente Expirado; permitir republicação se elegível, nunca restauração. |
+| Restauração cancelada ou no instante do vencimento | Nenhuma alteração; vencido oferece republicação se elegível. |
+| Republicação confirmada | Novo ID, 30 dias, mídias próprias, original intacto, nenhum favorito ou pergunta copiado. |
+| Republicação com menos de 3 ou mais de 5 fotos ou dados inválidos | Recusa sem criar registro parcial. |
+| Loja desativada | Histórico privado consultável, nenhuma restauração/republicação; anúncios antes disponíveis excluídos logicamente. |
+| Reativação da mesma loja | Nenhum retorno automático; ações manuais conforme validade. |
+| Tentativa de usar outra loja ou conta | Recusa no servidor, mesmo alterando IDs ou parâmetros. |
+| Moderação ou motivo legado desconhecido | Nenhuma restauração ou republicação pelo vendedor. |
+| POST sem CSRF ou sessão | Recusa sem alteração. |
+| URL direta de mídia indisponível por terceiro | Acesso negado, inclusive por URL antiga. |
+| Tarefa de expiração atrasada | Prazo vencido impede publicação/restauração mesmo com status desatualizado. |
+| Confirmação duplicada ou concorrente com desativação/moderação | Sem duplicação ou publicação indevida; revalidação transacional. |
+| Favoritos antigos | Referência preservada e indisponível até eventual restauração; republicação não transfere vínculos. |
+
+### Checklist de implementação (pendente)
+
+- [ ] Criar Migration, índices, classificação segura dos registros legados e atualizar Models.
+- [ ] Centralizar visibilidade, autorização e elegibilidade; adaptar tarefa de expiração e renovação.
+- [ ] Criar rotas, Controllers, Services e formulários POST protegidos.
+- [ ] Criar seções privadas nos dois perfis, inclusive acesso ao histórico da loja desativada.
+- [ ] Implementar restauração confirmada e republicação com revisão, mídias independentes e transações.
+- [ ] Integrar exclusão lógica de anúncios à desativação de loja sem retorno automático.
+- [ ] Proteger armazenamento e entrega de mídias, migrar arquivos e invalidar caches antigos.
+- [ ] Aplicar política de retenção e LGPD a históricos e mídias.
+- [ ] Executar os critérios de aceitação e testes de regressão das funcionalidades existentes.
