@@ -14,6 +14,8 @@ $erro = $erro ?? null;
     <title>Início | BargainCar</title>
     <link rel="stylesheet" href="<?= base_url('css/Home.css') ?>">
     <script src="<?= base_url('js/Home.js') ?>" defer></script>
+    <link rel="stylesheet" href="<?= base_url('css/Favoritos.css') ?>">
+    <script defer src="<?= base_url('js/Favoritos.js') ?>"></script>
 </head>
 <body>
     <?= view('layouts/Navbar') ?>
@@ -98,7 +100,7 @@ $erro = $erro ?? null;
             <?php else: ?>
                 <div class="home-grid">
                     <?php foreach ($anuncios as $anuncio): ?>
-                        <a class="home-anuncio" href="<?= site_url('anuncios/' . (int) $anuncio['id']) ?>">
+                        <div class="bc-fav-wrap"><a class="home-anuncio" href="<?= site_url('anuncios/' . (int) $anuncio['id']) ?>">
                             <div class="home-anuncio-foto">
                                 <?php if ($anuncio['foto_id']): ?>
                                     <img loading="lazy"
@@ -122,6 +124,8 @@ $erro = $erro ?? null;
                                 </div>
                             </div>
                         </a>
+<?= view('layouts/CoracaoFavorito',['anuncioId'=>$anuncio['id']]) ?>
+</div>
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
