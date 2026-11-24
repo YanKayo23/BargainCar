@@ -11,9 +11,10 @@ $loja = isset($loja) && is_array($loja) ? $loja : [];
 $cidade = isset($cidade) && is_array($cidade) ? $cidade : null;
 $anuncios = isset($anuncios) && is_array($anuncios) ? $anuncios : [];
 $totais = array_merge(
-    ['ativos' => 0, 'pendentes' => 0, 'expirados' => 0, 'arquivados' => 0],
+    ['ativos' => 0, 'pendentes' => 0, 'expirados' => 0, 'excluidos' => 0],
     isset($totais) && is_array($totais) ? $totais : []
 );
+$historico = $historico ?? [];
 $nome = (string) ($loja['nome_empresa'] ?? 'Loja');
 $cidadeTexto = $cidade ? ($cidade['nome'] ?? '') . ' - ' . ($cidade['uf'] ?? '') : 'Cidade não informada';
 $inicial = mb_strtoupper(mb_substr($nome, 0, 1));
@@ -54,7 +55,7 @@ $erros = session()->getFlashdata('erros') ?? [];
       </div>
       <div class="pl-dados"><h1><?= esc($nome) ?></h1><p><?= esc($cidadeTexto) ?> · Na plataforma há <?= esc($tempo) ?></p>
       </div>
-      <a href="<?= site_url('perfil-loja/editar') ?>" class="pl-btn pl-contorno">Editar dados da loja</a>
+      <span class="pl-btn pl-contorno pl-editar-futuro" title="A edição será criada em uma página separada">Editar loja (em breve)</span>
     </div>
   </section>
 
@@ -72,7 +73,7 @@ $erros = session()->getFlashdata('erros') ?? [];
       <div><strong><?= (int) $totais['ativos'] ?></strong><span>Ativos</span></div>
       <div><strong><?= (int) $totais['pendentes'] ?></strong><span>Pendentes</span></div>
       <div><strong><?= (int) $totais['expirados'] ?></strong><span>Expirados</span></div>
-      <div><strong><?= (int) $totais['arquivados'] ?></strong><span>Arquivados</span></div>
+      <div><strong><?= (int) $totais['excluidos'] ?></strong><span>Excluídos</span></div>
     </div>
   </section>
 
@@ -83,14 +84,63 @@ $erros = session()->getFlashdata('erros') ?? [];
       <?php foreach ($anuncios as $anuncio): ?>
       <?php $visivel = empty($anuncio['deleted_at']) && in_array($anuncio['status'], ['ativo', 'pendente'], true) && !empty($anuncio['data_expiracao']) && strtotime($anuncio['data_expiracao']) > time(); ?>
       <article class="pl-anuncio">
-        <div class="pl-foto"><?php if (!empty($anuncio['foto_id'])): ?><img loading="lazy" src="<?= site_url('anuncios/' . $anuncio['id'] . '/midias/' . $anuncio['foto_id']) ?>" alt="Foto de <?= esc($anuncio['titulo'], 'attr') ?>"><?php else: ?><span>Sem foto disponível</span><?php endif; ?></div>
+        <div class="pl-foto"><?php if (!empty($anuncio['foto_id'])): ?><img loading="lazy" src="<?= site_url('anuncios/' . $anuncio['id'] . '/midias-edicao/' . $anuncio['foto_id']) ?>" alt="Foto de <?= esc($anuncio['titulo'], 'attr') ?>"><?php else: ?><span>Sem foto disponível</span><?php endif; ?></div>
         <div class="pl-card-conteudo"><span class="pl-status"><?= esc($visivel ? ucfirst($anuncio['status']) : 'Indisponível') ?></span><h3><?= esc($anuncio['titulo']) ?></h3><strong>R$ <?= number_format((float)$anuncio['preco'], 2, ',', '.') ?></strong><p><?= esc($anuncio['ano']) ?> · <?= esc($anuncio['cor']) ?></p>
-        <?php if ($visivel && $anuncio['status'] === 'ativo'): ?><a class="pl-ver" href="<?= site_url('anuncios/' . $anuncio['id']) ?>">Ver anúncio</a><?php else: ?><span class="pl-ver pl-inativo">Visualização indisponível</span><?php endif; ?></div>
+        <?php if ($visivel && $anuncio['status'] === 'ativo'): ?><a class="pl-ver" href="<?= site_url('anuncios/' . $anuncio['id']) ?>">Ver anúncio</a><?php else: ?><span class="pl-ver pl-inativo">Visualização indisponível</span><?php endif; ?>
+        <?php if (empty($anuncio['deleted_at'])): ?>
+          <div class="pl-card-acoes">
+            <a class="pl-btn pl-contorno" href="<?= site_url('anuncios/' . $anuncio['id'] . '/editar?origem=loja') ?>">Editar</a>
+            <button type="button" class="pl-btn pl-excluir" data-excluir-anuncio data-url="<?= esc(site_url('anuncios/' . $anuncio['id'] . '/excluir'), 'attr') ?>" data-titulo="<?= esc($anuncio['titulo'], 'attr') ?>">Excluir</button>
+          </div>
+        <?php endif; ?></div>
       </article>
       <?php endforeach; ?>
     </div><?php endif; ?>
   </section>
-  <section class="pl-perigo"><div><h2>Desativar loja</h2><p>A loja deixará de aparecer publicamente. Somente os anúncios desta loja serão arquivados; seus anúncios pessoais permanecerão ativos.</p></div><button class="pl-btn pl-vermelho" type="button" id="pl-abrir-desativacao">Desativar loja</button></section>
+  <section class="pl-anuncios pl-historico" aria-labelledby="pl-historico-titulo">
+    <div class="pl-secao-topo"><div><h2 id="pl-historico-titulo">Histórico de anúncios</h2><p>Somente você pode visualizar este histórico.</p></div>
+      <label>Filtrar: <select id="pl-filtro-historico"><option value="todos">Todos</option><option value="excluido">Excluídos</option><option value="expirado">Expirados</option><option value="moderacao">Removidos por moderação</option></select></label>
+    </div>
+    <div id="pl-historico-vazio" class="pl-vazio" <?= $historico ? 'hidden' : '' ?>>Nenhum anúncio nesta situação.</div>
+    <div class="pl-historico-lista">
+<?php foreach ($historico ?? [] as $item): ?>
+<?php $situacao = $item['situacao_historico']; $acao = \App\Services\AnuncioCicloVidaService::acao($item); $data = $situacao === 'expirado' ? $item['data_expiracao'] : $item['deleted_at']; ?>
+<article class="pl-historico-item" data-situacao="<?= esc($situacao,'attr') ?>">
+<div class="pl-historico-foto"><?php if ($item['foto_id']): ?><img loading="lazy" src="<?= site_url('anuncios/'.$item['id'].'/midias-historico/'.$item['foto_id']) ?>" alt="Foto do veículo"><?php else: ?>Sem foto<?php endif; ?></div>
+<div class="pl-historico-dados"><h3><?= esc($item['titulo']) ?></h3><strong>R$ <?= number_format((float)$item['preco'],2,',','.') ?></strong>
+<p><?= esc(['excluido'=>'Excluído','expirado'=>'Expirado','moderacao'=>'Removido por moderação'][$situacao]) ?> · <?= $data ? esc(date('d/m/Y',strtotime($data))) : 'Data não informada' ?></p>
+<?php if ($acao === 'restaurar' && !($somenteConsulta ?? false)): ?>
+<form method="post" action="<?= site_url('anuncios/'.$item['id'].'/restaurar') ?>" class="form-restaurar-anuncio"><?= csrf_field() ?><input type="hidden" name="confirmar" value="1"> <button class="pl-btn pl-contorno" type="submit">Restaurar</button></form>
+<?php elseif ($acao === 'republicar' && !($somenteConsulta ?? false)): ?>
+<a class="pl-btn pl-contorno" href="<?= site_url('anuncios/'.$item['id'].'/republicar') ?>">Republicar</a>
+<?php else: ?><span>Operação indisponível</span><?php endif; ?>
+</div></article>
+<?php endforeach; ?>
+    </div>
+  </section>
+  <section class="pl-perigo"><div><h2>Desativar loja</h2><p>A loja deixará de aparecer publicamente. Somente os anúncios desta loja serão excluídos logicamente; seus anúncios pessoais permanecerão ativos.</p></div><button class="pl-btn pl-vermelho" type="button" id="pl-abrir-desativacao">Desativar loja</button></section>
 </main>
-<dialog id="pl-modal-desativacao" class="pl-modal" aria-labelledby="pl-titulo-desativacao"><h2 id="pl-titulo-desativacao">Desativar esta loja?</h2><p>Os anúncios desta empresa serão arquivados e não voltarão automaticamente após uma reativação. Os anúncios pessoais não serão afetados.</p><form method="post" action="<?= site_url('lojas/' . $loja['id'] . '/desativar') ?>" id="pl-form-desativar"><?= csrf_field() ?><div class="pl-modal-acoes"><button type="button" class="pl-btn pl-contorno" data-fechar>Cancelar</button><button type="submit" class="pl-btn pl-vermelho">Sim, desativar</button></div></form></dialog>
+<dialog id="pl-modal-desativacao" class="pl-modal" aria-labelledby="pl-titulo-desativacao"><h2 id="pl-titulo-desativacao">Desativar esta loja?</h2><p>Os anúncios desta empresa serão excluídos logicamente e não voltarão automaticamente após uma reativação. Os anúncios pessoais não serão afetados.</p><form method="post" action="<?= site_url('lojas/' . $loja['id'] . '/desativar') ?>" id="pl-form-desativar"><?= csrf_field() ?><div class="pl-modal-acoes"><button type="button" class="pl-btn pl-contorno" data-fechar>Cancelar</button><button type="submit" class="pl-btn pl-vermelho">Sim, desativar</button></div></form></dialog>
+<dialog id="pl-modal-excluir" class="pl-modal" aria-labelledby="pl-titulo-excluir">
+  <h2 id="pl-titulo-excluir">Excluir anúncio?</h2>
+  <p id="pl-anuncio-excluir"></p>
+  <p>O anúncio deixará de aparecer publicamente.</p>
+  <form method="post" id="pl-form-excluir">
+    <?= csrf_field() ?>
+    <div class="pl-modal-acoes">
+      <button type="button" class="pl-btn pl-contorno" data-fechar>Cancelar</button>
+      <button type="submit" class="pl-btn pl-vermelho" disabled>Sim, excluir</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="modal-restaurar-anuncio" class="perfil-modal-restaurar" aria-labelledby="titulo-restaurar">
+    <div class="restaurar-icone" aria-hidden="true">↶</div>
+    <h2 id="titulo-restaurar">Restaurar anúncio</h2>
+    <p>Tem certeza de que deseja restaurar este anúncio?</p>
+    <p class="restaurar-aviso">O anúncio voltará a ficar disponível, mantendo a validade original, as mídias, os favoritos e as perguntas.</p>
+    <div class="restaurar-acoes">
+        <button type="button" id="restaurar-cancelar" autofocus>Cancelar</button>
+        <button type="button" id="restaurar-confirmar">Sim, restaurar</button>
+    </div>
+</dialog>
 </body></html>
