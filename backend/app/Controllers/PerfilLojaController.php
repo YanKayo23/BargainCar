@@ -24,7 +24,7 @@ class PerfilLojaController extends BaseController
         session()->set('modo_perfil', 'loja');
         $cidade = (new CidadeModel())->find($loja['cidade_id']);
         $anuncios = (new AnuncioModel())->withDeleted()->where('loja_id', $loja['id'])
-            ->where('tipo_anunciante', 'loja')->orderBy('id', 'DESC')->findAll();
+            ->where('usuario_id', (int) session()->get('usuario_id'))->where('tipo_anunciante', 'loja')->orderBy('id', 'DESC')->findAll();
         $ids = array_column($anuncios, 'id');
         $fotos = [];
         if ($ids) {
@@ -35,19 +35,29 @@ class PerfilLojaController extends BaseController
         }
         foreach ($anuncios as &$anuncio) $anuncio['foto_id'] = $fotos[$anuncio['id']] ?? null;
         unset($anuncio);
-        $totais = ['ativos' => 0, 'pendentes' => 0, 'expirados' => 0, 'arquivados' => 0];
+        $totais = ['ativos' => 0, 'pendentes' => 0, 'expirados' => 0, 'excluidos' => 0];
+        $historico = [];
+        $atuais = [];
         foreach ($anuncios as $anuncio) {
-            if (! empty($anuncio['deleted_at'])) {
-                $totais['arquivados']++;
-            } elseif ($anuncio['status'] === 'expirado' || strtotime((string) $anuncio['data_expiracao']) <= time()) {
+            $motivo = $anuncio['motivo_indisponibilidade'] ?? null;
+            $vencido = $anuncio['status'] === 'expirado' || strtotime($anuncio['data_expiracao']) <= time();
+            if ($motivo === 'moderacao') {
+                $anuncio['situacao_historico'] = 'moderacao';
+            } elseif ($vencido) {
+                $anuncio['situacao_historico'] = 'expirado';
                 $totais['expirados']++;
-            } elseif ($anuncio['status'] === 'pendente') {
-                $totais['pendentes']++;
+            } elseif (!empty($anuncio['deleted_at']) || $motivo !== null) {
+                $anuncio['situacao_historico'] = 'excluido';
+                $totais['excluidos']++;
             } else {
-                $totais['ativos']++;
+                $totais[$anuncio['status'] === 'pendente' ? 'pendentes' : 'ativos']++;
+                $atuais[] = $anuncio;
+                continue;
             }
+            $historico[] = $anuncio;
         }
-        return view('lojas/PerfilLoja', compact('loja', 'cidade', 'anuncios', 'totais'));
+        $anuncios = $atuais;
+        return view('lojas/PerfilLoja', compact('loja', 'cidade', 'anuncios', 'totais', 'historico'));
     }
 
     public function sair(): RedirectResponse
