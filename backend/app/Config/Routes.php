@@ -126,8 +126,15 @@ $routes->get('anuncios/(:num)/republicar', 'AnunciosController::prepararRepublic
 $routes->post('anuncios/(:num)/republicar/preparar', 'AnunciosController::prepararRepublicacao/$1', ['filter'=>'auth']);
 $routes->post('anuncios/(:num)/republicar', 'AnunciosController::republicar/$1', ['filter'=>'auth']);
 
+// Perfis públicos e favoritos
 $routes->get('lojas/(:num)', 'VerPerfilLojaController::index/$1');
 $routes->get('usuarios/(:num)', 'VerPerfilUsuarioController::index/$1');
 $routes->get('favoritos', 'FavoritosController::index', ['filter'=>'auth']);
 $routes->get('favoritos/estado', 'FavoritosController::estado');
 $routes->post('anuncios/(:num)/favoritar', 'FavoritosController::alternar/$1', ['filter'=>'csrf']);
+
+// Perguntas e respostas
+$routes->get('anuncios/(:num)/perguntas', 'PerguntasController::index/$1');
+$routes->post('anuncios/(:num)/perguntas', 'PerguntasController::criar/$1', ['filter'=>'csrf']);
+$routes->post('anuncios/(:num)/perguntas/(:num)/responder', 'PerguntasController::responder/$1/$2', ['filter'=>'csrf']);
+$routes->post('anuncios/(:num)/perguntas/(:num)/excluir', 'PerguntasController::excluir/$1/$2', ['filter'=>'csrf']);
