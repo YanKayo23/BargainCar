@@ -44,6 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('bc-distancia-texto');
 
     const valores = ['10', '25', '50', '75', '100'];
+    const distanciaPersonalizada =
+        document.getElementById('bc-distancia-personalizada');
+    const distanciaValida = valor => /^[1-9]\d*$/.test(valor)
+        && Number.isSafeInteger(Number(valor));
+    let usarPersonalizada = Boolean(distanciaPersonalizada?.value);
 
     function fecharPerfis() {
         if (!menuBotao || !menuPerfis) return;
@@ -89,6 +94,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const selecionar = valor => {
             if (!valores.includes(valor)) return;
 
+            usarPersonalizada = false;
+            if (distanciaPersonalizada) {
+                distanciaPersonalizada.value = '';
+                distanciaPersonalizada.setCustomValidity('');
+            }
             distanciaInput.value = valor;
             distanciaTexto.textContent = `${valor} km`;
 
@@ -112,10 +122,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 opcao => opcao.dataset.km === distanciaInput.value
             );
 
-            (selecionada || opcoes[0])?.focus();
+            (selecionada || distanciaPersonalizada || opcoes[0])?.focus();
         };
 
-        const inicial = valores.includes(distanciaInput.value)
+        const inicial = distanciaValida(distanciaInput.value)
             ? distanciaInput.value
             : '100';
 
@@ -151,10 +161,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const passo = evento.key === 'ArrowDown' ? 1 : -1;
 
-                    const proximo =
-                        (indice + passo + opcoes.length) % opcoes.length;
-
-                    opcoes[proximo].focus();
+                    if (passo === 1 && indice === opcoes.length - 1 && distanciaPersonalizada) {
+                        distanciaPersonalizada.focus();
+                    } else {
+                        const proximo = (indice + passo + opcoes.length) % opcoes.length;
+                        opcoes[proximo].focus();
+                    }
 
                 } else if (['Home', 'End'].includes(evento.key)) {
                     evento.preventDefault();
@@ -169,10 +181,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     evento.preventDefault();
                     fecharDistancia(true);
 
-                } else if (evento.key === 'Tab') {
-                    fecharDistancia();
                 }
             });
+        });
+
+        distanciaPersonalizada?.addEventListener('input', () => {
+            usarPersonalizada = true;
+            distanciaPersonalizada.setCustomValidity('');
+            if (!distanciaValida(distanciaPersonalizada.value)) return;
+
+            distanciaInput.value = distanciaPersonalizada.value;
+            distanciaTexto.textContent = `${distanciaInput.value} km`;
+            opcoes.forEach(opcao => {
+                const ativa = opcao.dataset.km === distanciaInput.value;
+                opcao.classList.toggle('is-selected', ativa);
+                opcao.setAttribute('aria-selected', String(ativa));
+            });
+        });
+
+        distanciaContainer?.addEventListener('focusout', evento => {
+            if (!distanciaContainer.contains(evento.relatedTarget)) fecharDistancia();
+        });
+
+        distanciaPersonalizada?.addEventListener('keydown', evento => {
+            if (evento.key === 'Escape') {
+                evento.preventDefault();
+                fecharDistancia(true);
+            }
         });
     }
 
@@ -306,6 +341,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================
 
     form.addEventListener('submit', evento => {
+        if (usarPersonalizada && distanciaPersonalizada) {
+            if (!distanciaValida(distanciaPersonalizada.value)) {
+                evento.preventDefault();
+                distanciaOpcoes.hidden = false;
+                distanciaBotao.setAttribute('aria-expanded', 'true');
+                distanciaPersonalizada.setCustomValidity(
+                    'Informe uma distância em quilômetros inteiros maior que zero.'
+                );
+                distanciaPersonalizada.focus();
+                distanciaPersonalizada.reportValidity();
+                return;
+            }
+            distanciaInput.value = distanciaPersonalizada.value;
+        }
+
         const digitada = cidade.value.trim();
 
         if (digitada && !cidadeId.value) {
@@ -330,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (
             distanciaInput &&
-            !valores.includes(distanciaInput.value)
+            !distanciaValida(distanciaInput.value)
         ) {
             distanciaInput.value = '100';
         }

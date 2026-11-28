@@ -25,14 +25,10 @@ class BuscaController extends BaseController
             (string) $this->request->getGet('cidade_id')
         );
 
-        // O valor deve ser um dos cinco raios oficiais.
-        // Ausência do parâmetro significa 100 km.
-        $distanciaRecebida = $this->request->getGet('distancia');
-        $distanciaTexto = $distanciaRecebida === null ? '100' : $distanciaRecebida;
-        $distanciaValida = is_string($distanciaTexto)
-            && ctype_digit($distanciaTexto)
-            && in_array((int) $distanciaTexto, self::DISTANCIAS_PERMITIDAS, true);
-        $raioKm = $distanciaValida ? (int) $distanciaTexto : 100;
+        // Aceita as opções prontas e distâncias personalizadas em km inteiros.
+        $raioKm = DistanciaService::normalizarRaio(
+            $this->request->getGet('distancia')
+        );
 
 
         // Evita pesquisas excessivamente longas.

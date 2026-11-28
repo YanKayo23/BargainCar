@@ -120,7 +120,7 @@ $proximaDistancia = $proximaDistancia ?? null;
                     </form>
                     <p class="busca-mensagem-apoio">A cidade e o título da pesquisa serão mantidos.</p>
                 <?php else: ?>
-                    <p>Nenhum anúncio encontrado em até 100 km. Tente outra cidade ou outro termo de pesquisa.</p>
+                    <p>Nenhum anúncio encontrado em até <?= (int) $raioKm ?> km. Tente outra cidade ou outro termo de pesquisa.</p>
                 <?php endif; ?>
             </div>
 

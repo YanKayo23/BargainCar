@@ -10,6 +10,20 @@ class DistanciaService
     // Raio padrão das pesquisas do BargainCar.
     public const RAIO_PADRAO_KM = 100;
 
+    /** Normaliza o mesmo filtro na navbar e na consulta de anúncios. */
+    public static function normalizarRaio(mixed $valor): int
+    {
+        if (! is_string($valor) || ! ctype_digit($valor)) {
+            return self::RAIO_PADRAO_KM;
+        }
+
+        $raio = filter_var($valor, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1, 'max_range' => 9007199254740991],
+        ]);
+
+        return $raio === false ? self::RAIO_PADRAO_KM : $raio;
+    }
+
     /**
      * Calcula a distância aproximada em linha reta
      * entre duas cidades.

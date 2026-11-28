@@ -122,7 +122,7 @@
     position: absolute;
     top: calc(100% + 12px);
     left: 0;
-    width: 145px;
+    width: 210px;
     padding: 6px;
     background: #fff;
     border: 1px solid #d7e0ed;
@@ -131,6 +131,42 @@
     z-index: 1090;
 }
 .bc-navbar .bc-distancia-opcoes[hidden] { display: none !important; }
+.bc-navbar .bc-distancia-personalizada {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 10px 6px 4px;
+    border-top: 1px solid #e1e5ec;
+    color: #687587;
+    font-size: 13px;
+}
+.bc-navbar .bc-distancia-interrogacao {
+    display: grid;
+    place-items: center;
+    flex: 0 0 24px;
+    height: 24px;
+    border: 1px solid #c7dcf7;
+    border-radius: 50%;
+    background: #eaf2ff;
+    color: #0866c9;
+    font-weight: 700;
+    cursor: text;
+}
+.bc-navbar .bc-distancia-personalizada input {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    padding: 0 8px;
+    border: 1px solid #b9c4d3;
+    border-radius: 7px;
+    background: #fff;
+    font-size: 13px;
+}
+.bc-navbar .bc-distancia-personalizada input:focus {
+    outline: 2px solid #0866c9;
+    outline-offset: 1px;
+}
 .bc-navbar .bc-distancia-opcao {
     display: block;
     width: 100%;

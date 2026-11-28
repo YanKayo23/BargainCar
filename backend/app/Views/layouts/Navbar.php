@@ -11,10 +11,8 @@ $temLojaAtiva = !empty($lojaAtiva);
 $naLoja = ($nav['modoPerfil'] ?? 'pessoa') === 'loja';
 $destinoPerfil = $naLoja ? 'perfil-loja' : 'meu-perfil';
 
-$distancia = (int) ($_GET['distancia'] ?? 100);
-if (!in_array($distancia, [10, 25, 50, 75, 100], true)) {
-    $distancia = 100;
-}
+$distancia = \App\Libraries\DistanciaService::normalizarRaio($_GET['distancia'] ?? null);
+$distanciaPersonalizada = !in_array($distancia, [10, 25, 50, 75, 100], true);
 $termo = (string) ($_GET['termo'] ?? '');
 $cidadeId = (string) ($_GET['cidade_id'] ?? '');
 $cidadeTexto = '';
@@ -31,7 +29,7 @@ if ($cidadeId !== '' && ctype_digit($cidadeId)) {
 ?>
 <!-- Bootstrap 5: inclua uma única vez no layout geral caso já o utilize. -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="<?= base_url('css/Navbar.css') ?>">
+<link rel="stylesheet" href="<?= base_url('css/Navbar.css') ?>?v=20261128">
 
 <nav id="bc-navbar" class="navbar navbar-expand-xl fixed-top bc-navbar" aria-label="Navegação principal">
   <div class="container-fluid bc-navbar-conteudo">
@@ -57,16 +55,27 @@ if ($cidadeId !== '' && ctype_digit($cidadeId)) {
         <div class="bc-navbar-campo bc-navbar-distancia" id="bc-distancia-container">
           <input type="hidden" name="distancia" id="bc-distancia" value="<?= $distancia ?>">
           <button type="button" id="bc-distancia-botao" class="bc-distancia-botao"
-                  aria-label="Distância máxima" aria-haspopup="listbox"
+                  aria-label="Distância máxima" aria-haspopup="dialog"
                   aria-expanded="false" aria-controls="bc-distancia-opcoes">
             <span id="bc-distancia-texto"><?= $distancia ?> km</span>
             <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
           </button>
-          <div id="bc-distancia-opcoes" class="bc-distancia-opcoes" role="listbox" aria-label="Distância máxima" hidden>
+          <div id="bc-distancia-opcoes" class="bc-distancia-opcoes" role="dialog" aria-label="Distância máxima" hidden>
+            <div role="listbox" aria-label="Distâncias prontas">
             <?php foreach ([10, 25, 50, 75, 100] as $km): ?>
               <button type="button" role="option" class="bc-distancia-opcao<?= $distancia === $km ? ' is-selected' : '' ?>"
                       data-km="<?= $km ?>" aria-selected="<?= $distancia === $km ? 'true' : 'false' ?>"><?= $km ?> km</button>
             <?php endforeach; ?>
+            </div>
+            <div class="bc-distancia-personalizada">
+              <label for="bc-distancia-personalizada" class="bc-distancia-interrogacao" title="Distância personalizada">
+                <span aria-hidden="true">?</span>
+              </label>
+              <input type="number" id="bc-distancia-personalizada" min="1" step="1" inputmode="numeric"
+                     placeholder="Ex.: 150" aria-label="Distância personalizada em quilômetros"
+                     value="<?= $distanciaPersonalizada ? $distancia : '' ?>">
+              <span aria-hidden="true">km</span>
+            </div>
           </div>
         </div>
         <button type="submit" class="btn btn-primary bc-navbar-buscar"><span aria-hidden="true">⌕</span> Buscar</button>
@@ -143,4 +152,4 @@ if ($cidadeId !== '' && ctype_digit($cidadeId)) {
 <!-- Reserva a altura real da navbar fixa, inclusive quando ela quebra em linhas. -->
 <div id="bc-navbar-espacador" aria-hidden="true"></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
-<script src="<?= base_url('js/Navbar.js') ?>" defer></script>
+<script src="<?= base_url('js/Navbar.js') ?>?v=20261128" defer></script>
